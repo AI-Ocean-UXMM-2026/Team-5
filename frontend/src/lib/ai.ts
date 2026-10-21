@@ -1,0 +1,61 @@
+import { courses } from "./seed";
+import type { Lesson } from "./types";
+
+// shortcut: canned, rule-based "AI" for the demo; replace these functions with real model calls when the backend exists.
+const wait = <T>(value: T) => new Promise<T>((resolve) => setTimeout(() => resolve(value), 800));
+
+export const goals = [
+  { id: "frontend", label: "Frontend developer" },
+  { id: "qa", label: "QA tester" },
+  { id: "unsure", label: "Not sure yet" },
+];
+
+export function makeRoadmap(goal: string, currentSkills: string, hoursPerWeek: number) {
+  const roadmap = goal === "frontend" ? ["starter", "frontend"] : goal === "qa" ? ["starter", "qa"] : ["starter", "frontend", "qa"];
+  const hours = roadmap.reduce((sum, id) => sum + (courses.find((c) => c.id === id)?.hours ?? 0), 0);
+  const weeks = Math.max(1, Math.ceil(hours / Math.max(1, hoursPerWeek)));
+  const skip = /html|css/i.test(currentSkills) && roadmap.includes("frontend") ? " You already know some HTML or CSS, so the first frontend lessons should go quickly." : "";
+  return wait({
+    roadmap,
+    roadmapNote: `About ${hours} hours of learning, roughly ${weeks} week${weeks > 1 ? "s" : ""} at ${hoursPerWeek} hours a week. Start with the career starter so you know how IT teams work.${skip}`,
+  });
+}
+
+export const summarizeLesson = (lesson: Lesson) => wait({ keyPoints: lesson.keyPoints, summary: lesson.summary });
+
+const keywords = (point: string) => point.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+const covers = (answer: string, point: string) => keywords(point).some((w) => answer.toLowerCase().includes(w));
+
+export function challengeFeedback(answer: string, link: string, rubric: string[]) {
+  const feedback = rubric.map((p) => (covers(answer, p) ? `Covers "${p}".` : `Say more about "${p}".`));
+  if (answer.trim().length < 150) feedback.push("Your answer is short. Explain why you made each choice.");
+  if (!link.trim()) feedback.push("Add a link to your work so the company can check it.");
+  return wait(feedback);
+}
+
+export function scoreSubmission(answer: string, link: string, rubric: string[]) {
+  const covered = rubric.filter((p) => covers(answer, p)).length;
+  const score = Math.round((covered / Math.max(1, rubric.length)) * 70 + Math.min(20, answer.trim().length / 15) + (link.trim() ? 10 : 0));
+  const first = answer.trim().split(/(?<=\.)\s/)[0].slice(0, 140);
+  return wait({ aiScore: Math.min(100, score), aiSummary: `${first} Covers ${covered} of ${rubric.length} rubric points.` });
+}
+
+const drafts: Record<string, { title: string; task: string; rubric: string[] }> = {
+  frontend: {
+    title: "Build a simple product page",
+    task: "Build a one-page product listing with HTML, CSS and a little JavaScript: a header, three product cards and an Add to cart button that updates a counter. It must work on a phone and a laptop. Share a link and explain your choices.",
+    rubric: ["Semantic HTML", "Responsive layout", "Working JavaScript counter", "Clear explanation"],
+  },
+  qa: {
+    title: "Test a login form",
+    task: "Write five test cases for a login form with email and password fields, run them on the demo page and report any bugs you find.",
+    rubric: ["Clear test steps", "Expected results", "Bug reports with severity"],
+  },
+  starter: {
+    title: "Plan a small team sprint",
+    task: "Our team has five tasks for a one-week sprint. Put them in order, explain who should review each one and why.",
+    rubric: ["Sensible order", "Review plan", "Clear reasons"],
+  },
+};
+
+export const draftChallenge = (courseId: string) => wait(drafts[courseId] ?? drafts.starter);

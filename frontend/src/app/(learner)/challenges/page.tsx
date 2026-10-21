@@ -1,0 +1,56 @@
+"use client";
+
+import Link from "next/link";
+import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { challengeUnlocked } from "@/lib/rules";
+import { courses } from "@/lib/seed";
+import { useData } from "@/lib/store";
+
+const statusLabel = { submitted: "Waiting for review", "needs-work": "Feedback to act on", interview: "Interview invite" } as const;
+
+export default function Challenges() {
+  const { s, me } = useData();
+  const live = s.challenges.filter((c) => s.companies.find((co) => co.id === c.companyId)?.status === "verified");
+
+  return (
+    <>
+      <PageHeader title="Company challenges" intro="Real tasks from verified companies. Finish the course to unlock its challenge. It never costs anything to take part." pose="laptop" />
+      {!live.length && <Empty>No challenges yet.</Empty>}
+      <div className="grid gap-4 md:grid-cols-2">
+        {live.map((c) => {
+          const company = s.companies.find((co) => co.id === c.companyId)!;
+          const course = courses.find((x) => x.id === c.courseId);
+          const unlocked = challengeUnlocked(s.certificates, me.id, c.courseId);
+          const sub = s.submissions.find((x) => x.challengeId === c.id && x.learnerId === me.id);
+          return (
+            <Card key={c.id} className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2 text-body-sm text-muted">
+                {company.name} <VerifiedBadge company={company} />
+              </div>
+              <h2 className="text-h4">
+                {unlocked ? (
+                  <Link href={`/challenges/${c.id}`} className="hover:text-burgundy">
+                    {c.title}
+                  </Link>
+                ) : (
+                  c.title
+                )}
+              </h2>
+              <p className="text-muted">Course: {course?.title}</p>
+              <div className="mt-auto pt-2">
+                {sub ? (
+                  <Badge tone={sub.status === "needs-work" ? "highlight" : sub.status === "interview" ? "success" : "brand"}>{statusLabel[sub.status]}</Badge>
+                ) : unlocked ? (
+                  <Badge tone="brand">Open to you</Badge>
+                ) : (
+                  <Badge>🔒 Get certified in {course?.title} to unlock</Badge>
+                )}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </>
+  );
+}

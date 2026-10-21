@@ -1,0 +1,332 @@
+import type { Course, Progress, State } from "./types";
+
+export const courses: Course[] = [
+  {
+    id: "starter",
+    title: "Career starter: working in IT",
+    skill: "IT careers",
+    level: "Beginner",
+    hours: 3,
+    description: "Learn what IT roles exist, how teams work and how to show your skills to a company.",
+    lessons: [
+      {
+        id: "starter-1",
+        title: "IT roles in Myanmar",
+        body: [
+          "IT companies in Myanmar hire for many entry roles: frontend and backend developers, QA testers, UI designers and IT support.",
+          "Software houses build products for clients, outsourcing firms deliver projects for overseas companies, and startups build their own product.",
+          "Each role needs a different set of skills. Pick one goal first, then learn the skills for it in order.",
+        ],
+        keyPoints: [
+          "Common entry roles: developer, QA tester, designer, IT support",
+          "Company types: software house, outsourcing firm, startup, digital agency",
+          "Pick one goal and learn its skills in order",
+        ],
+        summary: "Entry IT jobs in Myanmar come in a few clear roles. Choosing one goal makes it easier to know what to learn next.",
+        quiz: [
+          {
+            q: "What should you do first when starting an IT career?",
+            options: ["Learn every language at once", "Pick one goal and learn its skills in order", "Apply to every job"],
+            answer: 1,
+          },
+        ],
+      },
+      {
+        id: "starter-2",
+        title: "How software teams work",
+        body: [
+          "Most teams plan work in short cycles called sprints, usually one or two weeks long.",
+          "Work is tracked as tasks on a board. Each task moves from To do, to In progress, to Review, to Done.",
+          "Code and designs are reviewed by teammates before they are released. Clear, polite feedback is part of the job.",
+        ],
+        keyPoints: ["Teams work in short sprints", "Tasks move across a board", "Every piece of work is reviewed"],
+        summary: "Software teams plan in sprints, track tasks on a board and review each other's work before release.",
+        quiz: [
+          {
+            q: "What usually happens before code is released?",
+            options: ["A teammate reviews it", "Nothing", "The client writes it again"],
+            answer: 0,
+          },
+        ],
+      },
+      {
+        id: "starter-3",
+        title: "Proving your skills",
+        body: [
+          "A certificate shows you finished a course. A real task shows a company you can do the work.",
+          "On The Citadel, every course ends with a challenge set by a verified partner company.",
+          "Good challenge answers explain your choices, not only the final result.",
+        ],
+        keyPoints: ["Certificates show learning; tasks show ability", "Courses end with a company challenge", "Explain your choices"],
+        summary: "Companies trust real work more than certificates, so explain your thinking when you answer a challenge.",
+        quiz: [
+          {
+            q: "What makes a strong challenge answer?",
+            options: ["Only the final result", "The result plus why you made each choice", "A long CV"],
+            answer: 1,
+          },
+        ],
+      },
+    ],
+    test: [
+      { q: "Which is an entry IT role?", options: ["Chief financial officer", "QA tester", "Bank teller"], answer: 1 },
+      { q: "How long is a typical sprint?", options: ["6 months", "1 day", "1–2 weeks"], answer: 2 },
+      { q: "Where do tasks move during a sprint?", options: ["On a board", "In an email", "On paper only"], answer: 0 },
+      { q: "What proves you can do the work?", options: ["A long CV", "A real task", "A photo"], answer: 1 },
+    ],
+  },
+  {
+    id: "frontend",
+    title: "Frontend basics: HTML, CSS and JavaScript",
+    skill: "Frontend development",
+    level: "Beginner",
+    hours: 12,
+    description: "Build simple, responsive web pages and add interaction with JavaScript.",
+    lessons: [
+      {
+        id: "frontend-1",
+        title: "HTML structure",
+        body: [
+          "HTML describes the structure of a page with elements such as header, main, section, h1 and p.",
+          "Use the element that matches the meaning: a button for actions, a link for navigation, a list for lists.",
+          "Meaningful HTML helps screen readers and search engines understand the page.",
+        ],
+        keyPoints: ["HTML is the page structure", "Use elements that match meaning", "Semantic HTML helps accessibility"],
+        summary: "HTML gives a page its structure. Choosing the right element for each job makes the page accessible.",
+        quiz: [
+          { q: "Which element should run an action?", options: ["div", "button", "span"], answer: 1 },
+        ],
+      },
+      {
+        id: "frontend-2",
+        title: "CSS layout and responsive design",
+        body: [
+          "CSS controls how elements look: colour, spacing, size and layout.",
+          "Flexbox lays items out in a row or column; grid lays them out in rows and columns at once.",
+          "Media queries change the layout at different screen widths, so one page works on phones and laptops.",
+        ],
+        keyPoints: ["CSS controls look and layout", "Flexbox for one direction, grid for two", "Media queries make pages responsive"],
+        summary: "CSS styles the page. Flexbox, grid and media queries let one layout adapt to any screen.",
+        quiz: [
+          { q: "What makes a layout change on small screens?", options: ["Media queries", "Bigger images", "More HTML"], answer: 0 },
+        ],
+      },
+      {
+        id: "frontend-3",
+        title: "JavaScript and the DOM",
+        body: [
+          "JavaScript makes pages interactive. It can read and change elements through the DOM.",
+          "Event listeners run code when the user clicks, types or submits a form.",
+          "Keep functions small and name them after what they do.",
+        ],
+        keyPoints: ["JavaScript adds interaction", "The DOM lets code change the page", "Event listeners react to the user"],
+        summary: "JavaScript listens for user events and updates the page through the DOM.",
+        quiz: [
+          { q: "What runs code when a user clicks?", options: ["An event listener", "A media query", "An h1"], answer: 0 },
+        ],
+      },
+    ],
+    test: [
+      { q: "Which element is best for navigation to another page?", options: ["button", "div", "a"], answer: 2 },
+      { q: "Which CSS tool lays out rows and columns at once?", options: ["Flexbox", "Grid", "Float"], answer: 1 },
+      { q: "What do media queries respond to?", options: ["Screen width", "User age", "File size"], answer: 0 },
+      { q: "How does JavaScript change the page?", options: ["Through CSS only", "It cannot", "Through the DOM"], answer: 2 },
+      { q: "Why use semantic HTML?", options: ["Faster typing", "Accessibility and meaning", "Smaller images"], answer: 1 },
+    ],
+  },
+  {
+    id: "qa",
+    title: "Manual QA testing",
+    skill: "QA testing",
+    level: "Beginner",
+    hours: 8,
+    description: "Write test cases, find bugs and report them clearly so developers can fix them.",
+    lessons: [
+      {
+        id: "qa-1",
+        title: "What QA testers do",
+        body: [
+          "QA testers check that software works as expected before users see it.",
+          "They read the requirements, plan what to test and try both normal and unusual inputs.",
+        ],
+        keyPoints: ["QA checks software before release", "Test normal and unusual inputs"],
+        summary: "QA testers protect users by checking software against its requirements before release.",
+        quiz: [{ q: "When does QA testing happen?", options: ["Before release", "Never", "Only after complaints"], answer: 0 }],
+      },
+      {
+        id: "qa-2",
+        title: "Writing test cases",
+        body: [
+          "A test case lists the steps, the input data and the expected result.",
+          "Good test cases are short, repeatable and test one thing each.",
+        ],
+        keyPoints: ["Steps, data and expected result", "One thing per test case"],
+        summary: "A good test case is short, repeatable and checks a single expected result.",
+        quiz: [{ q: "What must a test case include?", options: ["Expected result", "The tester's age", "A logo"], answer: 0 }],
+      },
+      {
+        id: "qa-3",
+        title: "Reporting bugs",
+        body: [
+          "A bug report needs a clear title, steps to reproduce, the expected and actual result, and a screenshot if possible.",
+          "Rate how serious the bug is so the team can decide what to fix first.",
+        ],
+        keyPoints: ["Clear title and steps", "Expected vs actual result", "Severity helps priority"],
+        summary: "Clear bug reports with steps, results and severity help developers fix the right things first.",
+        quiz: [{ q: "What helps a team decide what to fix first?", options: ["Severity", "Font size", "Report length"], answer: 0 }],
+      },
+    ],
+    test: [
+      { q: "What is a test case?", options: ["A bug fix", "Steps, data and expected result", "A design file"], answer: 1 },
+      { q: "What belongs in a bug report?", options: ["Your salary", "Nothing", "Steps to reproduce"], answer: 2 },
+      { q: "Why test unusual inputs?", options: ["To find hidden bugs", "To slow the team", "No reason"], answer: 0 },
+      { q: "What does severity describe?", options: ["Who found it", "How serious a bug is", "When it was found"], answer: 1 },
+    ],
+  },
+];
+
+export const emptyProgress: Progress = {
+  goal: "",
+  currentSkills: "",
+  hoursPerWeek: 5,
+  roadmap: [],
+  roadmapNote: "",
+  doneLessons: [],
+  notes: {},
+  testScores: {},
+};
+
+export const seed: State = {
+  sessionUserId: null,
+  users: [
+    { id: "u-aye", role: "learner", name: "Aye Chan", email: "aye@example.com", headline: "Aspiring frontend developer", skills: ["HTML"] },
+    {
+      id: "u-min",
+      role: "learner",
+      name: "Min Thu",
+      email: "min@example.com",
+      headline: "Frontend learner from Mandalay",
+      skills: ["HTML", "CSS", "JavaScript"],
+    },
+    {
+      id: "u-gp",
+      role: "company",
+      name: "Daw Hnin (Golden Pixel)",
+      email: "hr@goldenpixel.com.mm",
+      headline: "Hiring lead",
+      skills: [],
+      companyId: "c-gp",
+    },
+    {
+      id: "u-yds",
+      role: "company",
+      name: "Ko Zaw (Yangon Dev Studio)",
+      email: "zaw@yangondev.com",
+      headline: "Founder",
+      skills: [],
+      companyId: "c-yds",
+    },
+  ],
+  companies: [
+    {
+      id: "c-gp",
+      name: "Golden Pixel Software",
+      about: "A Yangon software house building web and mobile apps for local businesses.",
+      website: "https://goldenpixel.com.mm",
+      social: "https://www.linkedin.com/company/goldenpixel",
+      address: "No. 12, Pyay Road, Kamayut, Yangon",
+      phone: "+95 9 450 000 111",
+      email: "hr@goldenpixel.com.mm",
+      documents: ["company-registration.pdf"],
+      terms: { role: "Frontend intern", duration: "3 months", location: "Yangon (hybrid)", stipend: "300,000 MMK / month" },
+      status: "verified",
+      verifiedAt: "2026-10-01",
+    },
+    {
+      id: "c-yds",
+      name: "Yangon Dev Studio",
+      about: "",
+      website: "",
+      social: "",
+      address: "",
+      phone: "",
+      email: "zaw@yangondev.com",
+      documents: [],
+      terms: { role: "", duration: "", location: "", stipend: "" },
+      status: "draft",
+    },
+  ],
+  challenges: [
+    {
+      id: "ch-pricing",
+      companyId: "c-gp",
+      courseId: "frontend",
+      title: "Build a responsive pricing card",
+      task: "Build a pricing card for a mobile data plan with HTML and CSS. It must look good on a 360px phone and a 1280px laptop. Share a link to your code and explain your layout choices.",
+      rubric: ["Semantic HTML", "Works at 360px and 1280px", "Clear explanation of choices"],
+      createdAt: "2026-10-05",
+    },
+    {
+      id: "ch-bugs",
+      companyId: "c-gp",
+      courseId: "qa",
+      title: "Find and report three bugs",
+      task: "Test our demo sign-up form and write bug reports for the three most serious bugs you find.",
+      rubric: ["Clear steps to reproduce", "Expected vs actual result", "Sensible severity"],
+      createdAt: "2026-10-06",
+    },
+  ],
+  submissions: [
+    {
+      id: "s-min",
+      challengeId: "ch-pricing",
+      learnerId: "u-min",
+      answer:
+        "I used a section with an h2 for the plan name and a ul for the features. The card uses flexbox in a column and a media query at 640px to widen it. I kept the button as a real button element so it works with the keyboard.",
+      link: "https://github.com/minthu/pricing-card",
+      aiFeedback: ["Good use of semantic elements.", "Mention how you tested the 360px width."],
+      aiSummary: "Semantic card with flexbox and one media query; explains accessibility choices.",
+      aiScore: 82,
+      status: "submitted",
+      submittedAt: "2026-10-12",
+    },
+  ],
+  interviews: [],
+  ratings: [],
+  posts: [
+    {
+      id: "p-1",
+      authorId: "u-min",
+      kind: "course",
+      topicId: "frontend",
+      title: "When should I use grid instead of flexbox?",
+      body: "I understand flexbox, but grid feels confusing. Any simple rule?",
+      at: "2026-10-10",
+      replies: [
+        { id: "r-1", authorId: "u-aye", body: "I use flexbox for one row or column and grid when I need both.", at: "2026-10-11" },
+      ],
+    },
+    {
+      id: "p-2",
+      authorId: "u-min",
+      kind: "challenge",
+      topicId: "ch-pricing",
+      title: "Can we use a CSS framework for the pricing card?",
+      body: "Is plain CSS required, or can I use a framework?",
+      at: "2026-10-11",
+      replies: [{ id: "r-2", authorId: "u-gp", body: "Plain CSS please, we want to see your own layout.", at: "2026-10-11" }],
+    },
+  ],
+  reports: [],
+  certificates: [{ id: "cert-min-fe", learnerId: "u-min", courseId: "frontend", score: 80, issuedAt: "2026-10-09" }],
+  progress: {
+    "u-min": {
+      ...emptyProgress,
+      goal: "frontend",
+      roadmap: ["starter", "frontend"],
+      roadmapNote: "Start with the career starter, then frontend basics.",
+      doneLessons: ["frontend-1", "frontend-2", "frontend-3"],
+      testScores: { frontend: 80 },
+    },
+  },
+};
