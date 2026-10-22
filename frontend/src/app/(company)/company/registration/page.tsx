@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { YouTubeFrame } from "@/components/YouTubeFrame";
 import { Button } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Card";
 import { Input, Textarea } from "@/components/ui/Field";
-import { emailMatchesWebsite } from "@/lib/rules";
+import { emailMatchesWebsite, youtubeVideoId } from "@/lib/rules";
 import { setState, useData } from "@/lib/store";
 import type { Company } from "@/lib/types";
 
@@ -15,10 +16,13 @@ export default function Registration() {
   const [form, setForm] = useState<Company>(company!);
   const [agreed, setAgreed] = useState(false);
   const [tried, setTried] = useState(false);
+  const [videoUrl, setVideoUrl] = useState(company?.videoId ? `https://youtu.be/${company.videoId}` : "");
   const set = (patch: Partial<Company>) => setForm((f) => ({ ...f, ...patch }));
   const setTerms = (patch: Partial<Company["terms"]>) => setForm((f) => ({ ...f, terms: { ...f.terms, ...patch } }));
   const domainError = tried && !emailMatchesWebsite(form.email, form.website) ? "The email must be on your website's domain, not Gmail or similar." : undefined;
   const docsError = tried && !form.documents.length ? "Upload your business registration document." : undefined;
+  const videoId = youtubeVideoId(videoUrl);
+  const videoError = tried && videoUrl.trim() && videoId === undefined ? "Use a YouTube video link." : undefined;
 
   return (
     <>
@@ -34,8 +38,11 @@ export default function Registration() {
         onSubmit={(e) => {
           e.preventDefault();
           setTried(true);
-          if (!emailMatchesWebsite(form.email, form.website) || !form.documents.length) return;
-          setState((st) => ({ ...st, companies: st.companies.map((c) => (c.id === form.id ? { ...form, status: "pending", reviewNote: undefined } : c)) }));
+          if (!emailMatchesWebsite(form.email, form.website) || !form.documents.length || videoId === undefined) return;
+          setState((st) => ({
+            ...st,
+            companies: st.companies.map((c) => (c.id === form.id ? { ...form, videoId: videoId || undefined, status: "pending", reviewNote: undefined } : c)),
+          }));
           router.push("/company/registration/status");
         }}
       >
@@ -64,6 +71,16 @@ export default function Registration() {
             error={docsError}
             hint={form.documents.length ? `Attached: ${form.documents.join(", ")}` : "PDF or image."}
           />
+          <Input
+            label="Company video"
+            type="url"
+            placeholder="https://youtu.be/…"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            error={videoError}
+            hint="Paste an unlisted YouTube link. A private video only plays for you."
+          />
+          {typeof videoId === "string" ? <YouTubeFrame videoId={videoId} title={`${form.name} video`} /> : null}
           <p className="text-body-sm text-muted">After you submit, our team will also book a short call with a company representative.</p>
         </Card>
 

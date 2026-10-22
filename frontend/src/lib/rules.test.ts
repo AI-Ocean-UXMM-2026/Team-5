@@ -14,6 +14,7 @@ import {
   challengeUnlocked,
   counted,
   emailMatchesWebsite,
+  youtubeVideoId,
   hasContactDetails,
   registrationView,
   rubricMarks,
@@ -196,6 +197,12 @@ test("a learner can accept or decline an offer only once", () => {
   assert.equal(accepted.interviews.find((i) => i.id === "iv-min")?.status, "accepted");
   assert.equal(replyToOffer(accepted, "iv-min", false), accepted);
   assert.equal(replyToOffer(seed, "iv-min", false).interviews.find((i) => i.id === "iv-min")?.status, "declined");
+});
+
+test("a company video accepts a YouTube link", () => {
+  assert.equal(youtubeVideoId("https://youtu.be/dQw4w9WgXcQ"), "dQw4w9WgXcQ");
+  assert.equal(youtubeVideoId(""), null);
+  assert.equal(youtubeVideoId("https://vimeo.com/123"), undefined);
 });
 
 test("company email must be on its own domain", () => {

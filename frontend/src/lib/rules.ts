@@ -98,6 +98,30 @@ export function replyToOffer(s: State, interviewId: string, accept: boolean): St
   return { ...s, interviews: s.interviews.map((i) => (i.id === row.id ? { ...i, status: accept ? "accepted" : "declined" } : i)) };
 }
 
+const youtubeId = /^[A-Za-z0-9_-]{11}$/;
+
+export function youtubeVideoId(value: string) {
+  const raw = value.trim();
+  if (!raw) return null;
+  if (youtubeId.test(raw)) return raw;
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.replace(/^www\./, "");
+    const parts = url.pathname.split("/").filter(Boolean);
+    let id = "";
+    if (host === "youtu.be") id = parts[0] || "";
+    else if (host === "youtube.com" || host === "youtube-nocookie.com" || host === "m.youtube.com") {
+      id = url.searchParams.get("v") || "";
+      const marker = parts.findIndex((part) => part === "embed" || part === "shorts" || part === "live");
+      if (!id && marker >= 0) id = parts[marker + 1] || "";
+    }
+    if (youtubeId.test(id)) return id;
+  } catch {
+    // Not a URL.
+  }
+  return undefined;
+}
+
 export function emailMatchesWebsite(email: string, website: string) {
   try {
     const host = new URL(/^https?:\/\//.test(website) ? website : `https://${website}`).hostname.replace(/^www\./, "");

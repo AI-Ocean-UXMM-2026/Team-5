@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { GoogleSignIn } from "@/components/GoogleSignIn";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Field";
@@ -19,7 +20,7 @@ export default function Login() {
       <Card>
         <Mascot pose="wave" size={96} priority className="-mt-2 mb-2" />
         <h1 className="text-h2">Log in</h1>
-        <p className="mt-1 mb-6 text-muted">One login for learners and companies. This demo has no passwords.</p>
+        <p className="mt-1 mb-6 text-muted">Continue with Google, or use a demo email. Demo accounts have no passwords.</p>
         <form
           className="flex flex-col gap-4"
           onSubmit={(e) => {
@@ -32,6 +33,8 @@ export default function Login() {
           <Input label="Email" type="email" placeholder="you@email.com" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} />
           <Button type="submit">Log in</Button>
         </form>
+        <p className="my-4 text-center text-body-sm text-muted">or</p>
+        <GoogleSignIn />
         <p className="mt-6 text-muted">
           New here?{" "}
           <Link href="/signup" className="font-medium text-burgundy underline-offset-2 hover:underline">

@@ -9,7 +9,7 @@ import { Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Input, Textarea } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
-import { challengeFeedback, scoreSubmission } from "@/lib/ai";
+import { reviewChallenge } from "@/lib/ai";
 import { courseTitle } from "@/lib/i18n";
 import { challengeUnlocked } from "@/lib/rules";
 import { courses } from "@/lib/seed";
@@ -24,6 +24,7 @@ export default function ChallengeDetail() {
   const [link, setLink] = useState(sub?.link ?? "");
   const [feedback, setFeedback] = useState<string[] | null>(null);
   const [busy, setBusy] = useState<"" | "feedback" | "submit">("");
+  const [error, setError] = useState("");
 
   const company = s.companies.find((c) => c.id === challenge?.companyId);
   if (!challenge || company?.status !== "verified") return <Empty>Challenge not found.</Empty>;
@@ -44,18 +45,24 @@ export default function ChallengeDetail() {
 
   async function submit() {
     setBusy("submit");
-    const [aiFeedback, scored] = await Promise.all([feedback ?? challengeFeedback(answer, link, challenge!.rubric), scoreSubmission(answer, link, challenge!.rubric)]);
-    setState((st) => {
-      const next = { answer: answer.trim(), link: link.trim(), aiFeedback, ...scored, status: "submitted" as const, companyFeedback: undefined, submittedAt: today() };
-      return {
-        ...st,
-        submissions: sub
-          ? st.submissions.map((x) => (x.id === sub.id ? { ...x, ...next } : x))
-          : [...st.submissions, { id: newId("s"), challengeId: challenge!.id, learnerId: me.id, ...next }],
-      };
-    });
-    setFeedback(null);
-    setBusy("");
+    setError("");
+    try {
+      const review = await reviewChallenge(answer, link, challenge!.rubric, challenge!.task);
+      setState((st) => {
+        const next = { answer: answer.trim(), link: link.trim(), aiFeedback: review.feedback, aiScore: review.aiScore, aiSummary: review.aiSummary, aiRubric: review.aiRubric, status: "submitted" as const, companyFeedback: undefined, submittedAt: today() };
+        return {
+          ...st,
+          submissions: sub
+            ? st.submissions.map((x) => (x.id === sub.id ? { ...x, ...next } : x))
+            : [...st.submissions, { id: newId("s"), challengeId: challenge!.id, learnerId: me.id, ...next }],
+        };
+      });
+      setFeedback(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI did not answer.");
+    } finally {
+      setBusy("");
+    }
   }
 
   return (
@@ -117,8 +124,15 @@ export default function ChallengeDetail() {
                     disabled={!answer.trim() || !!busy}
                     onClick={async () => {
                       setBusy("feedback");
-                      setFeedback(await challengeFeedback(answer, link, challenge.rubric));
-                      setBusy("");
+                      setError("");
+                      try {
+                        const review = await reviewChallenge(answer, link, challenge.rubric, challenge.task);
+                        setFeedback(review.feedback);
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : "AI did not answer.");
+                      } finally {
+                        setBusy("");
+                      }
                     }}
                   >
                     Get AI feedback first
@@ -127,6 +141,7 @@ export default function ChallengeDetail() {
                     {busy === "submit" ? "Submitting…" : sub ? "Submit again" : "Submit to company"}
                   </Button>
                 </div>
+                {error ? <p className="text-body-sm text-danger">{error}</p> : null}
               </form>
             </Card>
           ) : (

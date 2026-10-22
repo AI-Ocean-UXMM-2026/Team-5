@@ -1,0 +1,18 @@
+{
+  "name": "citadel-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "migrate": "node src/migrate.js",
+    "create-staff": "node src/create-staff.js",
+    "seed": "node src/seed.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "busboy": "^1.6.0",
+    "google-auth-library": "^11.3.1",
+    "nodemailer": "^10.2.1",
+    "pg": "^8.16.3"
+  }
+}

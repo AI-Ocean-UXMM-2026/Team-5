@@ -16,6 +16,7 @@ export default function Onboarding() {
   const [currentSkills, setCurrentSkills] = useState(current.currentSkills);
   const [hours, setHours] = useState(current.hoursPerWeek);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const remake = current.roadmap.length > 0;
 
   return (
@@ -32,9 +33,15 @@ export default function Onboarding() {
             onSubmit={async (e) => {
               e.preventDefault();
               setBusy(true);
-              const result = await makeRoadmap(goal, currentSkills, hours);
-              updateProgress(me.id, (p) => ({ ...p, goal, currentSkills, hoursPerWeek: hours, ...result }));
-              router.push("/roadmap");
+              setError("");
+              try {
+                const result = await makeRoadmap(goal, currentSkills, hours);
+                updateProgress(me.id, (p) => ({ ...p, goal, currentSkills, hoursPerWeek: hours, ...result }));
+                router.push("/roadmap");
+              } catch (err) {
+                setError(err instanceof Error ? err.message : "AI did not answer.");
+                setBusy(false);
+              }
             }}
           >
             <Select label="Career goal" value={goal} onChange={(e) => setGoal(e.target.value)}>
@@ -49,6 +56,7 @@ export default function Onboarding() {
             <Button type="submit" disabled={busy}>
               {busy ? "AI is making your roadmap…" : remake ? "Remake my roadmap" : "Make my roadmap"}
             </Button>
+            {error ? <p className="text-body-sm text-danger">{error}</p> : null}
           </form>
         </Card>
         {remake && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { YouTubeFrame } from "@/components/YouTubeFrame";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Badge, Card, PageHeader } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Field";
@@ -48,6 +49,11 @@ export default function RegistrationStatus() {
       </PageHeader>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
+          {company.videoId ? (
+            <div className="mb-4">
+              <YouTubeFrame videoId={company.videoId} title={`${company.name} video`} />
+            </div>
+          ) : null}
           {company.reviewNote && view !== "live" && (
             <p role="status" className="mb-4">
               {company.reviewNote}

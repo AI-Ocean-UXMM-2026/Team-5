@@ -20,6 +20,7 @@ export default function NewChallenge() {
   const [task, setTask] = useState("");
   const [rubric, setRubric] = useState("");
   const [drafting, setDrafting] = useState(false);
+  const [error, setError] = useState("");
 
   return (
     <>
@@ -58,15 +59,22 @@ export default function NewChallenge() {
             variant="secondary"
             onClick={async () => {
               setDrafting(true);
-              const d = await draftChallenge(courseId);
-              setTitle(d.title);
-              setTask(d.task);
-              setRubric(d.rubric.join("\n"));
-              setDrafting(false);
+              setError("");
+              try {
+                const d = await draftChallenge(courseId);
+                setTitle(d.title);
+                setTask(d.task);
+                setRubric(d.rubric.join("\n"));
+              } catch (err) {
+                setError(err instanceof Error ? err.message : "AI did not answer.");
+              } finally {
+                setDrafting(false);
+              }
             }}
           >
             {title ? "Draft again" : "Draft with AI"}
           </Button>
+          {error ? <p className="mt-3 text-body-sm text-danger">{error}</p> : null}
         </AiPanel>
       </div>
     </>

@@ -1,9 +1,24 @@
-import { rubricMarks } from "./rules.ts";
 import { courses } from "./seed.ts";
 import type { Course, Lesson } from "./types.ts";
 
-// shortcut: canned, rule-based "AI" for the demo; replace these functions with real model calls when the backend exists.
-const wait = <T>(value: T) => new Promise<T>((resolve) => setTimeout(() => resolve(value), 800));
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+async function ask(path: string, body: unknown) {
+  let res: Response;
+  try {
+    res = await fetch(`${API}${path}`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error("AI did not answer.");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "AI did not answer.");
+  return data;
+}
 
 export const goals = [
   { id: "frontend", label: "Frontend Developer" },
@@ -21,22 +36,21 @@ export function coursesForGoal(goal: string) {
   return ["starter", "frontend", "qa"];
 }
 
-const goalNote: Record<string, string> = {
-  backend: " This demo has no backend course yet, so frontend basics stands in until it does.",
-  uiux: " This demo has no UI/UX course yet, so frontend basics stands in until it does.",
-  data: " This demo has no data course yet, so manual QA stands in until it does.",
-  fullstack: " Full-stack in this demo is the career starter, frontend basics, then manual QA.",
-};
-
 export function makeRoadmap(goal: string, currentSkills: string, hoursPerWeek: number) {
-  const roadmap = coursesForGoal(goal);
-  const hours = roadmap.reduce((sum, id) => sum + (courses.find((c) => c.id === id)?.hours ?? 0), 0);
-  const weeks = Math.max(1, Math.ceil(hours / Math.max(1, hoursPerWeek)));
-  const skip = /html|css/i.test(currentSkills) && roadmap.includes("frontend") ? " You already know some HTML or CSS, so the first frontend lessons should go quickly." : "";
-  return wait({
-    roadmap,
-    roadmapNote: `About ${hours} hours of learning, roughly ${weeks} week${weeks > 1 ? "s" : ""} at ${hoursPerWeek} hours a week. Start with the career starter so you know how IT teams work.${skip}${goalNote[goal] ?? ""}`,
-  });
+  const label = goals.find((item) => item.id === goal)?.label ?? goal;
+  return ask("/ai/roadmap", {
+    goal: label,
+    currentSkills,
+    hoursPerWeek,
+    courses: courses.map((course) => ({
+      id: course.id,
+      title: course.title,
+      skill: course.skill,
+      hours: course.hours,
+      level: course.level,
+      description: course.description,
+    })),
+  }) as Promise<{ roadmap: string[]; roadmapNote: string }>;
 }
 
 export function courseSuggestion(course: Course, doneLessons: string[], certified: boolean, hoursPerWeek: number) {
@@ -49,41 +63,24 @@ export function courseSuggestion(course: Course, doneLessons: string[], certifie
   return `You finished ${done} of ${course.lessons.length} lessons. Next up: “${next.title}”. Get every quiz answer right to complete it.`;
 }
 
-export const summarizeLesson = (lesson: Lesson) => wait({ keyPoints: lesson.keyPoints, summary: lesson.summary });
-
-const covers = (answer: string, point: string) => rubricMarks(answer, [point])[0]?.met;
-
-export function challengeFeedback(answer: string, link: string, rubric: string[]) {
-  const feedback = rubric.map((p) => (covers(answer, p) ? `Covers "${p}".` : `Say more about "${p}".`));
-  if (answer.trim().length < 150) feedback.push("Your answer is short. Explain why you made each choice.");
-  if (!link.trim()) feedback.push("Add a link to your work so the company can check it.");
-  return wait(feedback);
+export function summarizeLesson(lesson: Lesson) {
+  return ask("/ai/lesson-summary", { title: lesson.title, body: lesson.body }) as Promise<{ summary: string; keyPoints: string[] }>;
 }
 
-export function scoreSubmission(answer: string, link: string, rubric: string[]) {
-  const marks = rubricMarks(answer, rubric);
-  const covered = marks.filter((m) => m.met).length;
-  const score = Math.round((covered / Math.max(1, rubric.length)) * 70 + Math.min(20, answer.trim().length / 15) + (link.trim() ? 10 : 0));
-  const first = answer.trim().split(/(?<=\.)\s/)[0].slice(0, 140);
-  return wait({ aiScore: Math.min(100, score), aiSummary: `${first} Covers ${covered} of ${rubric.length} rubric points.`, aiRubric: marks });
+export function reviewChallenge(answer: string, link: string, rubric: string[], task: string) {
+  return ask("/ai/challenge-review", { answer, link, rubric, task }) as Promise<{
+    feedback: string[];
+    aiScore: number;
+    aiSummary: string;
+    aiRubric: { point: string; met: boolean }[];
+  }>;
 }
 
-const drafts: Record<string, { title: string; task: string; rubric: string[] }> = {
-  frontend: {
-    title: "Build a simple product page",
-    task: "Build a one-page product listing with HTML, CSS and a little JavaScript: a header, three product cards and an Add to cart button that updates a counter. It must work on a phone and a laptop. Share a link and explain your choices.",
-    rubric: ["Semantic HTML", "Responsive layout", "Working JavaScript counter", "Clear explanation"],
-  },
-  qa: {
-    title: "Test a login form",
-    task: "Write five test cases for a login form with email and password fields, run them on the demo page and report any bugs you find.",
-    rubric: ["Clear test steps", "Expected results", "Bug reports with severity"],
-  },
-  starter: {
-    title: "Plan a small team sprint",
-    task: "Our team has five tasks for a one-week sprint. Put them in order, explain who should review each one and why.",
-    rubric: ["Sensible order", "Review plan", "Clear reasons"],
-  },
-};
-
-export const draftChallenge = (courseId: string) => wait(drafts[courseId] ?? drafts.starter);
+export function draftChallenge(courseId: string) {
+  const course = courses.find((item) => item.id === courseId) ?? courses[0];
+  return ask("/ai/challenge-draft", { title: course.title, skill: course.skill, description: course.description }) as Promise<{
+    title: string;
+    task: string;
+    rubric: string[];
+  }>;
+}

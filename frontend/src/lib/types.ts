@@ -10,6 +10,8 @@ export type Lesson = {
   body: string[];
   keyPoints: string[];
   summary: string;
+  /** YouTube id. shortcut: a private video only plays for the owner, use Unlisted for learners. */
+  videoId?: string;
   quiz: Question[];
 };
 
@@ -50,6 +52,8 @@ export type Company = {
   phone: string;
   email: string;
   documents: string[];
+  /** YouTube id for the video sent with registration. */
+  videoId?: string;
   terms: InternshipTerms;
   status: CompanyStatus;
   reviewNote?: string;

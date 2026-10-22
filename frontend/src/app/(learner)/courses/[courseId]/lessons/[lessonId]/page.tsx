@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Quiz } from "@/components/Quiz";
+import { YouTubeFrame } from "@/components/YouTubeFrame";
 import { AiPanel } from "@/components/ui/AiPanel";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Card, Empty } from "@/components/ui/Card";
@@ -14,6 +15,21 @@ import { courseTitle } from "@/lib/i18n";
 import { lessonIncluded } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { progressOf, updateProgress, useData } from "@/lib/store";
+
+function LessonVideo({ videoId, title }: { videoId?: string; title: string }) {
+  if (!videoId) {
+    return (
+      <div className="mb-6 flex aspect-video items-center justify-center rounded-xl border border-line bg-surface px-6 text-center text-muted">
+        This lesson's YouTube video will play here.
+      </div>
+    );
+  }
+  return (
+    <div className="mb-6">
+      <YouTubeFrame videoId={videoId} title={title} />
+    </div>
+  );
+}
 
 function LessonNotes({ lessonId, saved, userId }: { lessonId: string; saved: string; userId: string }) {
   const [note, setNote] = useState(saved);
@@ -40,6 +56,7 @@ export default function LessonPage() {
   const { s, me, lang } = useData();
   const [result, setResult] = useState<{ lessonId: string; keyPoints: string[]; summary: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState("");
   const [passedId, setPassedId] = useState<string | null>(null);
   const course = courses.find((c) => c.id === courseId);
   const index = course?.lessons.findIndex((l) => l.id === lessonId) ?? -1;
@@ -73,6 +90,7 @@ export default function LessonPage() {
         / Lesson {index + 1}
       </nav>
       <h1 className="mb-8 text-h2 sm:text-h1">{lesson.title}</h1>
+      <LessonVideo videoId={lesson.videoId} title={lesson.title} />
       <div className="grid items-stretch gap-6 lg:grid-cols-[3fr_2fr]">
         <div className="flex h-full flex-col gap-6">
           <Card>
@@ -127,14 +145,21 @@ export default function LessonPage() {
                 variant="secondary"
                 onClick={async () => {
                   setLoading(true);
-                  setResult({ lessonId: lesson.id, ...(await summarizeLesson(lesson)) });
-                  setLoading(false);
+                  setSummaryError("");
+                  try {
+                    setResult({ lessonId: lesson.id, ...(await summarizeLesson(lesson)) });
+                  } catch (err) {
+                    setSummaryError(err instanceof Error ? err.message : "AI did not answer.");
+                  } finally {
+                    setLoading(false);
+                  }
                 }}
               >
                 Summarize this lesson
               </Button>
               </div>
             )}
+            {summaryError ? <p className="mt-3 text-body-sm text-danger">{summaryError}</p> : null}
           </AiPanel>
           <LessonNotes key={lesson.id} lessonId={lesson.id} saved={p.notes[lesson.id] ?? ""} userId={me.id} />
         </div>
