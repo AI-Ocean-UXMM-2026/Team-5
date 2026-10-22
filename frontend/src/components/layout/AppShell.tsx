@@ -5,8 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import { type Area, homePath, redirectFor } from "@/lib/access";
+import { copy } from "@/lib/i18n";
+import { isPitchUser } from "@/lib/seed";
 import { resetDemo, setState, useStore } from "@/lib/store";
-import type { State } from "@/lib/types";
+import type { Lang, State } from "@/lib/types";
 
 function navFor(s: State) {
   const me = s.users.find((u) => u.id === s.sessionUserId);
@@ -46,14 +48,21 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
   const router = useRouter();
   const redirect = s && redirectFor(s, area, pathname);
 
+  const lang: Lang = s?.lang === "my" ? "my" : "en";
+
   useEffect(() => {
     if (redirect) router.replace(redirect);
   }, [redirect, router]);
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   if (!s || redirect) return loading;
 
   const me = s.users.find((u) => u.id === s.sessionUserId);
   const nav = navFor(s);
+  const t = copy[lang];
 
   return (
     <>
@@ -80,14 +89,34 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
             </nav>
           )}
           <div className="ml-auto flex items-center gap-3 text-sm">
+            <div role="group" aria-label={t.language} className="flex rounded-xl border border-line p-0.5">
+              {(
+                [
+                  ["en", "English"],
+                  ["my", "မြန်မာ"],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={lang === id}
+                  onClick={() => lang !== id && setState((st) => ({ ...st, lang: id }))}
+                  className={`rounded-lg px-2 py-1 ${lang === id ? "bg-burgundy-tint font-medium text-burgundy" : "text-muted hover:text-ink"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             {me && <span className="hidden text-muted lg:inline">{me.name}</span>}
-            <button
-              type="button"
-              onClick={() => window.confirm("Reset all demo data?") && resetDemo()}
-              className="rounded-xl px-2 py-2 text-muted hover:bg-surface hover:text-ink"
-            >
-              Reset demo
-            </button>
+            {isPitchUser(me?.id) && (
+              <button
+                type="button"
+                onClick={() => window.confirm("Reset all demo data?") && resetDemo()}
+                className="rounded-xl px-2 py-2 text-muted hover:bg-surface hover:text-ink"
+              >
+                Reset demo
+              </button>
+            )}
             {me && (
               <button type="button" onClick={() => setState((st) => ({ ...st, sessionUserId: null }))} className="rounded-xl px-2 py-2 font-medium text-burgundy hover:bg-burgundy-tint">
                 Log out
@@ -100,7 +129,7 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
       <footer className="bg-ink-strong text-white">
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-6 py-8 md:px-8 lg:px-12">
           <Image src="/logo/the-citadel-logo-reversed.png" alt="The Citadel" width={96} height={96} className="size-24" />
-          <p className="text-body-sm text-white/70">Skills that get you in · Learners never pay to apply, take a challenge or interview.</p>
+          <p className="text-body-sm text-white/70">{t.footer}</p>
         </div>
       </footer>
     </>

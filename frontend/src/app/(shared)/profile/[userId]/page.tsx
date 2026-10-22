@@ -6,12 +6,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Field";
+import { courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
 import { nameOf, setState, useData } from "@/lib/store";
 
 export default function Profile() {
   const { userId } = useParams<{ userId: string }>();
-  const { s, me } = useData();
+  const { s, me, lang } = useData();
   const user = s.users.find((u) => u.id === userId);
   const [editing, setEditing] = useState(false);
   const [headline, setHeadline] = useState(user?.headline ?? "");
@@ -66,7 +67,7 @@ export default function Profile() {
             <ul className="flex flex-col gap-2">
               {certs.map((c) => (
                 <li key={c.id} className="flex items-center justify-between gap-3">
-                  <span>✓ {courses.find((x) => x.id === c.courseId)?.title}</span>
+                  <span>✓ {courseTitle(courses.find((x) => x.id === c.courseId), lang)}</span>
                   <span className="text-body-sm text-muted">
                     {c.score}% · {c.issuedAt}
                   </span>

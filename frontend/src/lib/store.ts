@@ -2,9 +2,9 @@
 
 import { useSyncExternalStore } from "react";
 import { emptyProgress, seed } from "./seed";
-import type { Progress, State } from "./types";
+import type { Lang, Progress, State } from "./types";
 
-const KEY = "citadel-demo-v1";
+const KEY = "citadel-demo-v2";
 let state: State | null = null;
 const listeners = new Set<() => void>();
 
@@ -60,7 +60,8 @@ export function useData() {
   if (!s) throw new Error("useData used outside AppShell");
   const me = s.users.find((u) => u.id === s.sessionUserId);
   const company = s.companies.find((c) => c.id === me?.companyId);
-  return { s, me: me!, company };
+  const lang: Lang = s.lang === "my" ? "my" : "en";
+  return { s, me: me!, company, lang };
 }
 
 export const newId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;

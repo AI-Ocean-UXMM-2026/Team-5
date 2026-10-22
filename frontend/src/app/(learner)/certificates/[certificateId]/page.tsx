@@ -5,12 +5,13 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Empty } from "@/components/ui/Card";
 import { Mascot } from "@/components/ui/Mascot";
+import { courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
 import { nameOf, useData } from "@/lib/store";
 
 export default function CertificatePage() {
   const { certificateId } = useParams<{ certificateId: string }>();
-  const { s } = useData();
+  const { s, lang } = useData();
   const cert = s.certificates.find((c) => c.id === certificateId);
   const course = courses.find((c) => c.id === cert?.courseId);
   if (!cert || !course) return <Empty>Certificate not found.</Empty>;
@@ -23,7 +24,7 @@ export default function CertificatePage() {
         <p className="mt-4 text-body-sm font-semibold tracking-wide text-burgundy uppercase">Certificate of completion</p>
         <h1 className="mt-4 text-h1">{nameOf(s, cert.learnerId)}</h1>
         <p className="mt-4 text-body-lg text-muted">has passed the final test for</p>
-        <p className="mt-1 font-heading text-h3 font-semibold">{course.title}</p>
+        <p className="mt-1 font-heading text-h3 font-semibold">{courseTitle(course, lang)}</p>
         <div className="mx-auto mt-8 h-1 w-24 rounded-full bg-yellow" />
         <dl className="mt-8 flex justify-center gap-10 text-left text-body-sm">
           <div>

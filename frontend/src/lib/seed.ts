@@ -7,6 +7,7 @@ export const courses: Course[] = [
     skill: "IT careers",
     level: "Beginner",
     hours: 3,
+    priceMmk: 0,
     description: "Learn what IT roles exist, how teams work and how to show your skills to a company.",
     lessons: [
       {
@@ -81,6 +82,7 @@ export const courses: Course[] = [
     skill: "Frontend development",
     level: "Beginner",
     hours: 12,
+    priceMmk: 45000, // shortcut: placeholder catalogue price, replace when the real price is set
     description: "Build simple, responsive web pages and add interaction with JavaScript.",
     lessons: [
       {
@@ -140,6 +142,7 @@ export const courses: Course[] = [
     skill: "QA testing",
     level: "Beginner",
     hours: 8,
+    priceMmk: 30000,
     description: "Write test cases, find bugs and report them clearly so developers can fix them.",
     lessons: [
       {
@@ -197,6 +200,7 @@ export const emptyProgress: Progress = {
 };
 
 export const seed: State = {
+  lang: "en",
   sessionUserId: null,
   users: [
     { id: "u-aye", role: "learner", name: "Aye Chan", email: "aye@example.com", headline: "Aspiring frontend developer", skills: ["HTML"] },
@@ -285,8 +289,13 @@ export const seed: State = {
         "I used a section with an h2 for the plan name and a ul for the features. The card uses flexbox in a column and a media query at 640px to widen it. I kept the button as a real button element so it works with the keyboard.",
       link: "https://github.com/minthu/pricing-card",
       aiFeedback: ["Good use of semantic elements.", "Mention how you tested the 360px width."],
-      aiSummary: "Semantic card with flexbox and one media query; explains accessibility choices.",
+      aiSummary: "Semantic card with flexbox and one media query. Meets semantic HTML and both screen sizes. The reason for each choice is brief, so this is 82 rather than a full mark.",
       aiScore: 82,
+      aiRubric: [
+        { point: "Semantic HTML", met: true },
+        { point: "Works at 360px and 1280px", met: true },
+        { point: "Clear explanation of choices", met: false },
+      ],
       status: "submitted",
       submittedAt: "2026-10-12",
     },
@@ -315,6 +324,7 @@ export const seed: State = {
       body: "Is plain CSS required, or can I use a framework?",
       at: "2026-10-11",
       replies: [{ id: "r-2", authorId: "u-gp", body: "Plain CSS please, we want to see your own layout.", at: "2026-10-11" }],
+      officialReplyId: "r-2",
     },
   ],
   reports: [],
@@ -330,3 +340,5 @@ export const seed: State = {
     },
   },
 };
+
+export const isPitchUser = (userId?: string | null) => !!userId && seed.users.some((u) => u.id === userId);

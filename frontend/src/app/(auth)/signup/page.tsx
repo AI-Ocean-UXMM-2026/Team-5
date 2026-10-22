@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
+import { copy } from "@/lib/i18n";
 import { newId, setState, useData } from "@/lib/store";
 import type { Role } from "@/lib/types";
 
 export default function Signup() {
-  const { s } = useData();
+  const { s, lang } = useData();
+  const t = copy[lang];
   const [role, setRole] = useState<Role>("learner");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,8 +21,8 @@ export default function Signup() {
   return (
     <Card className="mx-auto max-w-lg">
       <Mascot pose="hello" size={96} priority className="-mt-2 mb-2" />
-      <h1 className="text-h2">Create an account</h1>
-      <p className="mt-1 mb-6 text-muted">Learners never pay to apply, take a challenge or interview.</p>
+      <h1 className="text-h2">{t.signupTitle}</h1>
+      <p className="mt-1 mb-6 text-muted">{t.signupIntro}</p>
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {
@@ -53,28 +55,35 @@ export default function Signup() {
           }));
         }}
       >
-        <fieldset className="grid grid-cols-2 gap-2">
-          <legend className="mb-1.5 text-sm font-medium">I am</legend>
-          {(["learner", "company"] as const).map((r) => (
-            <label key={r} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 ${role === r ? "border-burgundy bg-burgundy-tint" : "border-line"}`}>
-              <input type="radio" name="role" checked={role === r} onChange={() => setRole(r)} className="accent-burgundy" />
-              {r === "learner" ? "A learner" : "A company"}
-            </label>
-          ))}
+        <fieldset>
+          <legend className="mb-1.5 text-sm font-medium">{t.iAm}</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {(
+              [
+                ["learner", t.learner],
+                ["company", t.company],
+              ] as const
+            ).map(([value, label]) => (
+              <label key={value} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 ${role === value ? "border-burgundy bg-burgundy-tint" : "border-line"}`}>
+                <input type="radio" name="role" value={value} checked={role === value} onChange={() => setRole(value)} aria-label={label} className="accent-burgundy" />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
         </fieldset>
-        <Input label="Your name" required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
-        {role === "company" && <Input label="Company name" required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />}
+        <Input label={t.yourName} required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
+        {role === "company" && <Input label={t.companyName} required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />}
         <Input
-          label="Email"
+          label={t.email}
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          error={taken ? "An account with this email already exists." : undefined}
-          hint={role === "company" ? "Use an email on your company's own domain." : undefined}
+          error={taken ? t.emailTaken : undefined}
+          hint={role === "company" ? t.emailHint : undefined}
         />
-        <Button type="submit">{role === "company" ? "Continue to registration" : "Continue to onboarding"}</Button>
+        <Button type="submit">{role === "company" ? t.continueRegistration : t.continueOnboarding}</Button>
       </form>
     </Card>
   );

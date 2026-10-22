@@ -4,11 +4,12 @@ export type Area = "guest" | "learner" | "company" | "shared";
 
 export function homePath(s: State): string {
   const me = s.users.find((u) => u.id === s.sessionUserId);
-  if (!me) return "/login";
+  if (!me) return "/";
   if (me.role === "learner") return s.progress[me.id]?.roadmap.length ? "/roadmap" : "/onboarding";
-  const status = s.companies.find((c) => c.id === me.companyId)?.status;
-  if (status === "verified") return "/company/challenges";
-  return status === "pending" ? "/company/registration/status" : "/company/registration";
+  const company = s.companies.find((c) => c.id === me.companyId);
+  if (company?.status === "verified") return "/company/challenges";
+  if (company?.status === "pending" || company?.status === "rejected" || company?.reviewNote) return "/company/registration/status";
+  return "/company/registration";
 }
 
 /** Where to send the current user instead of `pathname`, or null if they may stay. */
@@ -17,11 +18,13 @@ export function redirectFor(s: State, area: Area, pathname: string): string | nu
   if (area === "guest") return me ? homePath(s) : null;
   if (!me) return "/login";
   const verified = s.companies.find((c) => c.id === me.companyId)?.status === "verified";
+  const onRegistration = pathname.startsWith("/company/registration");
+  const onStatus = pathname.startsWith("/company/registration/status");
   const ok =
     area === "learner"
       ? me.role === "learner"
       : area === "company"
-        ? me.role === "company" && verified !== pathname.startsWith("/company/registration")
+        ? me.role === "company" && (verified ? !onRegistration || onStatus : onRegistration)
         : me.role === "learner" || verified || pathname.startsWith("/profile");
   return ok ? null : homePath(s);
 }

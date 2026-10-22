@@ -6,13 +6,14 @@ import { Quiz } from "@/components/Quiz";
 import { LinkButton } from "@/components/ui/Button";
 import { Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Mascot } from "@/components/ui/Mascot";
+import { courseTitle } from "@/lib/i18n";
 import { PASS_MARK, allLessonsDone, testPassed } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { progressOf, setState, today, updateProgress, useData } from "@/lib/store";
 
 export default function TestPage() {
   const { courseId } = useParams<{ courseId: string }>();
-  const { s, me } = useData();
+  const { s, me, lang } = useData();
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
   const course = courses.find((c) => c.id === courseId);
   if (!course) return <Empty>Course not found.</Empty>;
@@ -22,7 +23,7 @@ export default function TestPage() {
 
   return (
     <>
-      <PageHeader title={`Final test: ${course.title}`} intro={`${course.test.length} questions. You need ${PASS_MARK * 100}% to pass and get certified.`} pose="focus" />
+      <PageHeader title={`Final test: ${courseTitle(course, lang)}`} intro={`${course.test.length} questions. You need ${PASS_MARK * 100}% to pass and get certified.`} pose="focus" />
       {result && (
         <Card role="status" tone={result.passed ? "success" : "danger"} className="mb-6 flex flex-wrap items-center gap-6">
           <Mascot pose={result.passed ? "cheer" : "think"} size={120} />

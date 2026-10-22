@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { courseTitle } from "@/lib/i18n";
 import { challengeUnlocked } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { useData } from "@/lib/store";
@@ -10,7 +11,7 @@ import { useData } from "@/lib/store";
 const statusLabel = { submitted: "Waiting for review", "needs-work": "Feedback to act on", interview: "Interview invite" } as const;
 
 export default function Challenges() {
-  const { s, me } = useData();
+  const { s, me, lang } = useData();
   const live = s.challenges.filter((c) => s.companies.find((co) => co.id === c.companyId)?.status === "verified");
 
   return (
@@ -37,14 +38,14 @@ export default function Challenges() {
                   c.title
                 )}
               </h2>
-              <p className="text-muted">Course: {course?.title}</p>
+              <p className="text-muted">Course: {courseTitle(course, lang)}</p>
               <div className="mt-auto pt-2">
                 {sub ? (
                   <Badge tone={sub.status === "needs-work" ? "highlight" : sub.status === "interview" ? "success" : "brand"}>{statusLabel[sub.status]}</Badge>
                 ) : unlocked ? (
                   <Badge tone="brand">Open to you</Badge>
                 ) : (
-                  <Badge>🔒 Get certified in {course?.title} to unlock</Badge>
+                  <Badge>🔒 Get certified in {courseTitle(course, lang)} to unlock</Badge>
                 )}
               </div>
             </Card>

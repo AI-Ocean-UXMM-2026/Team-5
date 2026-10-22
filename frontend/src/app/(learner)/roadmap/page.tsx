@@ -5,11 +5,12 @@ import { AiPanel } from "@/components/ui/AiPanel";
 import { LinkButton } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
 import { goals } from "@/lib/ai";
+import { courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
 import { progressOf, useData } from "@/lib/store";
 
 export default function Roadmap() {
-  const { s, me } = useData();
+  const { s, me, lang } = useData();
   const p = progressOf(s, me.id);
   const goal = goals.find((g) => g.id === p.goal)?.label ?? "Your goal";
   if (!p.roadmap.length) return <Empty>No roadmap yet. <Link href="/onboarding" className="font-medium text-burgundy">Set your career goal</Link></Empty>;
@@ -33,7 +34,7 @@ export default function Roadmap() {
                   <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-yellow-tint font-heading font-semibold">{i + 1}</span>
                   <div className="min-w-0 flex-1">
                     <Link href={`/courses/${id}`} className="font-heading text-h4 font-semibold hover:text-burgundy">
-                      {c.title}
+                      {courseTitle(c, lang)}
                     </Link>
                     <p className="text-muted">
                       {c.hours} hours · {done} of {c.lessons.length} lessons done

@@ -19,6 +19,27 @@ export function canPostAsCompany(company: Company | undefined) {
   return company?.status === "verified";
 }
 
+export type RegistrationView = "none" | "waiting" | "needs-info" | "rejected" | "live";
+
+export function registrationView(company: Company | undefined): RegistrationView {
+  if (company?.status === "verified") return "live";
+  if (company?.status === "rejected") return "rejected";
+  if (company?.status === "pending") return "waiting";
+  if (company?.reviewNote) return "needs-info";
+  return "none";
+}
+
+export function counted(n: number, singular: string, plural = `${singular}s`) {
+  return `${n} ${n === 1 ? singular : plural}`;
+}
+
+const keywords = (point: string) => point.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+
+export function rubricMarks(answer: string, rubric: string[]) {
+  const text = answer.toLowerCase();
+  return rubric.map((point) => ({ point, met: keywords(point).some((w) => text.includes(w)) }));
+}
+
 const EMAIL = /[^\s@]+@[^\s@]+\.[^\s@]+/;
 const PHONE_LIKE = /\+?\d[\d\s().-]{5,}\d/g;
 

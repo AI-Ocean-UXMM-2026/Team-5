@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { LinkButton } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { courseTitle } from "@/lib/i18n";
 import { allLessonsDone, challengeUnlocked } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { progressOf, useData } from "@/lib/store";
 
 export default function CourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
-  const { s, me } = useData();
+  const { s, me, lang } = useData();
   const course = courses.find((c) => c.id === courseId);
   if (!course) return <Empty>Course not found.</Empty>;
 
@@ -22,7 +23,7 @@ export default function CourseDetail() {
 
   return (
     <>
-      <PageHeader title={course.title} intro={course.description} />
+      <PageHeader title={courseTitle(course, lang)} intro={course.description} />
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <Card>
           <h2 className="mb-4 text-h3">Lessons</h2>

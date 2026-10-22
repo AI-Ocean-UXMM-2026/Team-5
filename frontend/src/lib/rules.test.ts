@@ -4,8 +4,11 @@ import {
   allLessonsDone,
   canPostAsCompany,
   challengeUnlocked,
+  counted,
   emailMatchesWebsite,
   hasContactDetails,
+  registrationView,
+  rubricMarks,
   testPassed,
 } from "./rules.ts";
 import { homePath, redirectFor } from "./access.ts";
@@ -24,6 +27,39 @@ test("each role only reaches its own area", () => {
   assert.equal(redirectFor(as("u-gp"), "company", "/company/challenges"), null);
   assert.equal(redirectFor(as("u-gp"), "company", "/company/registration"), "/company/challenges");
   assert.equal(redirectFor(as("u-gp"), "learner", "/courses"), "/company/challenges");
+});
+
+test("guests go home from the logo, and registration status has a home", () => {
+  assert.equal(homePath(as(null)), "/");
+  assert.equal(redirectFor(as("u-gp"), "company", "/company/registration/status"), null);
+  assert.equal(registrationView({ status: "pending" } as Company), "waiting");
+  assert.equal(registrationView({ status: "draft", reviewNote: "Clearer document" } as Company), "needs-info");
+  assert.equal(registrationView({ status: "rejected" } as Company), "rejected");
+  assert.equal(registrationView({ status: "verified" } as Company), "live");
+  assert.equal(registrationView({ status: "draft" } as Company), "none");
+  const company = (status: Company["status"], reviewNote?: string): State => ({
+    ...seed,
+    sessionUserId: "u-yds",
+    companies: seed.companies.map((c) => (c.id === "c-yds" ? { ...c, status, reviewNote } : c)),
+  });
+  assert.equal(homePath(company("pending")), "/company/registration/status");
+  assert.equal(homePath(company("rejected")), "/company/registration/status");
+  assert.equal(homePath(company("draft", "Clearer document")), "/company/registration/status");
+  assert.equal(homePath(company("verified")), "/company/challenges");
+});
+
+test("counts use singular only for one", () => {
+  assert.equal(counted(0, "submission"), "0 submissions");
+  assert.equal(counted(1, "submission"), "1 submission");
+  assert.equal(counted(2, "submission"), "2 submissions");
+});
+
+test("rubric marks say which points an answer covers", () => {
+  assert.deepEqual(rubricMarks("I used semantic HTML and explained my choices clearly", ["Semantic HTML", "Clear explanation of choices", "Works at 360px"]), [
+    { point: "Semantic HTML", met: true },
+    { point: "Clear explanation of choices", met: true },
+    { point: "Works at 360px", met: false },
+  ]);
 });
 
 test("an unverified company is locked to registration and its profile", () => {

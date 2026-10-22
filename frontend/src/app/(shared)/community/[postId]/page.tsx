@@ -13,7 +13,7 @@ import { Author, communityRules, topicName } from "../Author";
 
 export default function PostPage() {
   const { postId } = useParams<{ postId: string }>();
-  const { s, me } = useData();
+  const { s, me, company, lang } = useData();
   const [reply, setReply] = useState("");
   const [tried, setTried] = useState(false);
   const post = s.posts.find((p) => p.id === postId);
@@ -29,7 +29,7 @@ export default function PostPage() {
       <Card className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Author userId={post.authorId} at={post.at} />
-          <Badge tone={post.kind === "challenge" ? "highlight" : "neutral"}>{topicName(s, post)}</Badge>
+          <Badge tone={post.kind === "challenge" ? "highlight" : "neutral"}>{topicName(s, post, lang)}</Badge>
         </div>
         <h1 className="text-h2">{post.title}</h1>
         <p className="whitespace-pre-wrap text-body-lg">{post.body}</p>
@@ -41,15 +41,34 @@ export default function PostPage() {
       <h2 className="mt-4 text-h4">
         {post.replies.length} {post.replies.length === 1 ? "reply" : "replies"}
       </h2>
-      {post.replies.map((r) => (
-        <Card key={r.id} className="flex flex-col gap-2">
-          <Author userId={r.authorId} at={r.at} />
-          <p className="whitespace-pre-wrap">{r.body}</p>
-          <div className="flex justify-end">
-            <ReportButton targetId={r.id} authorId={r.authorId} label="reply" />
-          </div>
-        </Card>
-      ))}
+      {[...post.replies]
+        .sort((a, b) => Number(b.id === post.officialReplyId) - Number(a.id === post.officialReplyId))
+        .map((r) => {
+          const ownsChallenge = post.kind === "challenge" && s.challenges.some((c) => c.id === post.topicId && c.companyId === company?.id && company.status === "verified");
+          const official = r.id === post.officialReplyId;
+          return (
+            <Card key={r.id} tone={official ? "success" : "default"} className="flex flex-col gap-2">
+              <Author userId={r.authorId} at={r.at} />
+              <p className="whitespace-pre-wrap">{r.body}</p>
+              <div className="flex items-center justify-between gap-2">
+                {official ? (
+                  <Badge tone="success">Official answer</Badge>
+                ) : ownsChallenge && r.authorId === me.id ? (
+                  <button
+                    type="button"
+                    onClick={() => setState((st) => ({ ...st, posts: st.posts.map((p) => (p.id === post.id ? { ...p, officialReplyId: r.id } : p)) }))}
+                    className="text-body-sm font-medium text-burgundy"
+                  >
+                    Mark as official answer
+                  </button>
+                ) : (
+                  <span />
+                )}
+                <ReportButton targetId={r.id} authorId={r.authorId} label="reply" />
+              </div>
+            </Card>
+          );
+        })}
 
       <Card>
         <form

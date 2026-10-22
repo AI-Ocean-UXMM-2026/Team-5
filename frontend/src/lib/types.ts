@@ -1,5 +1,7 @@
 export type Role = "learner" | "company";
 
+export type Lang = "en" | "my";
+
 export type Question = { q: string; options: string[]; answer: number };
 
 export type Lesson = {
@@ -17,6 +19,8 @@ export type Course = {
   skill: string;
   level: string;
   hours: number;
+  /** 0 means the whole course is free. */
+  priceMmk: number;
   description: string;
   lessons: Lesson[];
   test: Question[];
@@ -32,7 +36,7 @@ export type User = {
   companyId?: string;
 };
 
-export type CompanyStatus = "draft" | "pending" | "verified";
+export type CompanyStatus = "draft" | "pending" | "verified" | "rejected";
 
 export type InternshipTerms = { role: string; duration: string; location: string; stipend: string };
 
@@ -71,6 +75,7 @@ export type Submission = {
   aiFeedback: string[];
   aiSummary: string;
   aiScore: number;
+  aiRubric?: { point: string; met: boolean }[];
   status: "submitted" | "needs-work" | "interview";
   companyFeedback?: string;
   submittedAt: string;
@@ -106,6 +111,7 @@ export type Post = {
   body: string;
   at: string;
   replies: Reply[];
+  officialReplyId?: string;
 };
 
 export type Report = { id: string; targetId: string; reporterId: string; reason: string; at: string };
@@ -124,6 +130,7 @@ export type Progress = {
 };
 
 export type State = {
+  lang: Lang;
   sessionUserId: string | null;
   users: User[];
   companies: Company[];

@@ -10,12 +10,13 @@ import { Card, Empty } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
 import { summarizeLesson } from "@/lib/ai";
+import { courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
 import { progressOf, updateProgress, useData } from "@/lib/store";
 
 export default function LessonPage() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
-  const { s, me } = useData();
+  const { s, me, lang } = useData();
   const [result, setResult] = useState<{ lessonId: string; keyPoints: string[]; summary: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const course = courses.find((c) => c.id === courseId);
@@ -32,7 +33,7 @@ export default function LessonPage() {
     <>
       <nav aria-label="Breadcrumb" className="mb-4 text-body-sm text-muted">
         <Link href={`/courses/${course.id}`} className="hover:text-burgundy">
-          {course.title}
+          {courseTitle(course, lang)}
         </Link>{" "}
         / Lesson {index + 1}
       </nav>

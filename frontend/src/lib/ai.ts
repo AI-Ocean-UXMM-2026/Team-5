@@ -1,3 +1,4 @@
+import { rubricMarks } from "./rules";
 import { courses } from "./seed";
 import type { Lesson } from "./types";
 
@@ -23,8 +24,7 @@ export function makeRoadmap(goal: string, currentSkills: string, hoursPerWeek: n
 
 export const summarizeLesson = (lesson: Lesson) => wait({ keyPoints: lesson.keyPoints, summary: lesson.summary });
 
-const keywords = (point: string) => point.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
-const covers = (answer: string, point: string) => keywords(point).some((w) => answer.toLowerCase().includes(w));
+const covers = (answer: string, point: string) => rubricMarks(answer, [point])[0]?.met;
 
 export function challengeFeedback(answer: string, link: string, rubric: string[]) {
   const feedback = rubric.map((p) => (covers(answer, p) ? `Covers "${p}".` : `Say more about "${p}".`));
@@ -34,10 +34,11 @@ export function challengeFeedback(answer: string, link: string, rubric: string[]
 }
 
 export function scoreSubmission(answer: string, link: string, rubric: string[]) {
-  const covered = rubric.filter((p) => covers(answer, p)).length;
+  const marks = rubricMarks(answer, rubric);
+  const covered = marks.filter((m) => m.met).length;
   const score = Math.round((covered / Math.max(1, rubric.length)) * 70 + Math.min(20, answer.trim().length / 15) + (link.trim() ? 10 : 0));
   const first = answer.trim().split(/(?<=\.)\s/)[0].slice(0, 140);
-  return wait({ aiScore: Math.min(100, score), aiSummary: `${first} Covers ${covered} of ${rubric.length} rubric points.` });
+  return wait({ aiScore: Math.min(100, score), aiSummary: `${first} Covers ${covered} of ${rubric.length} rubric points.`, aiRubric: marks });
 }
 
 const drafts: Record<string, { title: string; task: string; rubric: string[] }> = {

@@ -8,6 +8,7 @@ import { Input, Select, Textarea } from "@/components/ui/Field";
 import { ReportButton } from "@/components/ui/ReportButton";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { canPostAsCompany, hasContactDetails } from "@/lib/rules";
+import { courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
 import { newId, setState, today, useData } from "@/lib/store";
 import type { Post } from "@/lib/types";
@@ -20,7 +21,7 @@ const tabs = [
 ] as const;
 
 export default function Community() {
-  const { s, me, company } = useData();
+  const { s, me, company, lang } = useData();
   const [tab, setTab] = useState<(typeof tabs)[number][0]>("all");
   const [q, setQ] = useState("");
   const [kind, setKind] = useState<Post["kind"]>("course");
@@ -31,7 +32,7 @@ export default function Community() {
 
   const canPost = me.role === "learner" || canPostAsCompany(company);
   const contactError = tried && hasContactDetails(`${title} ${body}`) ? "Remove phone numbers and email addresses. Keep contact on the platform." : undefined;
-  const topics = kind === "course" ? courses.map((c) => [c.id, c.title]) : s.challenges.map((c) => [c.id, c.title]);
+  const topics = kind === "course" ? courses.map((c) => [c.id, courseTitle(c, lang)]) : s.challenges.map((c) => [c.id, c.title]);
   const posts = s.posts
     .filter((p) => tab === "all" || p.kind === tab)
     .filter((p) => `${p.title} ${p.body}`.toLowerCase().includes(q.trim().toLowerCase()))
@@ -63,7 +64,7 @@ export default function Community() {
             <Card key={p.id} className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <Author userId={p.authorId} at={p.at} />
-                <Badge tone={p.kind === "challenge" ? "highlight" : "neutral"}>{topicName(s, p)}</Badge>
+                <Badge tone={p.kind === "challenge" ? "highlight" : "neutral"}>{topicName(s, p, lang)}</Badge>
               </div>
               <h2 className="text-h4">
                 <Link href={`/community/${p.id}`} className="hover:text-burgundy">

@@ -10,13 +10,14 @@ import { Input, Textarea } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { challengeFeedback, scoreSubmission } from "@/lib/ai";
+import { courseTitle } from "@/lib/i18n";
 import { challengeUnlocked } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { newId, setState, today, useData } from "@/lib/store";
 
 export default function ChallengeDetail() {
   const { challengeId } = useParams<{ challengeId: string }>();
-  const { s, me } = useData();
+  const { s, me, lang } = useData();
   const challenge = s.challenges.find((c) => c.id === challengeId);
   const sub = s.submissions.find((x) => x.challengeId === challengeId && x.learnerId === me.id);
   const [answer, setAnswer] = useState(sub?.answer ?? "");
@@ -32,7 +33,7 @@ export default function ChallengeDetail() {
       <Empty>
         This challenge unlocks after you get certified in{" "}
         <Link href={`/courses/${challenge.courseId}`} className="font-medium text-burgundy">
-          {course?.title}
+          {courseTitle(course, lang)}
         </Link>
         .
       </Empty>

@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { LinkButton } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { courseTitle } from "@/lib/i18n";
+import { counted } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { useData } from "@/lib/store";
 
 export default function CompanyChallenges() {
-  const { s, company } = useData();
+  const { s, company, lang } = useData();
   const mine = s.challenges.filter((c) => c.companyId === company?.id);
 
   return (
@@ -29,11 +31,11 @@ export default function CompanyChallenges() {
                   </Link>
                 </h2>
                 <p className="text-muted">
-                  {courses.find((x) => x.id === c.courseId)?.title} · posted {c.createdAt}
+                  {courseTitle(courses.find((x) => x.id === c.courseId), lang)} · posted {c.createdAt}
                 </p>
               </div>
               <div className="flex gap-2">
-                <Badge>{subs.length} submissions</Badge>
+                <Badge>{counted(subs.length, "submission")}</Badge>
                 {waiting > 0 && <Badge tone="highlight">{waiting} to review</Badge>}
               </div>
             </Card>

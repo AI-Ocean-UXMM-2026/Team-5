@@ -4,18 +4,21 @@ import Link from "next/link";
 import { useState } from "react";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
 import { SearchBar } from "@/components/ui/SearchBar";
+import { courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
 import { useData } from "@/lib/store";
 
+const challengeStatus = { submitted: "Waiting for review", "needs-work": "Needs another try", interview: "Interview invited" } as const;
+
 export default function Candidates() {
-  const { s } = useData();
+  const { s, company, lang } = useData();
   const [q, setQ] = useState("");
   const certified = s.users
     .filter((u) => u.role === "learner")
     .map((u) => ({ user: u, certs: s.certificates.filter((c) => c.learnerId === u.id) }))
     .filter(({ certs }) => certs.length)
     .filter(({ user, certs }) =>
-      `${user.name} ${user.skills.join(" ")} ${certs.map((c) => courses.find((x) => x.id === c.courseId)?.title).join(" ")}`.toLowerCase().includes(q.trim().toLowerCase()),
+      `${user.name} ${user.skills.join(" ")} ${certs.map((c) => courseTitle(courses.find((x) => x.id === c.courseId), lang)).join(" ")}`.toLowerCase().includes(q.trim().toLowerCase()),
     );
 
   return (
@@ -33,12 +36,23 @@ export default function Candidates() {
               </Link>
             </h2>
             <p className="text-muted">{user.headline}</p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {certs.map((c) => (
-                <Badge key={c.id} tone="success">
-                  ✓ {courses.find((x) => x.id === c.courseId)?.title} · {c.score}%
-                </Badge>
-              ))}
+            <div className="flex flex-col gap-2 pt-1">
+              {certs.map((c) => {
+                const course = courses.find((x) => x.id === c.courseId);
+                const challenge = s.challenges.find((ch) => ch.courseId === c.courseId && ch.companyId === company?.id);
+                const sub = challenge && s.submissions.find((x) => x.challengeId === challenge.id && x.learnerId === user.id);
+                return (
+                  <div key={c.id} className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <Badge tone="success">
+                      ✓ {courseTitle(course, lang)} · {c.score}%
+                    </Badge>
+                    <span className="text-body-sm text-muted">{challenge ? `${challenge.title} · ${sub ? challengeStatus[sub.status] : "Not submitted"}` : "No challenge yet"}</span>
+                    <Link href={`/profile/${user.id}`} className="text-body-sm font-medium text-burgundy">
+                      View profile
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
           </Card>
         ))}

@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Input, Textarea } from "@/components/ui/Field";
+import { courseTitle } from "@/lib/i18n";
+import { rubricMarks } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { nameOf, newId, setState, useData } from "@/lib/store";
 import type { Submission } from "@/lib/types";
@@ -15,6 +17,8 @@ function Review({ sub }: { sub: Submission }) {
   const [feedback, setFeedback] = useState("");
   const [when, setWhen] = useState("");
   const interview = s.interviews.find((i) => i.submissionId === sub.id);
+  const rubric = s.challenges.find((c) => c.id === sub.challengeId)?.rubric ?? [];
+  const marks = sub.aiRubric ?? rubricMarks(sub.answer, rubric);
   const update = (patch: Partial<Submission>) => setState((st) => ({ ...st, submissions: st.submissions.map((x) => (x.id === sub.id ? { ...x, ...patch } : x)) }));
 
   return (
@@ -36,9 +40,21 @@ function Review({ sub }: { sub: Submission }) {
           <p className="font-heading text-h3 font-semibold text-ai-ink">{sub.aiScore}</p>
           <p className="text-[11px] font-semibold whitespace-nowrap text-ai-ink">AI SCORE</p>
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="text-body-sm font-semibold text-ai-ink">AI summary</p>
           <p>{sub.aiSummary}</p>
+          {!!marks.length && (
+            <ul className="mt-3 flex flex-col gap-1 text-body-sm">
+              {marks.map((m) => (
+                <li key={m.point}>
+                  <span className={m.met ? "font-medium text-success" : "font-medium text-muted"}>{m.met ? "Met" : "Not met"}</span>
+                  {" · "}
+                  {m.point}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-2 text-body-sm text-ai-ink">You still decide.</p>
         </div>
       </div>
 
@@ -61,7 +77,8 @@ function Review({ sub }: { sub: Submission }) {
               update({ status: "needs-work", companyFeedback: feedback.trim() });
             }}
           >
-            <Textarea label="Not ready yet? Send feedback" required value={feedback} onChange={(e) => setFeedback(e.target.value)} className="min-h-20" />
+            <p className="text-sm font-medium">Not ready yet?</p>
+            <Textarea label="Feedback for the learner" required value={feedback} onChange={(e) => setFeedback(e.target.value)} className="min-h-20" />
             <Button type="submit" variant="secondary" className="self-start">
               Send feedback
             </Button>
@@ -100,14 +117,14 @@ function Review({ sub }: { sub: Submission }) {
 
 export default function ReviewChallenge() {
   const { challengeId } = useParams<{ challengeId: string }>();
-  const { s, company } = useData();
+  const { s, company, lang } = useData();
   const challenge = s.challenges.find((c) => c.id === challengeId && c.companyId === company?.id);
   if (!challenge) return <Empty>Challenge not found.</Empty>;
   const subs = s.submissions.filter((x) => x.challengeId === challenge.id).sort((a, b) => b.aiScore - a.aiScore);
 
   return (
     <>
-      <PageHeader title={challenge.title} intro={courses.find((c) => c.id === challenge.courseId)?.title} />
+      <PageHeader title={challenge.title} intro={courseTitle(courses.find((c) => c.id === challenge.courseId), lang)} />
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-4">
           <h2 className="text-h3">Submissions</h2>

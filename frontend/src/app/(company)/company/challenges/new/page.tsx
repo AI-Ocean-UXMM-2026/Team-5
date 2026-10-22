@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Card";
 import { Input, Select, Textarea } from "@/components/ui/Field";
 import { draftChallenge } from "@/lib/ai";
+import { courseTitle } from "@/lib/i18n";
 import { canPostAsCompany } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { newId, setState, today, useData } from "@/lib/store";
 
 export default function NewChallenge() {
-  const { company } = useData();
+  const { company, lang } = useData();
   const router = useRouter();
   const [courseId, setCourseId] = useState(courses[1].id);
   const [title, setTitle] = useState("");
@@ -39,7 +40,7 @@ export default function NewChallenge() {
             <Select label="Skill / course" value={courseId} onChange={(e) => setCourseId(e.target.value)} hint="Only learners certified in this course can take the challenge.">
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.title}
+                  {courseTitle(c, lang)}
                 </option>
               ))}
             </Select>
