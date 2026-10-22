@@ -51,11 +51,9 @@ export default function Community() {
 
   return (
     <>
-      <PageHeader title="Community" intro="Free for everyone. Verified companies post about their own challenges. Ask a question in a reply, and submit your solution in Challenges." pose="love">
-        <SearchBar label="Search posts" placeholder="Search posts" value={q} onChange={setQ} />
-      </PageHeader>
+      <PageHeader title="Community" intro="Free for everyone. Verified companies post about their own challenges. Ask a question in a reply, and submit your solution in Challenges." pose="love" />
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 lg:col-start-1 lg:row-start-1">
           <div role="tablist" aria-label="Post type" className="flex gap-1">
             {tabs.map(([id, label]) => (
               <button
@@ -70,6 +68,9 @@ export default function Community() {
               </button>
             ))}
           </div>
+          <SearchBar label="Search posts" placeholder="Search posts" value={q} onChange={setQ} />
+        </div>
+        <div className="flex flex-col gap-4 lg:col-start-1 lg:row-start-2">
           {!posts.length && <Empty>No posts here yet.</Empty>}
           {posts.map((p) => (
             <Card key={p.id} className="flex flex-col gap-2">
@@ -98,7 +99,7 @@ export default function Community() {
           ))}
         </div>
 
-        <Card className="self-start">
+        <Card className="self-start lg:col-start-2 lg:row-start-2">
           <h2 className="mb-1 text-h4">Start a discussion</h2>
           <p className="mb-4 text-body-sm text-muted">{communityRules}</p>
           {showForm ? (

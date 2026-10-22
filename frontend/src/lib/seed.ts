@@ -297,11 +297,11 @@ export const seed: State = {
         { point: "Works at 360px and 1280px", met: true },
         { point: "Clear explanation of choices", met: false },
       ],
-      status: "submitted",
+      status: "interview",
       submittedAt: "2026-10-12",
     },
   ],
-  interviews: [],
+  interviews: [{ id: "iv-min", submissionId: "s-min", challengeId: "ch-pricing", learnerId: "u-min", companyId: "c-gp", when: "2026-10-20T10:00", status: "offered" }],
   ratings: [],
   posts: [
     {

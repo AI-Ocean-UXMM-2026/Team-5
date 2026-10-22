@@ -18,9 +18,24 @@ export function ReportButton({ targetId, authorId, label = "post" }: { targetId:
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="text-caption font-medium text-muted underline-offset-2 hover:text-danger hover:underline">
-        Report
-      </button>
+      <span className="group relative inline-flex">
+        <button
+          type="button"
+          aria-label="Report"
+          onClick={() => setOpen(true)}
+          className="grid size-10 place-items-center rounded-xl text-muted hover:bg-danger-tint hover:text-danger pointer-coarse:size-11"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M5 21V4m0 0h11l-2 4 2 4H5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded-lg bg-ink px-2 py-1 text-caption text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+        >
+          Report
+        </span>
+      </span>
       <Dialog open={open} onClose={() => setOpen(false)} title={`Report this ${label}`}>
         <form
           onSubmit={(e) => {

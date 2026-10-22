@@ -2,13 +2,11 @@
 
 import { LinkButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Mascot, type Pose } from "@/components/ui/Mascot";
+import { Mascot } from "@/components/ui/Mascot";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { copy, courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
 import { useData } from "@/lib/store";
-
-const stepPoses: Pose[] = ["flag", "notes", "star", "laptop", "search"];
 
 export default function Landing() {
   const { s, lang } = useData();
@@ -57,17 +55,19 @@ export default function Landing() {
 
       <p className="rounded-2xl bg-yellow-tint px-5 py-4 text-center text-body font-medium">{t.freeStrip}</p>
 
-      <section aria-labelledby="how" className="rounded-3xl border border-line bg-white p-6 sm:p-10">
+      <section aria-labelledby="how">
         <h2 id="how" className="text-h3">
           {t.how}
         </h2>
-        <ol className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+        <ol className="mt-4 flex gap-4 overflow-x-auto pt-6">
           {t.steps.map((step, i) => (
-            <li key={step} className="flex flex-col gap-3">
-              <Mascot pose={stepPoses[i] ?? "flag"} size={80} className="h-14 w-14 sm:h-20 sm:w-20" />
-              <p className="text-body-sm text-muted">
-                {t.step} {i + 1}: {step}
-              </p>
+            <li key={step} className="min-w-52 flex-1">
+              <Card className="relative h-full !pt-10 text-center">
+                <span aria-hidden className="absolute top-0 left-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-burgundy font-heading text-h3 font-semibold text-white">
+                  {i + 1}
+                </span>
+                <p className="text-body-sm text-muted">{step}</p>
+              </Card>
             </li>
           ))}
         </ol>

@@ -16,6 +16,7 @@ export function Card({ tone = "default", className = "", ...props }: ComponentPr
 const tones = {
   neutral: "bg-surface text-muted",
   brand: "bg-burgundy-tint text-burgundy",
+  primary: "bg-burgundy-300 text-ink",
   highlight: "bg-yellow-tint text-ink",
   success: "bg-success-tint text-success",
   danger: "bg-danger-tint text-danger",

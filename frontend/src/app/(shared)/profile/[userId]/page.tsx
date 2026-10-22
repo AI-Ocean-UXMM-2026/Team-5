@@ -89,7 +89,11 @@ export default function Profile() {
           <Card>
             <h2 className="mb-3 text-h4">Skills</h2>
             <div className="flex flex-wrap gap-2">
-              {user.skills.length ? user.skills.map((k) => <Badge key={k}>{k}</Badge>) : <p className="text-muted">No skills listed yet.</p>}
+              {user.skills.length ? user.skills.map((k) => (
+                  <Badge key={k} tone="primary">
+                    {k}
+                  </Badge>
+                )) : <p className="text-muted">No skills listed yet.</p>}
             </div>
             <h2 className="mt-6 mb-3 text-h4">Certificates</h2>
             {!certs.length && <p className="text-muted">No certificates yet.</p>}
