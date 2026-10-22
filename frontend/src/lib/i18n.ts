@@ -2,18 +2,43 @@ import type { Lang } from "./types";
 
 type Copy = {
   language: string;
-  footer: string;
   eyebrow: string;
   heroTitle: string;
   heroLead: string;
   createAccount: string;
   logIn: string;
+  step: string;
   how: string;
   steps: string[];
+  freeStrip: string;
+  unlocksAfter: string;
+  startLearning: string;
+  registerCompany: string;
   forLearners: string;
   forLearnersBody: string;
   forCompanies: string;
   forCompaniesBody: string;
+  verifyTitle: string;
+  verifyPoints: { title: string; line: string }[];
+  verifyBody: string;
+  ctaTitle: string;
+  courses: string;
+  challenges: string;
+  internships: string;
+  community: string;
+  howVerify: string;
+  postChallenge: string;
+  trustHelp: string;
+  promise: string;
+  safetyTitle: string;
+  safetyBody: string;
+  rulesTitle: string;
+  rulesBody: string;
+  privacy: string;
+  privacyBody: string;
+  terms: string;
+  termsBody: string;
+  rights: string;
   signupTitle: string;
   signupIntro: string;
   iAm: string;
@@ -40,25 +65,53 @@ type Copy = {
 export const copy: Record<Lang, Copy> = {
   en: {
     language: "Language",
-    footer: "Skills that get you in · Learners never pay to apply, take a challenge or interview.",
-    eyebrow: "For young people in Myanmar and the IT companies that hire them",
+    eyebrow: "For young people in Myanmar and the IT companies that hire them.",
     heroTitle: "Skills that get you in",
-    heroLead:
-      "Follow a clear roadmap, learn IT skills, get certified, then prove yourself on a real challenge from a verified company. Coursera gives you a certificate. We give you an interview.",
-    createAccount: "Create an account",
+    heroLead: "Learn IT skills, get certified, solve a real company task, and get an interview. Free to start.",
+    createAccount: "Start free",
     logIn: "Log in",
+    step: "Step",
     how: "How it works",
     steps: [
-      "Set a career goal and get an AI roadmap",
-      "Learn with AI summaries and your own notes",
+      "Set a goal and get an AI roadmap",
+      "AI summary + your own notes",
       "Pass the test and get certified",
-      "Solve a real company challenge",
+      "Solve a real company task",
       "Interview and start your internship",
     ],
+    freeStrip: "Career starter: free · First 25% of every course: free · Applying and interviews: always free.",
+    unlocksAfter: "Unlocks after",
+    startLearning: "Start learning",
+    registerCompany: "Register your company",
     forLearners: "For learners",
-    forLearnersBody: "Free to apply, take challenges and interview. Learn what companies actually need.",
+    forLearnersBody: "Roadmap, AI notes, certificate, internship interview.",
     forCompanies: "For companies",
-    forCompaniesBody: "Meet tested talent fast. You set the challenge, AI pre-screens, you decide.",
+    forCompaniesBody: "You set the challenge, AI pre-screens, you decide. We verify every company.",
+    verifyTitle: "Every company is checked",
+    verifyPoints: [
+      { title: "Registration", line: "Business documents, checked by our team." },
+      { title: "A real office", line: "A working address, phone, and company email." },
+      { title: "A short call", line: "We speak with someone at the company." },
+    ],
+    verifyBody: "Before a company can post, we check its business registration, a real office, and a short call with the company.",
+    ctaTitle: "Ready for your first challenge?",
+    courses: "Courses",
+    challenges: "Challenges",
+    internships: "Internships",
+    community: "Community",
+    howVerify: "How we verify companies",
+    postChallenge: "Post a challenge",
+    trustHelp: "Trust and help",
+    promise: "Our promise",
+    safetyTitle: "Safety and reporting",
+    safetyBody: "Open a community post and choose Report. Our team reviews every report, including a fake offer or a company that breaks the rules.",
+    rulesTitle: "Community rules",
+    rulesBody: "No sharing challenge answers. No private contact details.",
+    privacy: "Privacy policy",
+    privacyBody: "This demo keeps your account, learning progress and community posts in this browser only. Nothing is sent to a server. Clearing this site's data removes it.",
+    terms: "Terms",
+    termsBody: "Learners never pay to apply, take a challenge or interview. The career starter course is free, and the first 25% of every other course is free. Companies are checked before they can post a challenge. Community rules apply to every post.",
+    rights: "© 2026 The Citadel · Team 404",
     signupTitle: "Create an account",
     signupIntro: "Learners never pay to apply, take a challenge or interview.",
     iAm: "I am",
@@ -83,25 +136,53 @@ export const copy: Record<Lang, Copy> = {
   },
   my: {
     language: "ဘာသာစကား",
-    footer: "အလုပ်ဝင်နိုင်မယ့် ကျွမ်းကျင်မှု · လျှောက်ထားခြင်း၊ စိန်ခေါ်မှုဖြေခြင်း၊ အင်တာဗျူးတက်ခြင်းအတွက် သင်ယူသူ ငွေမပေးရပါ။",
-    eyebrow: "မြန်မာနိုင်ငံက လူငယ်တွေနဲ့ သူတို့ကို ခန့်မယ့် IT ကုမ္ပဏီတွေအတွက်",
+    eyebrow: "မြန်မာနိုင်ငံက လူငယ်တွေနဲ့ သူတို့ကို ခန့်မယ့် IT ကုမ္ပဏီတွေအတွက်။",
     heroTitle: "အလုပ်ဝင်နိုင်မယ့် ကျွမ်းကျင်မှု",
-    heroLead:
-      "လမ်းကြောင်းရှင်းရှင်းလေးအတိုင်း IT ကျွမ်းကျင်မှု သင်ယူပါ။ လက်မှတ်ရပြီးရင် အတည်ပြုထားတဲ့ ကုမ္ပဏီရဲ့ တကယ့်အလုပ်ကို ပြပါ။ Coursera က လက်မှတ်ပေးတယ်။ ကျွန်ုပ်တို့က အင်တာဗျူးပေးတယ်။",
-    createAccount: "အကောင့်ဖွင့်ရန်",
+    heroLead: "IT ကျွမ်းကျင်မှု သင်ယူပါ၊ လက်မှတ်ရယူပါ၊ ကုမ္ပဏီရဲ့ တကယ့်အလုပ်ကို ဖြေရှင်းပြီး အင်တာဗျူးရယူပါ။ အခမဲ့ စတင်နိုင်ပါတယ်။",
+    createAccount: "အခမဲ့ စတင်ရန်",
     logIn: "အကောင့်ဝင်ရန်",
+    step: "အဆင့်",
     how: "ဘယ်လို လုပ်သလဲ",
     steps: [
-      "အသက်မွေးဝမ်းကျောင်း ပန်းတိုင် သတ်မှတ်ပြီး AI လမ်းကြောင်း ရယူပါ",
-      "AI အနှစ်ချုပ်နဲ့ ကိုယ့်မှတ်စုနဲ့ သင်ယူပါ",
+      "ပန်းတိုင်သတ်မှတ်ပြီး AI လမ်းကြောင်း ရယူပါ",
+      "AI အနှစ်ချုပ် + ကိုယ့်မှတ်စု",
       "စာမေးပွဲအောင်ပြီး လက်မှတ်ရယူပါ",
-      "ကုမ္ပဏီရဲ့ တကယ့် စိန်ခေါ်မှုကို ဖြေရှင်းပါ",
+      "ကုမ္ပဏီရဲ့ တကယ့်အလုပ်ကို ဖြေရှင်းပါ",
       "အင်တာဗျူးပြီး အလုပ်သင် စတင်ပါ",
     ],
+    freeStrip: "အလုပ်အကိုင် အစ — အခမဲ့ · သင်တန်းတိုင်းရဲ့ ပထမ ၂၅% — အခမဲ့ · လျှောက်ထားခြင်းနဲ့ အင်တာဗျူး — အမြဲအခမဲ့။",
+    unlocksAfter: "ပြီးမှ ဖွင့်နိုင်မည်",
+    startLearning: "စတင် သင်ယူရန်",
+    registerCompany: "ကုမ္ပဏီ မှတ်ပုံတင်ရန်",
     forLearners: "သင်ယူသူများအတွက်",
-    forLearnersBody: "လျှောက်ထားခြင်း၊ စိန်ခေါ်မှုဖြေခြင်း၊ အင်တာဗျူးတက်ခြင်း အခမဲ့ပါ။ ကုမ္ပဏီတွေ တကယ်လိုအပ်တာကို သင်ယူပါ။",
+    forLearnersBody: "လမ်းကြောင်း၊ AI မှတ်စု၊ လက်မှတ်၊ အလုပ်သင် အင်တာဗျူး။",
     forCompanies: "ကုမ္ပဏီများအတွက်",
-    forCompaniesBody: "စစ်ပြီးသား လူတွေကို မြန်မြန်တွေ့ပါ။ စိန်ခေါ်မှုကို သင်သတ်မှတ်၊ AI က အရင်စစ်၊ ဆုံးဖြတ်ချက်က သင့်ဆီမှာ။",
+    forCompaniesBody: "စိန်ခေါ်မှုကို သင်သတ်မှတ်၊ AI က အရင်စစ်၊ ဆုံးဖြတ်ချက်က သင့်ဆီမှာ။ ကုမ္ပဏီတိုင်းကို ကျွန်ုပ်တို့ အတည်ပြုပါတယ်။",
+    verifyTitle: "ကုမ္ပဏီတိုင်းကို စစ်ဆေးပါတယ်",
+    verifyPoints: [
+      { title: "မှတ်ပုံတင်", line: "လုပ်ငန်း မှတ်ပုံတင် စာရွက်စာတမ်းတွေကို ကျွန်ုပ်တို့အဖွဲ့ စစ်ပါတယ်။" },
+      { title: "တကယ့်ရုံး", line: "အလုပ်လုပ်နေတဲ့ လိပ်စာ၊ ဖုန်း၊ ကုမ္ပဏီ အီးမေးလ်။" },
+      { title: "ဖုန်းခေါ်ဆိုမှုတို", line: "ကုမ္ပဏီက လူတစ်ယောက်နဲ့ ကျွန်ုပ်တို့ စကားပြောပါတယ်။" },
+    ],
+    verifyBody: "စိန်ခေါ်မှု မတင်ခင် လုပ်ငန်း မှတ်ပုံတင်၊ တကယ့်ရုံး၊ ကုမ္ပဏီနဲ့ ဖုန်းခေါ်ဆိုမှုတိုကို စစ်ပါတယ်။",
+    ctaTitle: "ပထမဆုံး စိန်ခေါ်မှုအတွက် အဆင်သင့်ဖြစ်ပြီလား။",
+    courses: "သင်တန်းများ",
+    challenges: "စိန်ခေါ်မှုများ",
+    internships: "အလုပ်သင်များ",
+    community: "အသိုင်းအဝိုင်း",
+    howVerify: "ကုမ္ပဏီတွေကို ဘယ်လို အတည်ပြုသလဲ",
+    postChallenge: "စိန်ခေါ်မှု တင်ရန်",
+    trustHelp: "ယုံကြည်မှုနဲ့ အကူအညီ",
+    promise: "ကျွန်ုပ်တို့ ကတိ",
+    safetyTitle: "လုံခြုံရေးနဲ့ တိုင်ကြားခြင်း",
+    safetyBody: "အသိုင်းအဝိုင်း ပို့စ်ကို ဖွင့်ပြီး တိုင်ကြားမည် ကို ရွေးပါ။ အတုအယောင် ကမ်းလှမ်းချက်နဲ့ စည်းကမ်းဖောက်တဲ့ ကုမ္ပဏီ အပါအဝင် တိုင်ကြားချက်တိုင်းကို ကျွန်ုပ်တို့အဖွဲ့ စစ်ပါတယ်။",
+    rulesTitle: "အသိုင်းအဝိုင်း စည်းကမ်း",
+    rulesBody: "စိန်ခေါ်မှု အဖြေတွေ မမျှဝေရ။ ဖုန်းနံပါတ်၊ အီးမေးလ်လို ကိုယ်ရေး အဆက်အသွယ် မထည့်ရ။",
+    privacy: "ကိုယ်ရေးအချက်အလက် မူဝါဒ",
+    privacyBody: "ဒီစမ်းသပ်ချက်က အကောင့်၊ သင်ယူမှု တိုးတက်မှုနဲ့ အသိုင်းအဝိုင်း ပို့စ်တွေကို ဒီဘရောက်ဇာထဲမှာပဲ သိမ်းပါတယ်။ ဆာဗာကို မပို့ပါ။ ဒီဆိုက်ရဲ့ ဒေတာကို ဖျက်လိုက်ရင် ပျောက်ပါတယ်။",
+    terms: "စည်းကမ်းချက်များ",
+    termsBody: "သင်ယူသူတွေ လျှောက်ထားခြင်း၊ စိန်ခေါ်မှုဖြေခြင်း၊ အင်တာဗျူးတက်ခြင်းအတွက် ငွေမပေးရပါ။ အလုပ်အကိုင် အစ သင်တန်းက အခမဲ့ဖြစ်ပြီး တခြားသင်တန်းတိုင်းရဲ့ ပထမ ၂၅% လည်း အခမဲ့ပါ။ ကုမ္ပဏီတွေ စိန်ခေါ်မှု မတင်ခင် စစ်ဆေးခံရပါတယ်။ အသိုင်းအဝိုင်း စည်းကမ်းက ပို့စ်တိုင်းမှာ သက်ရောက်ပါတယ်။",
+    rights: "© 2026 The Citadel · Team 404",
     signupTitle: "အကောင့်ဖွင့်ရန်",
     signupIntro: "သင်ယူသူတွေ လျှောက်ထားခြင်း၊ စိန်ခေါ်မှုဖြေခြင်း၊ အင်တာဗျူးတက်ခြင်းအတွက် ငွေမပေးရပါ။",
     iAm: "ကျွန်ုပ်သည်",
@@ -138,3 +219,10 @@ export function courseTitle(course: { id: string; title: string } | undefined, l
 }
 
 export const formatMmk = (n: number) => `${n.toLocaleString("en-US")} MMK`;
+
+/** Burmese for Myanmar locales, and for visitors whose clock is set to Myanmar. */
+export function defaultLang(languages: readonly string[], timeZone = ""): Lang {
+  if (languages.some((l) => l.toLowerCase().startsWith("my"))) return "my";
+  if (timeZone === "Asia/Yangon" || timeZone === "Asia/Rangoon") return "my";
+  return "en";
+}

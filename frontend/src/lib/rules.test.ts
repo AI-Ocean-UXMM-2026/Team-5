@@ -12,6 +12,7 @@ import {
   testPassed,
 } from "./rules.ts";
 import { homePath, redirectFor } from "./access.ts";
+import { defaultLang } from "./i18n.ts";
 import { seed } from "./seed.ts";
 import type { Company, Course, State } from "./types.ts";
 
@@ -27,6 +28,16 @@ test("each role only reaches its own area", () => {
   assert.equal(redirectFor(as("u-gp"), "company", "/company/challenges"), null);
   assert.equal(redirectFor(as("u-gp"), "company", "/company/registration"), "/company/challenges");
   assert.equal(redirectFor(as("u-gp"), "learner", "/courses"), "/company/challenges");
+});
+
+test("myanmar visitors start in burmese, and legal pages stay open", () => {
+  assert.equal(defaultLang(["my-MM"], "America/New_York"), "my");
+  assert.equal(defaultLang(["en-US"], "Asia/Yangon"), "my");
+  assert.equal(defaultLang(["en"], "Asia/Rangoon"), "my");
+  assert.equal(defaultLang(["en-GB"], "Asia/Bangkok"), "en");
+  assert.equal(defaultLang([], ""), "en");
+  assert.equal(redirectFor(as(null), "guest", "/legal"), null);
+  assert.equal(redirectFor(as("u-aye"), "guest", "/legal"), null);
 });
 
 test("guests go home from the logo, and registration status has a home", () => {

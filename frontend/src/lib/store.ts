@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { defaultLang } from "./i18n";
 import { emptyProgress, seed } from "./seed";
 import type { Lang, Progress, State } from "./types";
 
@@ -12,7 +13,11 @@ function load(): State {
   if (state) return state;
   try {
     const raw = localStorage.getItem(KEY);
-    state = raw ? (JSON.parse(raw) as State) : structuredClone(seed);
+    if (raw) state = JSON.parse(raw) as State;
+    else {
+      state = structuredClone(seed);
+      state.lang = defaultLang(navigator.languages, Intl.DateTimeFormat().resolvedOptions().timeZone);
+    }
   } catch {
     state = structuredClone(seed);
   }

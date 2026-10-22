@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Field";
@@ -12,7 +13,8 @@ import type { Role } from "@/lib/types";
 export default function Signup() {
   const { s, lang } = useData();
   const t = copy[lang];
-  const [role, setRole] = useState<Role>("learner");
+  const preset = useSearchParams().get("role") === "company" ? "company" : "learner";
+  const [role, setRole] = useState<Role>(preset);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [companyName, setCompanyName] = useState("");

@@ -34,6 +34,31 @@ function navFor(s: State) {
 
 const loading = <p className="p-12 text-center text-muted">Loading…</p>;
 
+function FooterCol({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <details open className="group border-b border-white/15 md:border-0 md:[&>:not(summary)]:!flex">
+      <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-body-lg font-semibold md:pointer-events-none md:py-0 [&::-webkit-details-marker]:hidden">
+        {title}
+        <span aria-hidden className="text-white/60 md:hidden group-open:hidden">
+          +
+        </span>
+        <span aria-hidden className="hidden text-white/60 group-open:inline md:hidden">
+          –
+        </span>
+      </summary>
+      <div className="flex flex-col gap-3 pb-4 text-body-lg text-white/80 md:pt-4 md:pb-0">{children}</div>
+    </details>
+  );
+}
+
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="hover:text-white">
+      {children}
+    </Link>
+  );
+}
+
 export function AppShell(props: { area: Area; children: React.ReactNode }) {
   return (
     <Suspense fallback={loading}>
@@ -68,9 +93,14 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
     <>
       <header className="border-b border-line bg-white">
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-8 gap-y-2 px-6 py-3 md:px-8 lg:px-12">
-          <Link href={homePath(s)} className="shrink-0 rounded-lg">
-            <Image src="/logo/the-citadel-icon-primary.png" alt="The Citadel" width={44} height={44} priority className="size-11" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href={homePath(s)} className="flex shrink-0 items-center gap-2 rounded-lg">
+              <Image src="/logo/the-citadel-icon-primary.png" alt="" width={44} height={44} priority className="size-11" />
+              <span className="font-heading text-base font-semibold">The Citadel</span>
+            </Link>
+            <span aria-hidden className={`hidden h-5 w-px shrink-0 bg-line ${nav.length ? "xl:block" : "sm:block"}`} />
+            <p className={`hidden text-body text-muted ${nav.length ? "xl:block" : "sm:block"}`}>{t.heroTitle}</p>
+          </div>
           {nav.length > 0 && (
             <nav aria-label="Main" className="order-last -mx-2 flex w-full flex-wrap gap-1 md:order-none md:w-auto">
               {nav.map(([href, label]) => {
@@ -127,9 +157,47 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
       </header>
       <main className="mx-auto w-full max-w-[1280px] flex-1 px-6 py-10 md:px-8 lg:px-12">{children}</main>
       <footer className="bg-ink-strong text-white">
-        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-6 py-8 md:px-8 lg:px-12">
-          <Image src="/logo/the-citadel-logo-reversed.png" alt="The Citadel" width={96} height={96} className="size-24" />
-          <p className="text-body-sm text-white/70">{t.footer}</p>
+        <div className="mx-auto grid max-w-[1280px] gap-2 px-6 py-8 md:grid-cols-4 md:gap-8 md:px-8 lg:px-12">
+          <FooterCol title="The Citadel">
+            <Image src="/logo/the-citadel-logo-reversed.png" alt="The Citadel" width={96} height={96} className="size-20" />
+            <p className="font-semibold text-white">{t.heroTitle}</p>
+            <p>{t.eyebrow}</p>
+          </FooterCol>
+          <FooterCol title={t.forLearners}>
+            <FooterLink href="/legal#how">{t.how}</FooterLink>
+            <FooterLink href="/courses">{t.courses}</FooterLink>
+            <FooterLink href="/challenges">{t.challenges}</FooterLink>
+            <FooterLink href="/internships">{t.internships}</FooterLink>
+            <FooterLink href="/community">{t.community}</FooterLink>
+          </FooterCol>
+          <FooterCol title={t.forCompanies}>
+            <FooterLink href="/signup?role=company">{t.registerCompany}</FooterLink>
+            <FooterLink href="/legal#verify">{t.howVerify}</FooterLink>
+            <FooterLink href="/company/challenges/new">{t.postChallenge}</FooterLink>
+            <FooterLink href="/community">{t.community}</FooterLink>
+          </FooterCol>
+          <FooterCol title={t.trustHelp}>
+            <p>
+              <span className="font-semibold text-white">{t.promise}: </span>
+              {t.signupIntro}
+            </p>
+            <p>
+              <FooterLink href="/legal#safety">{t.safetyTitle}: </FooterLink>
+              {t.safetyBody}
+            </p>
+            <p>
+              <FooterLink href="/legal#rules">{t.rulesTitle}: </FooterLink>
+              {t.rulesBody}
+            </p>
+          </FooterCol>
+        </div>
+        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-3 border-t border-white/15 px-6 py-4 text-body text-white/80 md:px-8 lg:px-12">
+          <p>{t.rights}</p>
+          <nav aria-label={t.trustHelp} className="flex flex-wrap gap-x-4 gap-y-2">
+            <FooterLink href="/legal#privacy">{t.privacy}</FooterLink>
+            <FooterLink href="/legal#terms">{t.terms}</FooterLink>
+            <FooterLink href="/legal#rules">{t.rulesTitle}</FooterLink>
+          </nav>
         </div>
       </footer>
     </>

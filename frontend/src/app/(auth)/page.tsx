@@ -1,60 +1,132 @@
 "use client";
 
 import { LinkButton } from "@/components/ui/Button";
-import { Mascot } from "@/components/ui/Mascot";
-import { copy } from "@/lib/i18n";
+import { Card } from "@/components/ui/Card";
+import { Mascot, type Pose } from "@/components/ui/Mascot";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { copy, courseTitle } from "@/lib/i18n";
+import { courses } from "@/lib/seed";
 import { useData } from "@/lib/store";
 
+const stepPoses: Pose[] = ["flag", "notes", "star", "laptop", "search"];
+
 export default function Landing() {
-  const { lang } = useData();
+  const { s, lang } = useData();
   const t = copy[lang];
+  const challenge = s.challenges.find((c) => c.id === "ch-pricing");
+  const company = s.companies.find((c) => c.id === challenge?.companyId);
+  const course = courses.find((c) => c.id === challenge?.courseId);
+  const unlocks = courseTitle(course, lang).split(/[:—]/)[0].trim();
 
   return (
     <div className="flex flex-col gap-16 py-4">
-      <section className="grid grid-cols-[1fr_5rem] items-start gap-3 sm:grid-cols-[1fr_7rem] md:grid-cols-[3fr_2fr] md:items-center md:gap-10">
+      <section className="grid items-center gap-8 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div>
-          <p className="mb-3 text-body-sm font-semibold text-burgundy">{t.eyebrow}</p>
-          <h1 className="text-h1 sm:text-display">{t.heroTitle}</h1>
-          <p className="mt-4 max-w-xl text-body-lg text-muted">{t.heroLead}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-h1 sm:text-display">{t.heroTitle}</h1>
+              <p className="mt-4 max-w-xl text-body-lg text-muted">{t.heroLead}</p>
+            </div>
+            <Mascot pose="journey" size={80} priority className="h-14 w-14 sm:h-16 sm:w-16 md:hidden" />
+          </div>
+          <div className="mt-8 flex flex-wrap items-center gap-1">
             <LinkButton href="/signup">{t.createAccount}</LinkButton>
-            <LinkButton href="/login" variant="secondary">
+            <LinkButton href="/login" variant="tertiary">
               {t.logIn}
             </LinkButton>
           </div>
+          <p className="mt-3 text-body-sm text-muted">{t.signupIntro}</p>
         </div>
-        <Mascot pose="journey" size={360} priority className="h-20 w-20 sm:h-28 sm:w-28 md:mx-auto md:h-auto md:w-full md:max-w-[360px]" />
+        <div className="flex flex-col items-center gap-4">
+          <Mascot pose="journey" size={200} priority className="hidden h-40 w-40 md:block" />
+          {challenge && company && (
+            <Card className="w-full">
+              <div className="flex flex-wrap items-center gap-2 text-body-sm text-muted">
+                {company.name} <VerifiedBadge company={company} />
+              </div>
+              <h2 className="mt-2 text-h4">{challenge.title}</h2>
+              {unlocks && (
+                <p className="mt-2 text-body-sm text-muted">
+                  {t.unlocksAfter} {unlocks}
+                </p>
+              )}
+            </Card>
+          )}
+        </div>
       </section>
+
+      <p className="rounded-2xl bg-yellow-tint px-5 py-4 text-center text-body font-medium">{t.freeStrip}</p>
 
       <section aria-labelledby="how" className="rounded-3xl border border-line bg-white p-6 sm:p-10">
         <h2 id="how" className="text-h3">
           {t.how}
         </h2>
-        <ol className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        <ol className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           {t.steps.map((step, i) => (
-            <li key={step} className="flex flex-col gap-2 border-t-2 border-yellow pt-4">
-              <span className="font-heading text-h4 text-burgundy">{i + 1}</span>
-              {step}
+            <li key={step} className="flex flex-col gap-3">
+              <Mascot pose={stepPoses[i] ?? "flag"} size={80} className="h-14 w-14 sm:h-20 sm:w-20" />
+              <p className="text-body-sm text-muted">
+                {t.step} {i + 1}: {step}
+              </p>
             </li>
           ))}
         </ol>
       </section>
 
       <section className="grid gap-6 md:grid-cols-2">
-        <div className="flex items-center gap-5 rounded-2xl border border-line bg-white p-6">
-          <Mascot pose="teach" size={112} />
-          <div>
-            <h2 className="text-h4">{t.forLearners}</h2>
-            <p className="mt-1 text-muted">{t.forLearnersBody}</p>
+        <Card className="flex h-full flex-col gap-4 !p-8 sm:!p-10">
+          <Mascot pose="teach" size={96} />
+          <h2 className="text-h3">{t.forLearners}</h2>
+          <p className="text-body-lg text-muted">{t.forLearnersBody}</p>
+          <LinkButton href="/signup" className="mt-auto self-start">
+            {t.startLearning}
+          </LinkButton>
+        </Card>
+        <Card className="flex h-full flex-col gap-4 !p-8 sm:!p-10">
+          <Mascot pose="search" size={96} />
+          <h2 className="text-h3">{t.forCompanies}</h2>
+          <p className="text-body-lg text-muted">{t.forCompaniesBody}</p>
+          <LinkButton href="/signup?role=company" className="mt-auto self-start">
+            {t.registerCompany}
+          </LinkButton>
+        </Card>
+      </section>
+
+      <section aria-labelledby="trust" className="overflow-hidden rounded-3xl border border-line bg-white">
+        <div className="grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <div className="flex min-w-0 flex-col gap-6 border-b border-line bg-burgundy-tint p-6 sm:p-10 md:border-r md:border-b-0">
+            <h2 id="trust" className="text-h2">
+              {t.verifyTitle}
+            </h2>
+            <p className="text-body-lg">{t.verifyBody}</p>
+            {company && (
+              <div className="mt-auto flex flex-wrap items-center gap-3">
+                <VerifiedBadge company={company} />
+                <span className="text-body-sm text-muted">{company.name}</span>
+              </div>
+            )}
           </div>
+          <ol className="flex min-w-0 flex-col">
+            {t.verifyPoints.map((point, i) => (
+              <li key={point.title} className="flex min-w-0 gap-4 border-b border-line px-6 py-5 last:border-b-0 sm:px-8 sm:py-6">
+                <span aria-hidden className="font-heading text-h4 text-burgundy">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0">
+                  <p className="font-heading text-h4">{point.title}</p>
+                  <p className="mt-1 text-muted">{point.line}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
-        <div className="flex items-center gap-5 rounded-2xl border border-line bg-white p-6">
-          <Mascot pose="search" size={112} />
-          <div>
-            <h2 className="text-h4">{t.forCompanies}</h2>
-            <p className="mt-1 text-muted">{t.forCompaniesBody}</p>
-          </div>
-        </div>
+      </section>
+
+      <section className="rounded-3xl border border-line bg-white px-6 py-10 text-center">
+        <h2 className="text-h2">{t.ctaTitle}</h2>
+        <LinkButton href="/signup" className="mt-6">
+          {t.createAccount}
+        </LinkButton>
       </section>
     </div>
   );
