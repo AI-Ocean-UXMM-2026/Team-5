@@ -8,7 +8,7 @@ import { courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
 import { useData } from "@/lib/store";
 
-const challengeStatus = { submitted: "Waiting for review", "needs-work": "Needs another try", interview: "Interview invited" } as const;
+const challengeStatus = { submitted: "Waiting for review", "needs-work": "Needs another try", interview: "Interview invited", offered: "Offer sent" } as const;
 
 export default function Candidates() {
   const { s, company, lang } = useData();

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button, LinkButton } from "@/components/ui/Button";
-import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, Empty, LockIcon, PageHeader } from "@/components/ui/Card";
 import { courseTitle } from "@/lib/i18n";
 import { allLessonsDone, challengeUnlocked, lessonIncluded, paidTrackOpen, previewLessonCount } from "@/lib/rules";
 import { courses } from "@/lib/seed";
@@ -61,7 +61,15 @@ export default function CourseDetail() {
                       {i + 1}. {l.title}
                     </span>
                   )}
-                  {done ? <Badge tone="success">✓ Done</Badge> : open ? <Badge>To do</Badge> : <Badge>Locked</Badge>}
+                  {done ? (
+                    <Badge tone="success">✓ Done</Badge>
+                  ) : open ? (
+                    <Badge>To do</Badge>
+                  ) : (
+                    <Badge>
+                      <LockIcon /> Locked
+                    </Badge>
+                  )}
                 </li>
               );
             })}
@@ -109,7 +117,9 @@ export default function CourseDetail() {
                       {c.title}
                     </Link>
                   ) : (
-                    <span className="text-muted">🔒 {c.title}</span>
+                    <span className="inline-flex items-center gap-1 text-muted">
+                      <LockIcon /> {c.title}
+                    </span>
                   )}
                 </li>
               ))}

@@ -3,19 +3,23 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button, LinkArrow } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { Dialog } from "@/components/ui/Dialog";
 import { Input, Textarea } from "@/components/ui/Field";
 import { courseTitle } from "@/lib/i18n";
-import { rubricMarks } from "@/lib/rules";
+import { applyOffer, rubricMarks } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { nameOf, newId, setState, useData } from "@/lib/store";
-import type { Submission } from "@/lib/types";
+import type { Interview, Submission } from "@/lib/types";
+
+const offerLabel: Partial<Record<Interview["status"], string>> = { offered: "Waiting for reply", accepted: "Accepted", declined: "Declined" };
 
 function Review({ sub }: { sub: Submission }) {
-  const { s } = useData();
+  const { s, company } = useData();
   const [feedback, setFeedback] = useState("");
   const [when, setWhen] = useState("");
+  const [confirming, setConfirming] = useState(false);
   const interview = s.interviews.find((i) => i.submissionId === sub.id);
   const rubric = s.challenges.find((c) => c.id === sub.challengeId)?.rubric ?? [];
   const marks = sub.aiRubric ?? rubricMarks(sub.answer, rubric);
@@ -32,7 +36,13 @@ function Review({ sub }: { sub: Submission }) {
           </h3>
           <p className="text-body-sm text-muted">Submitted {sub.submittedAt}</p>
         </div>
-        {sub.status === "submitted" ? <Badge tone="highlight">To review</Badge> : sub.status === "needs-work" ? <Badge>Feedback sent</Badge> : <Badge tone="success">Interview</Badge>}
+        {sub.status === "submitted" ? (
+          <Badge tone="highlight">To review</Badge>
+        ) : sub.status === "needs-work" ? (
+          <Badge>Feedback sent</Badge>
+        ) : (
+          <Badge tone="success">{sub.status === "offered" ? "Offer sent" : "Interview"}</Badge>
+        )}
       </div>
 
       <div className="flex gap-4 rounded-xl border border-ai-line bg-ai p-4">
@@ -62,8 +72,9 @@ function Review({ sub }: { sub: Submission }) {
         <summary className="cursor-pointer font-medium">Full answer</summary>
         <p className="mt-2 whitespace-pre-wrap">{sub.answer}</p>
         {sub.link && (
-          <a href={sub.link} target="_blank" rel="noreferrer" className="mt-2 inline-block text-burgundy underline">
+          <a href={sub.link} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-burgundy underline">
             {sub.link}
+            <LinkArrow className="size-3" />
           </a>
         )}
       </details>
@@ -100,10 +111,43 @@ function Review({ sub }: { sub: Submission }) {
               Invite to interview
             </Button>
           </form>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 md:col-span-2">
+            <p className="text-sm font-medium">Already sure? Skip the interview.</p>
+            <Button onClick={() => setConfirming(true)}>Send offer</Button>
+          </div>
         </div>
       )}
       {sub.status === "needs-work" && <p className="text-muted">Your feedback: “{sub.companyFeedback}”. The learner can submit again.</p>}
-      {interview && (
+      {sub.status === "interview" && interview?.status === "scheduled" && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+          <p className="text-sm font-medium">Ready to hire? Send an offer.</p>
+          <Button onClick={() => setConfirming(true)}>Send offer</Button>
+        </div>
+      )}
+      <Dialog open={confirming} onClose={() => setConfirming(false)} title={`Send an offer to ${nameOf(s, sub.learnerId)}?`}>
+        <p className="mb-4 text-muted">
+          They get an offer for {company?.terms.role || "an internship"} ({company?.terms.duration}, {company?.terms.stipend}) and can accept or decline it on their Internships page.
+        </p>
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button variant="secondary" onClick={() => setConfirming(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setConfirming(false);
+              setState((st) => applyOffer(st, sub.id, newId("iv")));
+            }}
+          >
+            Yes, send offer
+          </Button>
+        </div>
+      </Dialog>
+      {sub.status === "offered" && (
+        <p role="status" className="font-medium text-success">
+          Offer sent to {nameOf(s, sub.learnerId)}. They can accept or decline it on their Internships page.
+        </p>
+      )}
+      {interview?.when && (
         <p className="text-muted">
           Interview {interview.when.replace("T", " at ")} ·{" "}
           <Link href="/company/interviews" className="font-medium text-burgundy">
@@ -121,6 +165,7 @@ export default function ReviewChallenge() {
   const challenge = s.challenges.find((c) => c.id === challengeId && c.companyId === company?.id);
   if (!challenge) return <Empty>Challenge not found.</Empty>;
   const subs = s.submissions.filter((x) => x.challengeId === challenge.id).sort((a, b) => b.aiScore - a.aiScore);
+  const offers = s.interviews.filter((i) => i.challengeId === challenge.id && offerLabel[i.status]);
 
   return (
     <>
@@ -134,16 +179,32 @@ export default function ReviewChallenge() {
             <Review key={sub.id} sub={sub} />
           ))}
         </div>
-        <Card className="self-start">
-          <h2 className="mb-2 text-h4">The task</h2>
-          <p>{challenge.task}</p>
-          <h3 className="mt-4 mb-2 text-body-lg">Rubric</h3>
-          <ul className="list-disc pl-5">
-            {challenge.rubric.map((r) => (
-              <li key={r}>{r}</li>
-            ))}
-          </ul>
-        </Card>
+        <div className="flex flex-col gap-6 self-start">
+          <Card>
+            <h2 className="mb-2 text-h4">Sent offers</h2>
+            {!offers.length && <p className="text-muted">No offers sent yet.</p>}
+            <ul className="flex flex-col gap-2">
+              {offers.map((i) => (
+                <li key={i.id} className="flex flex-wrap items-center justify-between gap-2">
+                  <Link href={`/profile/${i.learnerId}`} className="font-medium hover:text-burgundy">
+                    {nameOf(s, i.learnerId)}
+                  </Link>
+                  <Badge tone={i.status === "accepted" ? "success" : i.status === "offered" ? "highlight" : "neutral"}>{offerLabel[i.status]}</Badge>
+                </li>
+              ))}
+            </ul>
+          </Card>
+          <Card>
+            <h2 className="mb-2 text-h4">The task</h2>
+            <p>{challenge.task}</p>
+            <h3 className="mt-4 mb-2 text-body-lg">Rubric</h3>
+            <ul className="list-disc pl-5">
+              {challenge.rubric.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          </Card>
+        </div>
       </div>
     </>
   );

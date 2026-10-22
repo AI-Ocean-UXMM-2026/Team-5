@@ -2,10 +2,14 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   allLessonsDone,
+  applyOffer,
+  replyToOffer,
   canPostAsCompany,
+  communityPostKind,
   lessonIncluded,
   paidTrackOpen,
   previewLessonCount,
+  roadmapStepOpen,
   companyChallengeIds,
   challengeUnlocked,
   counted,
@@ -53,15 +57,16 @@ test("guests go home from the logo, and registration status has a home", () => {
   assert.equal(registrationView({ status: "rejected" } as Company), "rejected");
   assert.equal(registrationView({ status: "verified" } as Company), "live");
   assert.equal(registrationView({ status: "draft" } as Company), "none");
-  const company = (status: Company["status"], reviewNote?: string): State => ({
+  const company = (status: Company["status"], reviewNote?: string, approvalSeen?: boolean): State => ({
     ...seed,
     sessionUserId: "u-yds",
-    companies: seed.companies.map((c) => (c.id === "c-yds" ? { ...c, status, reviewNote } : c)),
+    companies: seed.companies.map((c) => (c.id === "c-yds" ? { ...c, status, reviewNote, approvalSeen } : c)),
   });
   assert.equal(homePath(company("pending")), "/company/registration/status");
   assert.equal(homePath(company("rejected")), "/company/registration/status");
   assert.equal(homePath(company("draft", "Clearer document")), "/company/registration/status");
-  assert.equal(homePath(company("verified")), "/company/challenges");
+  assert.equal(homePath(company("verified")), "/company/registration/status");
+  assert.equal(homePath(company("verified", undefined, true)), "/company/challenges");
 });
 
 test("counts use singular only for one", () => {
@@ -99,6 +104,20 @@ test("a paid course keeps the first 25 percent free until the track is unlocked"
   assert.equal(lessonIncluded(free, 2, [], false), true);
 });
 
+test("a roadmap course stays locked until the one before it is finished", () => {
+  const steps = [
+    { id: "a", lessons: [{ id: "a1" }, { id: "a2" }] },
+    { id: "b", lessons: [{ id: "b1" }] },
+    { id: "c", lessons: [{ id: "c1" }] },
+  ] as Course[];
+  assert.equal(roadmapStepOpen(steps, 0, [], []), true);
+  assert.equal(roadmapStepOpen(steps, 1, ["a1"], []), false);
+  assert.equal(roadmapStepOpen(steps, 1, ["a1", "a2"], []), true);
+  assert.equal(roadmapStepOpen(steps, 2, ["a1", "a2"], []), false);
+  assert.equal(roadmapStepOpen(steps, 2, [], ["b"]), true);
+  assert.equal(roadmapStepOpen(steps, 1, [], ["b"]), true);
+});
+
 test("test pass mark is 70%", () => {
   assert.equal(testPassed(7, 10), true);
   assert.equal(testPassed(6, 10), false);
@@ -116,6 +135,11 @@ test("challenge unlocks only with a certificate for that course", () => {
   assert.equal(challengeUnlocked(certs, "u1", "fe"), true);
   assert.equal(challengeUnlocked(certs, "u1", "qa"), false);
   assert.equal(challengeUnlocked(certs, "u2", "fe"), false);
+});
+
+test("learners post course discussions and companies post challenges", () => {
+  assert.equal(communityPostKind("learner"), "course");
+  assert.equal(communityPostKind("company"), "challenge");
 });
 
 test("only verified companies can post", () => {
@@ -148,6 +172,30 @@ test("each career goal uses a real demo course path", () => {
   assert.deepEqual(coursesForGoal("data"), ["starter", "qa"]);
   assert.deepEqual(coursesForGoal("fullstack"), ["starter", "frontend", "qa"]);
   assert.deepEqual(coursesForGoal("unsure"), ["starter", "frontend", "qa"]);
+});
+
+test("a company offer marks the submission and adds or updates the interview", () => {
+  const offered = applyOffer(seed, "s-aye", "iv-aye");
+  const row = offered.interviews.find((i) => i.submissionId === "s-aye");
+  assert.equal(offered.submissions.find((x) => x.id === "s-aye")?.status, "offered");
+  assert.equal(row?.status, "offered");
+  assert.equal(row?.id, "iv-aye");
+  const scheduled: State = {
+    ...seed,
+    submissions: seed.submissions.map((x) => (x.id === "s-min" ? { ...x, status: "interview" } : x)),
+    interviews: seed.interviews.map((i) => (i.id === "iv-min" ? { ...i, status: "scheduled" } : i)),
+  };
+  const afterInterview = applyOffer(scheduled, "s-min", "iv-new");
+  assert.equal(afterInterview.interviews.find((i) => i.submissionId === "s-min")?.id, "iv-min");
+  assert.equal(afterInterview.submissions.find((x) => x.id === "s-min")?.status, "offered");
+  assert.equal(applyOffer(seed, "s-min", "iv-dup"), seed);
+});
+
+test("a learner can accept or decline an offer only once", () => {
+  const accepted = replyToOffer(seed, "iv-min", true);
+  assert.equal(accepted.interviews.find((i) => i.id === "iv-min")?.status, "accepted");
+  assert.equal(replyToOffer(accepted, "iv-min", false), accepted);
+  assert.equal(replyToOffer(seed, "iv-min", false).interviews.find((i) => i.id === "iv-min")?.status, "declined");
 });
 
 test("company email must be on its own domain", () => {

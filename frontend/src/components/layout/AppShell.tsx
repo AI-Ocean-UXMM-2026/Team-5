@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { LinkArrow } from "@/components/ui/Button";
 import { type Area, homePath, redirectFor } from "@/lib/access";
 import { copy } from "@/lib/i18n";
 import { isPitchUser } from "@/lib/seed";
@@ -56,8 +57,9 @@ function FooterCol({ title, children }: { title: string; children: React.ReactNo
 
 function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="hover:text-white">
+    <Link href={href} className="inline-flex items-center gap-1 hover:text-white">
       {children}
+      <LinkArrow className="size-3" />
     </Link>
   );
 }
@@ -104,14 +106,13 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
     <>
       <header className="border-b border-line bg-white">
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-8 gap-y-2 px-6 py-3 md:px-8 lg:px-12">
-          <div className="flex items-center gap-3">
-            <Link href={homePath(s)} className="flex shrink-0 items-center gap-2 rounded-lg">
-              <Image src="/logo/the-citadel-icon-primary.png" alt="" width={44} height={44} priority className="size-11" />
-              <span className="font-heading text-base font-semibold">The Citadel</span>
-            </Link>
-            <span aria-hidden className={`hidden h-5 w-px shrink-0 bg-line ${nav.length ? "xl:block" : "sm:block"}`} />
-            <p className={`hidden text-body text-muted ${nav.length ? "xl:block" : "sm:block"}`}>{t.heroTitle}</p>
-          </div>
+          <Link href={homePath(s)} className="flex shrink-0 items-center gap-2.5 rounded-lg">
+            <Image src="/logo/the-citadel-icon-primary.png" alt="" width={40} height={40} priority className="size-10" />
+            <span className="flex flex-col">
+              <span className="font-heading text-base leading-5 font-semibold">The Citadel</span>
+              <span className="text-[11px] leading-4 text-subtle">{t.heroTitle}</span>
+            </span>
+          </Link>
           {nav.length > 0 && (
             <nav aria-label="Main" className="hidden gap-1 md:flex">
               {nav.map(([href, label]) => {
@@ -121,9 +122,10 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
                     key={href}
                     href={href}
                     aria-current={active ? "page" : undefined}
-                    className={`whitespace-nowrap border-b-2 px-2 py-2 text-sm font-medium transition-colors ${active ? "border-burgundy text-burgundy" : "border-transparent text-muted hover:text-ink"}`}
+                    className={`inline-flex items-center gap-1 whitespace-nowrap border-b-2 px-2 py-2 text-sm font-medium transition-colors ${active ? "border-burgundy text-burgundy" : "border-transparent text-muted hover:text-ink"}`}
                   >
                     {label}
+                    <LinkArrow className="size-3" />
                   </Link>
                 );
               })}
@@ -210,9 +212,10 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
                   href={href}
                   aria-current={active ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className={`rounded-xl px-3 py-3 text-sm font-medium ${active ? "bg-burgundy-tint text-burgundy" : "text-ink hover:bg-surface"}`}
+                  className={`inline-flex items-center gap-1 rounded-xl px-3 py-3 text-sm font-medium ${active ? "bg-burgundy-tint text-burgundy" : "text-ink hover:bg-surface"}`}
                 >
                   {label}
+                  <LinkArrow className="size-3" />
                 </Link>
               );
             })}
@@ -268,7 +271,22 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
           </nav>
         )}
       </header>
-      <main className="mx-auto w-full max-w-[1280px] flex-1 px-6 py-10 md:px-8 lg:px-12">{children}</main>
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-6 py-10 md:px-8 lg:px-12">
+        {pathname !== homePath(s) && (
+          <button
+            type="button"
+            // shortcut: history.length can't tell if the previous entry is on this site; track in-app history if that matters.
+            onClick={() => (window.history.length > 1 ? router.back() : router.push(homePath(s)))}
+            className="-ml-2 mb-4 inline-flex items-center gap-1 rounded-xl px-2 py-2 text-sm font-medium text-muted hover:bg-surface hover:text-ink"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Back
+          </button>
+        )}
+        {children}
+      </main>
       <footer className="bg-ink-strong text-white">
         <div className="mx-auto grid max-w-[1280px] gap-2 px-6 py-8 md:grid-cols-4 md:gap-8 md:px-8 lg:px-12">
           <FooterCol title="The Citadel">

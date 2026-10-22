@@ -1,4 +1,4 @@
-import type { Certificate, Company, Course } from "./types";
+import type { Certificate, Company, Course, Role, State } from "./types";
 
 export const PASS_MARK = 0.7;
 
@@ -8,6 +8,13 @@ export function testPassed(correct: number, total: number) {
 
 export function allLessonsDone(doneLessons: string[], course: Course) {
   return course.lessons.every((l) => doneLessons.includes(l.id));
+}
+
+// A roadmap course opens once the one before it is finished (every lesson done or certified); a course you are already certified in stays open.
+export function roadmapStepOpen(steps: Course[], index: number, doneLessons: string[], certifiedIds: string[]) {
+  if (index === 0 || certifiedIds.includes(steps[index].id)) return true;
+  const prev = steps[index - 1];
+  return certifiedIds.includes(prev.id) || allLessonsDone(doneLessons, prev);
 }
 
 export function previewLessonCount(course: Course) {
@@ -31,6 +38,10 @@ export function challengeUnlocked(certificates: Certificate[], learnerId: string
 
 export function canPostAsCompany(company: Company | undefined) {
   return company?.status === "verified";
+}
+
+export function communityPostKind(role: Role) {
+  return role === "company" ? "challenge" : "course";
 }
 
 export function companyChallengeIds(company: Company | undefined, challenges: { id: string; companyId: string }[]) {
@@ -65,6 +76,26 @@ const PHONE_LIKE = /\+?\d[\d\s().-]{5,}\d/g;
 // shortcut: any run of 7+ digits counts as a phone number, so long plain numbers are also blocked; upgrade to a phone parser if that annoys users.
 export function hasContactDetails(text: string) {
   return EMAIL.test(text) || (text.match(PHONE_LIKE) ?? []).some((m) => m.replace(/\D/g, "").length >= 7);
+}
+
+export function applyOffer(s: State, submissionId: string, interviewId: string): State {
+  const sub = s.submissions.find((x) => x.id === submissionId);
+  const ch = s.challenges.find((c) => c.id === sub?.challengeId);
+  const existing = s.interviews.find((i) => i.submissionId === submissionId);
+  if (!sub || !ch || sub.status === "offered" || (existing && existing.status !== "scheduled")) return s;
+  return {
+    ...s,
+    submissions: s.submissions.map((x) => (x.id === sub.id ? { ...x, status: "offered" as const } : x)),
+    interviews: existing
+      ? s.interviews.map((i) => (i.id === existing.id ? { ...i, status: "offered" as const } : i))
+      : [...s.interviews, { id: interviewId, submissionId: sub.id, challengeId: ch.id, learnerId: sub.learnerId, companyId: ch.companyId, when: "", status: "offered" }],
+  };
+}
+
+export function replyToOffer(s: State, interviewId: string, accept: boolean): State {
+  const row = s.interviews.find((i) => i.id === interviewId);
+  if (!row || row.status !== "offered") return s;
+  return { ...s, interviews: s.interviews.map((i) => (i.id === row.id ? { ...i, status: accept ? "accepted" : "declined" } : i)) };
 }
 
 export function emailMatchesWebsite(email: string, website: string) {

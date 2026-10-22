@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { AiPanel } from "@/components/ui/AiPanel";
-import { Button, LinkButton } from "@/components/ui/Button";
+import { Button, LinkArrow, LinkButton } from "@/components/ui/Button";
 import { Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Input, Textarea } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
@@ -27,6 +27,7 @@ export default function ChallengeDetail() {
 
   const company = s.companies.find((c) => c.id === challenge?.companyId);
   if (!challenge || company?.status !== "verified") return <Empty>Challenge not found.</Empty>;
+  const companyUser = s.users.find((u) => u.companyId === company.id);
   const course = courses.find((c) => c.id === challenge.courseId);
   if (!challengeUnlocked(s.certificates, me.id, challenge.courseId))
     return (
@@ -61,7 +62,14 @@ export default function ChallengeDetail() {
     <>
       <PageHeader title={challenge.title}>
         <div className="flex items-center gap-2 text-muted">
-          {company.name} <VerifiedBadge company={company} />
+          {companyUser ? (
+            <Link href={`/profile/${companyUser.id}`} className="hover:text-burgundy">
+              {company.name}
+            </Link>
+          ) : (
+            company.name
+          )}{" "}
+          <VerifiedBadge company={company} />
         </div>
       </PageHeader>
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
@@ -123,18 +131,34 @@ export default function ChallengeDetail() {
             </Card>
           ) : (
             <Card>
-              <Mascot pose={sub.status === "interview" ? "excited" : "wink"} size={96} className="mb-2" />
-              <h2 className="mb-2 text-h4">{sub.status === "interview" ? "You're invited to interview" : "Submitted, waiting for review"}</h2>
+              <Mascot pose={sub.status === "submitted" ? "wink" : "excited"} size={96} className="mb-2" />
+              <h2 className="mb-2 text-h4">{sub.status === "offered" ? "You received an offer" : sub.status === "interview" ? "You're invited to interview" : "Submitted, waiting for review"}</h2>
               <p className="mb-4 text-muted">
-                {sub.status === "interview" ? `${company.name} liked your work.` : `${company.name} will review your work. AI pre-screens it, but the company makes the decision.`}
+                {sub.status === "submitted" ? (
+                  <>
+                    {company.name} will review your work. AI pre-screens it, but the company makes the decision.
+                  </>
+                ) : (
+                  <>
+                    {companyUser ? (
+                      <Link href={`/profile/${companyUser.id}`} className="font-medium text-burgundy hover:underline">
+                        {company.name}
+                      </Link>
+                    ) : (
+                      company.name
+                    )}{" "}
+                    liked your work.
+                  </>
+                )}
               </p>
-              {sub.status === "interview" && <LinkButton href="/internships">See your interview</LinkButton>}
+              {sub.status !== "submitted" && <LinkButton href="/internships">{sub.status === "offered" ? "See your offer" : "See your interview"}</LinkButton>}
               <details className="mt-4">
                 <summary className="cursor-pointer font-medium">Your answer</summary>
                 <p className="mt-2 whitespace-pre-wrap">{sub.answer}</p>
                 {sub.link && (
-                  <a href={sub.link} target="_blank" rel="noreferrer" className="mt-2 inline-block text-burgundy underline">
+                  <a href={sub.link} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-burgundy underline">
                     {sub.link}
+                    <LinkArrow className="size-3" />
                   </a>
                 )}
               </details>

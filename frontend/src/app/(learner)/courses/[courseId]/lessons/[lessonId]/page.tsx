@@ -60,6 +60,8 @@ export default function LessonPage() {
       </Empty>
     );
   const done = p.doneLessons.includes(lesson.id);
+  const complete = done || passedId === lesson.id;
+  const lastLesson = !next;
   const summary = result?.lessonId === lesson.id ? result : null;
 
   return (
@@ -93,15 +95,18 @@ export default function LessonPage() {
                 setPassedId(perfect ? lesson.id : null);
                 if (perfect && !done) updateProgress(me.id, (pr) => ({ ...pr, doneLessons: [...pr.doneLessons, lesson.id] }));
               }}
-            />
-            {passedId === lesson.id && nextOpen && next && (
-              <LinkButton href={`/courses/${course.id}/lessons/${next.id}`} variant="tertiary" className="mt-6 self-start">
-                Next lesson
-                <svg aria-hidden viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 8h10M9 4l4 4-4 4" />
-                </svg>
-              </LinkButton>
-            )}
+            >
+              {complete && nextOpen && next && (
+                <LinkButton href={`/courses/${course.id}/lessons/${next.id}`} variant="tertiary">
+                  Next lesson
+                </LinkButton>
+              )}
+              {complete && lastLesson && (
+                <LinkButton href={`/courses/${course.id}/test`}>
+                  Finish course
+                </LinkButton>
+              )}
+            </Quiz>
           </Card>
         </div>
         <div className="flex h-full flex-col gap-6">

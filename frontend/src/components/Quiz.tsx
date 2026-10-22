@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Question } from "@/lib/types";
 import { Button } from "./ui/Button";
 
-export function Quiz({ questions, submitLabel, onChecked, retry = true }: { questions: Question[]; submitLabel: string; onChecked: (correct: number) => void; retry?: boolean }) {
+export function Quiz({ questions, submitLabel, onChecked, retry = true, children }: { questions: Question[]; submitLabel: string; onChecked: (correct: number) => void; retry?: boolean; children?: React.ReactNode }) {
   const [picked, setPicked] = useState<(number | null)[]>(() => questions.map(() => null));
   const [checked, setChecked] = useState(false);
 
@@ -47,22 +47,25 @@ export function Quiz({ questions, submitLabel, onChecked, retry = true }: { ques
           </fieldset>
         );
       })}
-      {checked && retry ? (
-        <Button
-          variant="secondary"
-          className="self-start"
-          onClick={() => {
-            setPicked(questions.map(() => null));
-            setChecked(false);
-          }}
-        >
-          Try again
-        </Button>
-      ) : checked ? null : (
-        <Button type="submit" className="self-start">
-          {submitLabel}
-        </Button>
-      )}
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        {checked && retry ? (
+          <Button
+            variant="secondary"
+            className={children ? "mr-auto" : ""}
+            onClick={() => {
+              setPicked(questions.map(() => null));
+              setChecked(false);
+            }}
+          >
+            Try again
+          </Button>
+        ) : checked ? null : (
+          <Button type="submit" className={children ? "mr-auto" : ""}>
+            {submitLabel}
+          </Button>
+        )}
+        {children}
+      </div>
     </form>
   );
 }

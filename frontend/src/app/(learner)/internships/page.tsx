@@ -1,10 +1,15 @@
 "use client";
 
+import Link from "next/link";
+import { useState } from "react";
 import { RatingForm } from "@/components/RatingForm";
 import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { Detail } from "@/components/ui/Detail";
+import { Dialog } from "@/components/ui/Dialog";
 import { Mascot } from "@/components/ui/Mascot";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { replyToOffer } from "@/lib/rules";
 import { setState, useData } from "@/lib/store";
 import type { Interview } from "@/lib/types";
 
@@ -16,12 +21,12 @@ const label: Record<Interview["status"], string> = {
   "not-selected": "Not selected this time",
 };
 
-const setStatus = (id: string, status: Interview["status"]) =>
-  setState((st) => ({ ...st, interviews: st.interviews.map((i) => (i.id === id ? { ...i, status } : i)) }));
-
 export default function Internships() {
   const { s, me } = useData();
+  const [confirming, setConfirming] = useState<string | null>(null);
   const mine = s.interviews.filter((i) => i.learnerId === me.id);
+  const pending = confirming ? mine.find((i) => i.id === confirming) : undefined;
+  const pendingCompany = pending ? s.companies.find((c) => c.id === pending.companyId) : undefined;
 
   return (
     <>
@@ -30,38 +35,44 @@ export default function Internships() {
       <div className="flex flex-col gap-4">
         {mine.map((i) => {
           const company = s.companies.find((c) => c.id === i.companyId)!;
+          const companyUser = s.users.find((u) => u.companyId === company.id);
           const challenge = s.challenges.find((c) => c.id === i.challengeId);
           return (
             <Card key={i.id} className="flex flex-col gap-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="flex flex-wrap items-center gap-2 text-h4">
-                    {company.terms.role || "Internship"} at {company.name} <VerifiedBadge company={company} />
+                    {company.terms.role || "Internship"} at{" "}
+                    {companyUser ? (
+                      <Link href={`/profile/${companyUser.id}`} className="hover:text-burgundy">
+                        {company.name}
+                      </Link>
+                    ) : (
+                      company.name
+                    )}{" "}
+                    <VerifiedBadge company={company} />
                   </h2>
                   <p className="text-muted">
-                    From the challenge “{challenge?.title}” · Interview {i.when.replace("T", " at ")}
+                    From the challenge “{challenge?.title}”{i.when && ` · Interview ${i.when.replace("T", " at ")}`}
                   </p>
                 </div>
                 <Badge tone={i.status === "accepted" ? "success" : i.status === "offered" ? "highlight" : "neutral"}>{label[i.status]}</Badge>
               </div>
-              <dl className="grid gap-x-6 gap-y-1 text-body-sm sm:grid-cols-3">
-                <div>
-                  <dt className="text-muted">Duration</dt>
-                  <dd>{company.terms.duration}</dd>
-                </div>
-                <div>
-                  <dt className="text-muted">Location</dt>
-                  <dd>{company.terms.location}</dd>
-                </div>
-                <div>
-                  <dt className="text-muted">Stipend</dt>
-                  <dd>{company.terms.stipend}</dd>
-                </div>
+              <dl className="grid gap-4 text-body-sm sm:grid-cols-3">
+                <Detail kind="duration" label="Duration">
+                  {company.terms.duration}
+                </Detail>
+                <Detail kind="location" label="Location">
+                  {company.terms.location}
+                </Detail>
+                <Detail kind="stipend" label="Stipend">
+                  {company.terms.stipend}
+                </Detail>
               </dl>
               {i.status === "offered" && (
                 <div className="flex flex-wrap gap-3">
-                  <Button onClick={() => setStatus(i.id, "accepted")}>Accept offer</Button>
-                  <Button variant="secondary" onClick={() => setStatus(i.id, "declined")}>
+                  <Button onClick={() => setConfirming(i.id)}>Accept offer</Button>
+                  <Button variant="secondary" onClick={() => setState((st) => replyToOffer(st, i.id, false))}>
                     Decline
                   </Button>
                 </div>
@@ -79,6 +90,26 @@ export default function Internships() {
           );
         })}
       </div>
+      {pending && pendingCompany && (
+        <Dialog open onClose={() => setConfirming(null)} title={`Accept the offer from ${pendingCompany.name}?`}>
+          <p className="mb-4 text-muted">
+            You accept the {pendingCompany.terms.role || "internship"} ({pendingCompany.terms.duration}, {pendingCompany.terms.stipend}). You can rate the company after it starts.
+          </p>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button variant="secondary" onClick={() => setConfirming(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setState((st) => replyToOffer(st, pending.id, true));
+                setConfirming(null);
+              }}
+            >
+              Yes, accept offer
+            </Button>
+          </div>
+        </Dialog>
+      )}
     </>
   );
 }

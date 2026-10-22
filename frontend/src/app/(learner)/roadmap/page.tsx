@@ -1,17 +1,19 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { AiPanel } from "@/components/ui/AiPanel";
 import { LinkButton } from "@/components/ui/Button";
-import { Badge, Card, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, LockIcon, PageHeader } from "@/components/ui/Card";
 import { Mascot } from "@/components/ui/Mascot";
-import { goals } from "@/lib/ai";
+import { courseSuggestion, goals } from "@/lib/ai";
 import { courseTitle } from "@/lib/i18n";
+import { roadmapStepOpen } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { progressOf, useData } from "@/lib/store";
 
 export default function Roadmap() {
   const { s, me, lang } = useData();
+  const [picked, setPicked] = useState<number | null>(null);
   const p = progressOf(s, me.id);
   const goal = goals.find((g) => g.id === p.goal)?.label ?? "Your goal";
   if (!p.roadmap.length) {
@@ -46,6 +48,18 @@ export default function Roadmap() {
     );
   }
 
+  const certifiedIds = s.certificates.filter((x) => x.learnerId === me.id).map((x) => x.courseId);
+  const stepCourses = p.roadmap.map((id) => courses.find((x) => x.id === id)!);
+  const steps = stepCourses.map((c, i) => ({
+    c,
+    done: c.lessons.filter((l) => p.doneLessons.includes(l.id)).length,
+    certified: certifiedIds.includes(c.id),
+    open: roadmapStepOpen(stepCourses, i, p.doneLessons, certifiedIds),
+  }));
+  const firstToDo = steps.findIndex((x) => x.open && !x.certified);
+  const selected = picked !== null && picked < steps.length ? picked : Math.max(0, firstToDo);
+  const current = steps[selected];
+
   return (
     <>
       <PageHeader title={`Roadmap: ${goal}`} intro="Complete each course, pass the test, and tackle a real company challenge." pose="flag">
@@ -53,32 +67,58 @@ export default function Roadmap() {
           Change goal
         </LinkButton>
       </PageHeader>
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <ol className="flex flex-col gap-3">
-          {p.roadmap.map((id, i) => {
-            const c = courses.find((x) => x.id === id)!;
-            const done = c.lessons.filter((l) => p.doneLessons.includes(l.id)).length;
-            const certified = s.certificates.some((x) => x.learnerId === me.id && x.courseId === id);
-            return (
-              <li key={id}>
-                <Card className="flex items-center gap-4">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-yellow-tint font-heading font-semibold">{i + 1}</span>
-                  <div className="min-w-0 flex-1">
-                    <Link href={`/courses/${id}`} className="font-heading text-h4 font-semibold hover:text-burgundy">
-                      {courseTitle(c, lang)}
-                    </Link>
-                    <p className="text-muted">
-                      {c.hours} hours · {done} of {c.lessons.length} lessons done
-                    </p>
-                  </div>
-                  {certified ? <Badge tone="success">Certified</Badge> : done ? <Badge tone="highlight">In progress</Badge> : <Badge>Not started</Badge>}
-                </Card>
-              </li>
-            );
-          })}
+      <div className="relative overflow-x-auto py-4">
+        <div aria-hidden className="absolute top-1/2 right-0 left-0 border-t-2 border-dotted border-subtle">
+          <span className="absolute -top-[5px] left-0 size-2 rounded-full bg-ink" />
+          <span className="absolute -top-[5px] right-0 size-2 rounded-full bg-ink" />
+        </div>
+        <ol className="relative flex justify-around gap-6 px-6">
+          {steps.map(({ c, done, certified, open }, i) => (
+            <li key={c.id} className="w-48 shrink-0">
+              <button
+                type="button"
+                aria-pressed={selected === i}
+                onClick={() => setPicked(i)}
+                className={`flex h-full w-full flex-col items-center gap-2 rounded-2xl border bg-white p-4 text-center shadow-sm transition-colors ${selected === i ? "border-burgundy ring-2 ring-burgundy/20" : "border-line hover:border-subtle"} ${open ? "" : "bg-disabled text-muted"}`}
+              >
+                <span
+                  aria-label={open ? undefined : "Locked"}
+                  className={`grid size-8 place-items-center rounded-full font-heading text-sm font-semibold ${open ? "bg-burgundy text-white" : "bg-line text-muted"}`}
+                >
+                  {open ? i + 1 : <LockIcon className="size-3.5" />}
+                </span>
+                <span className="font-heading text-body font-semibold">{courseTitle(c, lang)}</span>
+                {certified ? (
+                  <Badge tone="success">Certified</Badge>
+                ) : !open ? (
+                  <Badge>
+                    <LockIcon /> Locked
+                  </Badge>
+                ) : done ? (
+                  <Badge tone="highlight">In progress</Badge>
+                ) : (
+                  <Badge>Not started</Badge>
+                )}
+              </button>
+            </li>
+          ))}
         </ol>
-        <AiPanel title="Why this order">
-          <p>{p.roadmapNote}</p>
+      </div>
+      <div className="mt-4">
+        <AiPanel title={`Lesson ${selected + 1}: ${courseTitle(current.c, lang)}`} tone="yellow">
+          {current.open ? (
+            <>
+              <p>{courseSuggestion(current.c, p.doneLessons, current.certified, p.hoursPerWeek)}</p>
+              <p className="mt-2 text-body-sm text-muted">
+                {current.c.hours} hours · {current.done} of {current.c.lessons.length} lessons done
+              </p>
+              <LinkButton href={`/courses/${current.c.id}`} variant="secondary" className="mt-4">
+                Open course
+              </LinkButton>
+            </>
+          ) : (
+            <p>Finish “{courseTitle(steps[selected - 1].c, lang)}” first. This course unlocks when every lesson there is done.</p>
+          )}
         </AiPanel>
       </div>
     </>

@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, Empty, LockIcon, PageHeader } from "@/components/ui/Card";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { courseTitle } from "@/lib/i18n";
 import { challengeUnlocked } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { useData } from "@/lib/store";
 
-const statusLabel = { submitted: "Waiting for review", "needs-work": "Feedback to act on", interview: "Interview invite" } as const;
+const statusLabel = { submitted: "Waiting for review", "needs-work": "Feedback to act on", interview: "Interview invite", offered: "Offer received" } as const;
 
 export default function Challenges() {
   const { s, me, lang } = useData();
@@ -25,13 +25,17 @@ export default function Challenges() {
           const unlocked = challengeUnlocked(s.certificates, me.id, c.courseId);
           const sub = s.submissions.find((x) => x.challengeId === c.id && x.learnerId === me.id);
           return (
-            <Card key={c.id} className="flex flex-col gap-2">
+            <Card key={c.id} className={`relative flex flex-col gap-2 ${unlocked ? "group transition-shadow hover:shadow-md" : ""}`}>
               <div className="flex flex-wrap items-center gap-2 text-body-sm text-muted">
-                {company.name} <VerifiedBadge company={company} />
+                {company.name}
+                <span className="relative z-10">
+                  <VerifiedBadge company={company} />
+                </span>
               </div>
               <h2 className="text-h4">
                 {unlocked ? (
-                  <Link href={`/challenges/${c.id}`} className="hover:text-burgundy">
+                  // The link's ::after covers the whole card so the card is clickable.
+                  <Link href={`/challenges/${c.id}`} className="group-hover:text-burgundy after:absolute after:inset-0 after:rounded-2xl">
                     {c.title}
                   </Link>
                 ) : (
@@ -41,11 +45,13 @@ export default function Challenges() {
               <p className="text-muted">Course: {courseTitle(course, lang)}</p>
               <div className="mt-auto pt-2">
                 {sub ? (
-                  <Badge tone={sub.status === "needs-work" ? "highlight" : sub.status === "interview" ? "success" : "brand"}>{statusLabel[sub.status]}</Badge>
+                  <Badge tone={sub.status === "needs-work" ? "highlight" : sub.status === "interview" || sub.status === "offered" ? "success" : "brand"}>{statusLabel[sub.status]}</Badge>
                 ) : unlocked ? (
                   <Badge tone="brand">Open to you</Badge>
                 ) : (
-                  <Badge>🔒 Get certified in {courseTitle(course, lang)} to unlock</Badge>
+                  <Badge>
+                    <LockIcon /> Get certified in {courseTitle(course, lang)} to unlock
+                  </Badge>
                 )}
               </div>
             </Card>

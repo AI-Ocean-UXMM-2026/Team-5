@@ -1,6 +1,6 @@
 import { rubricMarks } from "./rules.ts";
 import { courses } from "./seed.ts";
-import type { Lesson } from "./types.ts";
+import type { Course, Lesson } from "./types.ts";
 
 // shortcut: canned, rule-based "AI" for the demo; replace these functions with real model calls when the backend exists.
 const wait = <T>(value: T) => new Promise<T>((resolve) => setTimeout(() => resolve(value), 800));
@@ -37,6 +37,16 @@ export function makeRoadmap(goal: string, currentSkills: string, hoursPerWeek: n
     roadmap,
     roadmapNote: `About ${hours} hours of learning, roughly ${weeks} week${weeks > 1 ? "s" : ""} at ${hoursPerWeek} hours a week. Start with the career starter so you know how IT teams work.${skip}${goalNote[goal] ?? ""}`,
   });
+}
+
+export function courseSuggestion(course: Course, doneLessons: string[], certified: boolean, hoursPerWeek: number) {
+  const done = course.lessons.filter((l) => doneLessons.includes(l.id)).length;
+  const next = course.lessons.find((l) => !doneLessons.includes(l.id));
+  const weeks = Math.max(1, Math.ceil(course.hours / Math.max(1, hoursPerWeek)));
+  if (certified) return `You are certified in ${course.skill.toLowerCase()}. Try this course's company challenge next. It can lead to an interview.`;
+  if (!next) return "Every lesson is done. Take the final test. You need 70% to get certified and unlock the company challenge.";
+  if (!done) return `Start with lesson 1, “${next.title}”. This course is about ${course.hours} hours, roughly ${weeks} week${weeks > 1 ? "s" : ""} at ${hoursPerWeek} hours a week.`;
+  return `You finished ${done} of ${course.lessons.length} lessons. Next up: “${next.title}”. Get every quiz answer right to complete it.`;
 }
 
 export const summarizeLesson = (lesson: Lesson) => wait({ keyPoints: lesson.keyPoints, summary: lesson.summary });

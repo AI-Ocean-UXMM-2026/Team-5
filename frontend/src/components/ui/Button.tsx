@@ -16,6 +16,19 @@ export function Button({ variant = "primary", className = "", ...props }: Compon
   return <button type="button" className={`${base} ${variants[variant]} ${className}`} {...props} />;
 }
 
-export function LinkButton({ variant = "primary", className = "", ...props }: ComponentProps<typeof Link> & { variant?: Variant }) {
-  return <Link className={`${base} ${variants[variant]} ${className}`} {...props} />;
+export function LinkArrow({ className = "size-3.5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" className={`shrink-0 ${className}`} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M5 11 11 5M6.5 5H11v4.5" />
+    </svg>
+  );
+}
+
+export function LinkButton({ variant = "primary", className = "", children, ...props }: ComponentProps<typeof Link> & { variant?: Variant }) {
+  return (
+    <Link className={`${base} ${variants[variant]} ${className}`} {...props}>
+      {children}
+      <LinkArrow />
+    </Link>
+  );
 }

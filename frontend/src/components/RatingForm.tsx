@@ -1,9 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { newId, setState, useData } from "@/lib/store";
+import { nameOf, newId, setState, useData } from "@/lib/store";
+import type { Rating } from "@/lib/types";
 import { Button } from "./ui/Button";
 import { Textarea } from "./ui/Field";
+
+export function RatingsList({ ratings, empty }: { ratings: Rating[]; empty: string }) {
+  const { s } = useData();
+  if (!ratings.length) return <p className="text-muted">{empty}</p>;
+  return (
+    <ul className="flex flex-col gap-3">
+      {ratings.map((r) => (
+        <li key={r.id}>
+          <span aria-hidden className="text-yellow">
+            {"★".repeat(r.stars)}
+          </span>
+          <span className="sr-only">{r.stars} of 5 stars</span> <span className="text-muted">by {nameOf(s, r.fromId)}</span>
+          {r.comment && <p>{r.comment}</p>}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export function RatingForm({ interviewId, toId, toName }: { interviewId: string; toId: string; toName: string }) {
   const { s, me } = useData();

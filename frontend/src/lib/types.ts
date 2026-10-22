@@ -54,6 +54,9 @@ export type Company = {
   status: CompanyStatus;
   reviewNote?: string;
   verifiedAt?: string;
+  approvalSeen?: boolean;
+  /** Data URL of the company logo. */
+  logo?: string;
 };
 
 export type Challenge = {
@@ -76,7 +79,7 @@ export type Submission = {
   aiSummary: string;
   aiScore: number;
   aiRubric?: { point: string; met: boolean }[];
-  status: "submitted" | "needs-work" | "interview";
+  status: "submitted" | "needs-work" | "interview" | "offered";
   companyFeedback?: string;
   submittedAt: string;
 };

@@ -7,7 +7,7 @@ import { registrationView } from "@/lib/rules";
 import { isPitchUser } from "@/lib/seed";
 import { setState, today, useData } from "@/lib/store";
 import type { Company } from "@/lib/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const steps = ["Business registration documents", "Office address, phone and domain email", "Website and LinkedIn or Facebook history", "Short call with a company representative", "Internship terms"];
 
@@ -23,6 +23,13 @@ export default function RegistrationStatus() {
   const [note, setNote] = useState("Please upload a clearer copy of your registration document.");
   const view = registrationView(company);
   const update = (patch: Partial<Company>) => setState((st) => ({ ...st, companies: st.companies.map((c) => (c.id === company!.id ? { ...c, ...patch } : c)) }));
+  const unseenApproval = view === "live" && !company?.approvalSeen;
+
+  // Home stops pointing here once the company has seen its approval.
+  useEffect(() => {
+    if (unseenApproval) update({ approvalSeen: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unseenApproval]);
 
   if (view === "none" || !company)
     return (
@@ -36,7 +43,7 @@ export default function RegistrationStatus() {
 
   return (
     <>
-      <PageHeader title={copy.title} intro={copy.intro} pose="search">
+      <PageHeader title={copy.title} intro={copy.intro} pose={view === "live" ? "excited" : "search"}>
         <Badge tone={copy.tone}>{copy.badge}</Badge>
       </PageHeader>
       <div className="grid gap-6 lg:grid-cols-2">
