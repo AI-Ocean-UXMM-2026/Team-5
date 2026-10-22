@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { LinkButton } from "@/components/ui/Button";
+import { Button, LinkButton } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
 import { courseTitle } from "@/lib/i18n";
-import { allLessonsDone, challengeUnlocked } from "@/lib/rules";
+import { allLessonsDone, challengeUnlocked, lessonIncluded, paidTrackOpen, previewLessonCount } from "@/lib/rules";
 import { courses } from "@/lib/seed";
-import { progressOf, useData } from "@/lib/store";
+import { progressOf, updateProgress, useData } from "@/lib/store";
 
 export default function CourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -18,31 +18,67 @@ export default function CourseDetail() {
   const p = progressOf(s, me.id);
   const lessonsDone = allLessonsDone(p.doneLessons, course);
   const cert = s.certificates.find((c) => c.learnerId === me.id && c.courseId === course.id);
+  const trackOpen = paidTrackOpen(course, p.paidCourseIds, !!cert);
   const unlocked = challengeUnlocked(s.certificates, me.id, course.id);
+  const unlock = () => updateProgress(me.id, (pr) => ({ ...pr, paidCourseIds: [...new Set([...(pr.paidCourseIds ?? []), course.id])] }));
   const challenges = s.challenges.filter((c) => c.courseId === course.id);
+
+  const title = courseTitle(course, lang);
 
   return (
     <>
-      <PageHeader title={courseTitle(course, lang)} intro={course.description} />
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <Card>
+      <nav aria-label="Breadcrumb" className="mb-4">
+        <ol className="flex flex-wrap items-center gap-2 text-body-sm">
+          <li>
+            <Link href="/courses" className="text-muted hover:text-burgundy">
+              Courses
+            </Link>
+          </li>
+          <li aria-hidden className="text-subtle">
+            /
+          </li>
+          <li aria-current="page" className="font-medium">
+            {title}
+          </li>
+        </ol>
+      </nav>
+      <PageHeader title={title} intro={course.description} />
+      <div className="grid items-stretch gap-6 lg:grid-cols-[2fr_1fr]">
+        <Card className="h-full">
           <h2 className="mb-4 text-h3">Lessons</h2>
           <ol className="flex flex-col divide-y divide-line">
             {course.lessons.map((l, i) => {
               const done = p.doneLessons.includes(l.id);
+              const open = lessonIncluded(course, i, p.paidCourseIds, !!cert);
               return (
                 <li key={l.id} className="flex items-center justify-between gap-4 py-3">
-                  <Link href={`/courses/${course.id}/lessons/${l.id}`} className="font-medium hover:text-burgundy">
-                    {i + 1}. {l.title}
-                  </Link>
-                  {done ? <Badge tone="success">✓ Done</Badge> : <Badge>To do</Badge>}
+                  {open ? (
+                    <Link href={`/courses/${course.id}/lessons/${l.id}`} className="font-medium hover:text-burgundy">
+                      {i + 1}. {l.title}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-muted">
+                      {i + 1}. {l.title}
+                    </span>
+                  )}
+                  {done ? <Badge tone="success">✓ Done</Badge> : open ? <Badge>To do</Badge> : <Badge>Locked</Badge>}
                 </li>
               );
             })}
           </ol>
+          {!trackOpen && (
+            <div className="mt-4">
+              <p className="text-body-sm text-muted">
+                {previewLessonCount(course) === 1 ? "The first lesson is free." : `The first ${previewLessonCount(course)} lessons are free.`} The rest of this course, the final test and the certificate are on the paid track.
+              </p>
+              <Button className="mt-3" onClick={unlock}>
+                Unlock the rest
+              </Button>
+            </div>
+          )}
         </Card>
-        <div className="flex flex-col gap-4">
-          <Card>
+        <div className="flex h-full flex-col gap-4">
+          <Card className="flex flex-1 flex-col">
             <h2 className="mb-2 text-h4">Final test</h2>
             {cert ? (
               <>
@@ -51,6 +87,8 @@ export default function CourseDetail() {
                   View certificate
                 </LinkButton>
               </>
+            ) : !trackOpen ? (
+              <p className="text-muted">The final test is included with the paid track.</p>
             ) : lessonsDone ? (
               <>
                 <p className="mb-4 text-muted">All lessons done. Pass with 70% or more to get certified.</p>
@@ -60,7 +98,7 @@ export default function CourseDetail() {
               <p className="text-muted">Finish every lesson quiz to unlock the test.</p>
             )}
           </Card>
-          <Card>
+          <Card className="flex flex-1 flex-col">
             <h2 className="mb-2 text-h4">Company challenges</h2>
             {!challenges.length && <p className="text-muted">No challenges for this course yet.</p>}
             <ul className="flex flex-col gap-2">

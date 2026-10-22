@@ -52,7 +52,18 @@ export function Select({ label, hint, error, className = "", ...props }: Compone
   const id = useId();
   return (
     <Wrap id={id} label={label} hint={hint} error={error}>
-      <select id={id} aria-invalid={!!error} aria-describedby={describedBy(id, { label, hint, error })} className={`${control} h-10 pointer-coarse:h-11 ${className}`} {...props} />
+      <div className="relative">
+        <select
+          id={id}
+          aria-invalid={!!error}
+          aria-describedby={describedBy(id, { label, hint, error })}
+          className={`${control} h-10 appearance-none pr-12 pointer-coarse:h-11 ${className}`}
+          {...props}
+        />
+        <svg aria-hidden viewBox="0 0 16 16" className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-muted">
+          <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
     </Wrap>
   );
 }

@@ -18,7 +18,7 @@ export default function Courses() {
 
   return (
     <>
-      <PageHeader title="Courses" intro="IT courses built with partner companies." pose="read">
+      <PageHeader title="Courses" intro="Start free. Every paid course lets you try the first 25% for free. Each course ends with a real company challenge." pose="read">
         <SearchBar label="Search courses" placeholder="Search courses" value={q} onChange={setQ} />
       </PageHeader>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -27,7 +27,7 @@ export default function Courses() {
           return (
             <Card key={c.id} className="flex flex-col gap-2">
               <div className="flex flex-wrap gap-2">
-                <Badge tone={c.priceMmk === 0 ? "success" : "neutral"}>{c.priceMmk === 0 ? t.free : t.paid}</Badge>
+                <Badge tone={c.priceMmk === 0 ? "success" : "highlight"}>{c.priceMmk === 0 ? t.free : t.paid}</Badge>
                 <Badge>{c.level}</Badge>
                 {roadmap.includes(c.id) && <Badge tone="brand">On your roadmap</Badge>}
               </div>

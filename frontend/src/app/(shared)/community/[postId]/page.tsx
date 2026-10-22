@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Field";
@@ -17,9 +17,15 @@ export default function PostPage() {
   const [reply, setReply] = useState("");
   const [tried, setTried] = useState(false);
   const post = s.posts.find((p) => p.id === postId);
+
+  useEffect(() => {
+    if (window.location.hash === "#reply") document.querySelector<HTMLTextAreaElement>("#reply textarea")?.focus();
+  }, [postId]);
+
   if (!post) return <Empty>Post not found.</Empty>;
 
   const contactError = tried && hasContactDetails(reply) ? "Remove phone numbers and email addresses. Keep contact on the platform." : undefined;
+  const ownsChallenge = post.kind === "challenge" && company?.status === "verified" && s.challenges.some((c) => c.id === post.topicId && c.companyId === company.id);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
@@ -44,7 +50,6 @@ export default function PostPage() {
       {[...post.replies]
         .sort((a, b) => Number(b.id === post.officialReplyId) - Number(a.id === post.officialReplyId))
         .map((r) => {
-          const ownsChallenge = post.kind === "challenge" && s.challenges.some((c) => c.id === post.topicId && c.companyId === company?.id && company.status === "verified");
           const official = r.id === post.officialReplyId;
           return (
             <Card key={r.id} tone={official ? "success" : "default"} className="flex flex-col gap-2">
@@ -70,22 +75,41 @@ export default function PostPage() {
           );
         })}
 
-      <Card>
+      <Card id="reply" className="scroll-mt-8">
         <form
           className="flex flex-col gap-3"
           onSubmit={(e) => {
             e.preventDefault();
             setTried(true);
             if (hasContactDetails(reply)) return;
+            const replyId = newId("r");
             setState((st) => ({
               ...st,
-              posts: st.posts.map((p) => (p.id === post.id ? { ...p, replies: [...p.replies, { id: newId("r"), authorId: me.id, body: reply.trim(), at: today() }] } : p)),
+              posts: st.posts.map((p) =>
+                p.id === post.id
+                  ? { ...p, replies: [...p.replies, { id: replyId, authorId: me.id, body: reply.trim(), at: today() }], officialReplyId: ownsChallenge ? replyId : p.officialReplyId }
+                  : p,
+              ),
             }));
             setReply("");
             setTried(false);
           }}
         >
-          <Textarea label="Write a reply" hint={communityRules} required value={reply} onChange={(e) => setReply(e.target.value)} error={contactError} className="min-h-24" />
+          <Textarea
+            label="Write a reply"
+            hint={
+              post.kind === "challenge" && me.role === "learner"
+                ? "Ask a question or leave a comment. Submit your solution in Challenges, not here."
+                : ownsChallenge
+                  ? "Your reply is marked as the official answer."
+                  : communityRules
+            }
+            required
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+            error={contactError}
+            className="min-h-24"
+          />
           <Button type="submit" className="self-start">
             Reply
           </Button>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Question } from "@/lib/types";
 import { Button } from "./ui/Button";
 
-export function Quiz({ questions, submitLabel, onChecked }: { questions: Question[]; submitLabel: string; onChecked: (correct: number) => void }) {
+export function Quiz({ questions, submitLabel, onChecked, retry = true }: { questions: Question[]; submitLabel: string; onChecked: (correct: number) => void; retry?: boolean }) {
   const [picked, setPicked] = useState<(number | null)[]>(() => questions.map(() => null));
   const [checked, setChecked] = useState(false);
 
@@ -47,7 +47,7 @@ export function Quiz({ questions, submitLabel, onChecked }: { questions: Questio
           </fieldset>
         );
       })}
-      {checked ? (
+      {checked && retry ? (
         <Button
           variant="secondary"
           className="self-start"
@@ -58,7 +58,7 @@ export function Quiz({ questions, submitLabel, onChecked }: { questions: Questio
         >
           Try again
         </Button>
-      ) : (
+      ) : checked ? null : (
         <Button type="submit" className="self-start">
           {submitLabel}
         </Button>

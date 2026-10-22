@@ -11,21 +11,54 @@ import { Textarea } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
 import { summarizeLesson } from "@/lib/ai";
 import { courseTitle } from "@/lib/i18n";
+import { lessonIncluded } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { progressOf, updateProgress, useData } from "@/lib/store";
+
+function LessonNotes({ lessonId, saved, userId }: { lessonId: string; saved: string; userId: string }) {
+  const [note, setNote] = useState(saved);
+  return (
+    <Card className="flex flex-1 flex-col">
+      <form
+        className="flex flex-1 flex-col"
+        onSubmit={(e) => {
+          e.preventDefault();
+          updateProgress(userId, (pr) => ({ ...pr, notes: { ...pr.notes, [lessonId]: note } }));
+        }}
+      >
+        <Textarea label="My notes" hint="Saved on this device when you press Save." value={note} onChange={(e) => setNote(e.target.value)} className="min-h-48" />
+        <div className="mt-auto pt-4">
+          <Button type="submit">Save</Button>
+        </div>
+      </form>
+    </Card>
+  );
+}
 
 export default function LessonPage() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const { s, me, lang } = useData();
   const [result, setResult] = useState<{ lessonId: string; keyPoints: string[]; summary: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [passedId, setPassedId] = useState<string | null>(null);
   const course = courses.find((c) => c.id === courseId);
   const index = course?.lessons.findIndex((l) => l.id === lessonId) ?? -1;
   if (!course || index < 0) return <Empty>Lesson not found.</Empty>;
 
   const lesson = course.lessons[index];
-  const next = course.lessons[index + 1];
   const p = progressOf(s, me.id);
+  const certified = s.certificates.some((c) => c.learnerId === me.id && c.courseId === course.id);
+  const next = course.lessons[index + 1];
+  const nextOpen = !!next && lessonIncluded(course, index + 1, p.paidCourseIds, certified);
+  if (!lessonIncluded(course, index, p.paidCourseIds, certified))
+    return (
+      <Empty>
+        This lesson is on the paid track.{" "}
+        <Link href={`/courses/${course.id}`} className="font-medium text-burgundy">
+          Back to the course
+        </Link>
+      </Empty>
+    );
   const done = p.doneLessons.includes(lesson.id);
   const summary = result?.lessonId === lesson.id ? result : null;
 
@@ -38,8 +71,8 @@ export default function LessonPage() {
         / Lesson {index + 1}
       </nav>
       <h1 className="mb-8 text-h2 sm:text-h1">{lesson.title}</h1>
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
-        <div className="flex flex-col gap-6">
+      <div className="grid items-stretch gap-6 lg:grid-cols-[3fr_2fr]">
+        <div className="flex h-full flex-col gap-6">
           <Card>
             <div className="flex max-w-prose flex-col gap-4 text-body-lg">
               {lesson.body.map((para) => (
@@ -47,31 +80,31 @@ export default function LessonPage() {
               ))}
             </div>
           </Card>
-          <Card>
+          <Card className="flex flex-1 flex-col">
             <h2 className="mb-1 text-h3">Practice quiz</h2>
             <p className="mb-5 text-muted">{done ? "✓ You passed this quiz." : "Get every answer right to complete the lesson."}</p>
             <Quiz
               key={lesson.id}
               questions={lesson.quiz}
               submitLabel="Check answers"
+              retry={passedId !== lesson.id}
               onChecked={(correct) => {
-                if (correct === lesson.quiz.length && !done) updateProgress(me.id, (pr) => ({ ...pr, doneLessons: [...pr.doneLessons, lesson.id] }));
+                const perfect = correct === lesson.quiz.length;
+                setPassedId(perfect ? lesson.id : null);
+                if (perfect && !done) updateProgress(me.id, (pr) => ({ ...pr, doneLessons: [...pr.doneLessons, lesson.id] }));
               }}
             />
-          </Card>
-          <div className="flex gap-3">
-            {next ? (
-              <LinkButton href={`/courses/${course.id}/lessons/${next.id}`} variant={done ? "primary" : "secondary"}>
+            {passedId === lesson.id && nextOpen && next && (
+              <LinkButton href={`/courses/${course.id}/lessons/${next.id}`} variant="tertiary" className="mt-6 self-start">
                 Next lesson
-              </LinkButton>
-            ) : (
-              <LinkButton href={`/courses/${course.id}`} variant={done ? "primary" : "secondary"}>
-                Back to course
+                <svg aria-hidden viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 8h10M9 4l4 4-4 4" />
+                </svg>
               </LinkButton>
             )}
-          </div>
+          </Card>
         </div>
-        <div className="flex flex-col gap-6">
+        <div className="flex h-full flex-col gap-6">
           <AiPanel title="Lesson summary" loading={loading}>
             {summary ? (
               <>
@@ -98,18 +131,7 @@ export default function LessonPage() {
               </div>
             )}
           </AiPanel>
-          <Card>
-            <Textarea
-              label="My notes"
-              hint="Saved automatically on this device."
-              value={p.notes[lesson.id] ?? ""}
-              onChange={(e) => {
-                const text = e.target.value;
-                updateProgress(me.id, (pr) => ({ ...pr, notes: { ...pr.notes, [lesson.id]: text } }));
-              }}
-              className="min-h-48"
-            />
-          </Card>
+          <LessonNotes key={lesson.id} lessonId={lesson.id} saved={p.notes[lesson.id] ?? ""} userId={me.id} />
         </div>
       </div>
     </>

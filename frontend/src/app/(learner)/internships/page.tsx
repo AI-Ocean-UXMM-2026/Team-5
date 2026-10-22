@@ -26,7 +26,7 @@ export default function Internships() {
   return (
     <>
       <PageHeader title="Internships" intro="Interviews and offers from companies whose challenge you passed. Applying and interviewing are always free." pose="journey" />
-      {!mine.length && <Empty pose="sleep">No interviews yet. Pass a company challenge to get invited.</Empty>}
+      {!mine.length && <Empty pose="sleep">No interviews yet. Pass a company challenge and take the next step toward your interview.</Empty>}
       <div className="flex flex-col gap-4">
         {mine.map((i) => {
           const company = s.companies.find((c) => c.id === i.companyId)!;

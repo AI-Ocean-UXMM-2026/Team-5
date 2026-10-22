@@ -10,6 +10,20 @@ export function allLessonsDone(doneLessons: string[], course: Course) {
   return course.lessons.every((l) => doneLessons.includes(l.id));
 }
 
+export function previewLessonCount(course: Course) {
+  if (course.priceMmk === 0) return course.lessons.length;
+  return Math.max(1, Math.ceil(course.lessons.length * 0.25));
+}
+
+// shortcut: paidCourseIds is a local unlock, not a payment; replace when billing exists.
+export function paidTrackOpen(course: Course, paidCourseIds: string[] | undefined, certified: boolean) {
+  return course.priceMmk === 0 || certified || (paidCourseIds ?? []).includes(course.id);
+}
+
+export function lessonIncluded(course: Course, index: number, paidCourseIds: string[] | undefined, certified: boolean) {
+  return paidTrackOpen(course, paidCourseIds, certified) || index < previewLessonCount(course);
+}
+
 // A company challenge unlocks only after the learner finishes (is certified in) its course.
 export function challengeUnlocked(certificates: Certificate[], learnerId: string, courseId: string) {
   return certificates.some((c) => c.learnerId === learnerId && c.courseId === courseId);
@@ -17,6 +31,11 @@ export function challengeUnlocked(certificates: Certificate[], learnerId: string
 
 export function canPostAsCompany(company: Company | undefined) {
   return company?.status === "verified";
+}
+
+export function companyChallengeIds(company: Company | undefined, challenges: { id: string; companyId: string }[]) {
+  if (!company || company.status !== "verified") return [];
+  return challenges.filter((c) => c.companyId === company.id).map((c) => c.id);
 }
 
 export type RegistrationView = "none" | "waiting" | "needs-info" | "rejected" | "live";

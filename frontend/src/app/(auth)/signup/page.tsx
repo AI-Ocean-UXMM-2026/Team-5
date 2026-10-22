@@ -24,7 +24,7 @@ export default function Signup() {
     <Card className="mx-auto max-w-lg">
       <Mascot pose="hello" size={96} priority className="-mt-2 mb-2" />
       <h1 className="text-h2">{t.signupTitle}</h1>
-      <p className="mt-1 mb-6 text-muted">{t.signupIntro}</p>
+      <p className="mt-1 mb-6 text-muted">{role === "company" ? t.signupCompany : t.signupIntro}</p>
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {
@@ -73,11 +73,12 @@ export default function Signup() {
             ))}
           </div>
         </fieldset>
-        <Input label={t.yourName} required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
-        {role === "company" && <Input label={t.companyName} required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />}
+        <Input label={t.yourName} placeholder={t.namePlaceholder} required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
+        {role === "company" && <Input label={t.companyName} placeholder={t.companyPlaceholder} required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />}
         <Input
           label={t.email}
           type="email"
+          placeholder={role === "company" ? "hr@company.com" : t.emailPlaceholder}
           required
           autoComplete="email"
           value={email}

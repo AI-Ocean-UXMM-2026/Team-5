@@ -25,4 +25,4 @@ export function Author({ userId, at }: { userId: string; at: string }) {
 export const topicName = (s: State, p: Post, lang: Lang) =>
   p.kind === "course" ? courseTitle(courses.find((c) => c.id === p.topicId), lang) : s.challenges.find((c) => c.id === p.topicId)?.title;
 
-export const communityRules = "Be kind. Don't share challenge answers or private contact details like phone numbers and emails.";
+export const communityRules = "Be kind. Don't share challenge solutions here — submit those in Challenges. No phone numbers or email addresses.";

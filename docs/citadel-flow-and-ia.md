@@ -21,7 +21,7 @@ The Citadel (web app)
 ├── Shared
 │   ├── Log in                 one login, role decides the view
 │   ├── Profile                skills and certificates
-│   ├── Community              course discussion, challenge questions
+│   ├── Community              course discussion, challenge posts (company posts, learner replies)
 │   ├── More community         LATER: study groups, meetups, success stories
 │   └── Ratings and reports    rate each other, report a post or user
 ├── Learner view
@@ -128,6 +128,24 @@ flowchart TD
 - AI pre-screens and supports; the company makes every hiring decision.
 - Community: free for everyone; every post has a Report button; no sharing challenge answers; no private contact details in posts.
 - Company challenge unlocks only after the learner finishes the course.
+
+### Community → Challenge tab
+
+Company view
+- A verified company can add a challenge post for its own challenge.
+- The post has a title, the challenge it belongs to, and a short message, such as notes, rules or a question for learners.
+- The post shows the company name and the Verified badge.
+
+Learner view
+- A learner can view every challenge post from verified companies.
+- A learner can reply to a challenge post with a question or a comment.
+- The company's reply is marked "Official answer".
+
+Rules
+- Only verified companies can add challenge posts.
+- Learners do not share their challenge solutions in replies. Solutions are submitted in Challenges, not in Community.
+- No private contact details in posts or replies.
+- Every post and reply has a Report button.
 
 ## 5. Learning access (suggested, to confirm)
 

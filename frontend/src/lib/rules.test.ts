@@ -3,6 +3,10 @@ import { test } from "node:test";
 import {
   allLessonsDone,
   canPostAsCompany,
+  lessonIncluded,
+  paidTrackOpen,
+  previewLessonCount,
+  companyChallengeIds,
   challengeUnlocked,
   counted,
   emailMatchesWebsite,
@@ -11,6 +15,7 @@ import {
   rubricMarks,
   testPassed,
 } from "./rules.ts";
+import { coursesForGoal } from "./ai.ts";
 import { homePath, redirectFor } from "./access.ts";
 import { defaultLang } from "./i18n.ts";
 import { seed } from "./seed.ts";
@@ -81,6 +86,19 @@ test("an unverified company is locked to registration and its profile", () => {
   assert.equal(redirectFor(as("u-yds"), "shared", "/profile/u-yds"), null);
 });
 
+test("a paid course keeps the first 25 percent free until the track is unlocked", () => {
+  const paid = { id: "fe", priceMmk: 45000, lessons: [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }] } as Course;
+  const free = { id: "starter", priceMmk: 0, lessons: [{ id: "a" }, { id: "b" }, { id: "c" }] } as Course;
+  assert.equal(previewLessonCount(paid), 1);
+  assert.equal(previewLessonCount(free), 3);
+  assert.equal(lessonIncluded(paid, 0, [], false), true);
+  assert.equal(lessonIncluded(paid, 1, [], false), false);
+  assert.equal(paidTrackOpen(paid, [], false), false);
+  assert.equal(lessonIncluded(paid, 3, ["fe"], false), true);
+  assert.equal(paidTrackOpen(paid, [], true), true);
+  assert.equal(lessonIncluded(free, 2, [], false), true);
+});
+
 test("test pass mark is 70%", () => {
   assert.equal(testPassed(7, 10), true);
   assert.equal(testPassed(6, 10), false);
@@ -106,11 +124,30 @@ test("only verified companies can post", () => {
   assert.equal(canPostAsCompany(undefined), false);
 });
 
+test("a company can only discuss its own challenge, and only when verified", () => {
+  const challenges = [
+    { id: "a", companyId: "c1" },
+    { id: "b", companyId: "c2" },
+  ];
+  assert.deepEqual(companyChallengeIds({ id: "c1", status: "verified" } as Company, challenges), ["a"]);
+  assert.deepEqual(companyChallengeIds({ id: "c1", status: "pending" } as Company, challenges), []);
+  assert.deepEqual(companyChallengeIds(undefined, challenges), []);
+});
+
 test("community posts block private contact details", () => {
   assert.equal(hasContactDetails("mail me at aye@gmail.com"), true);
   assert.equal(hasContactDetails("call 09 7712 34567"), true);
   assert.equal(hasContactDetails("+95 9 771 234 567"), true);
   assert.equal(hasContactDetails("Lesson 3 in 2026 was hard"), false);
+});
+
+test("each career goal uses a real demo course path", () => {
+  assert.deepEqual(coursesForGoal("frontend"), ["starter", "frontend"]);
+  assert.deepEqual(coursesForGoal("backend"), ["starter", "frontend"]);
+  assert.deepEqual(coursesForGoal("uiux"), ["starter", "frontend"]);
+  assert.deepEqual(coursesForGoal("data"), ["starter", "qa"]);
+  assert.deepEqual(coursesForGoal("fullstack"), ["starter", "frontend", "qa"]);
+  assert.deepEqual(coursesForGoal("unsure"), ["starter", "frontend", "qa"]);
 });
 
 test("company email must be on its own domain", () => {

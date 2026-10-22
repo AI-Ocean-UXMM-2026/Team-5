@@ -7,7 +7,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Mascot } from "@/components/ui/Mascot";
 import { courseTitle } from "@/lib/i18n";
-import { PASS_MARK, allLessonsDone, testPassed } from "@/lib/rules";
+import { PASS_MARK, allLessonsDone, paidTrackOpen, testPassed } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { progressOf, setState, today, updateProgress, useData } from "@/lib/store";
 
@@ -17,7 +17,10 @@ export default function TestPage() {
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
   const course = courses.find((c) => c.id === courseId);
   if (!course) return <Empty>Course not found.</Empty>;
-  if (!allLessonsDone(progressOf(s, me.id).doneLessons, course)) return <Empty>Finish every lesson quiz before you take the test.</Empty>;
+  const progress = progressOf(s, me.id);
+  const certified = s.certificates.some((c) => c.learnerId === me.id && c.courseId === course.id);
+  if (!paidTrackOpen(course, progress.paidCourseIds, certified)) return <Empty>The final test is included with the paid track.</Empty>;
+  if (!allLessonsDone(progress.doneLessons, course)) return <Empty>Finish every lesson quiz before you take the test.</Empty>;
 
   const certId = `cert-${me.id}-${course.id}`;
 

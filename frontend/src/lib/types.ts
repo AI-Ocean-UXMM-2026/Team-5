@@ -125,6 +125,7 @@ export type Progress = {
   roadmap: string[];
   roadmapNote: string;
   doneLessons: string[];
+  paidCourseIds: string[];
   notes: Record<string, string>;
   testScores: Record<string, number>;
 };

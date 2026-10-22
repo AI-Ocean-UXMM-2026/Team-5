@@ -29,7 +29,7 @@ export default function Login() {
             else setError("No account with this email. Try a demo account or sign up.");
           }}
         >
-          <Input label="Email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} />
+          <Input label="Email" type="email" placeholder="you@email.com" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} />
           <Button type="submit">Log in</Button>
         </form>
         <p className="mt-6 text-muted">

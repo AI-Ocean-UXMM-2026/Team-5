@@ -1,24 +1,41 @@
-import { rubricMarks } from "./rules";
-import { courses } from "./seed";
-import type { Lesson } from "./types";
+import { rubricMarks } from "./rules.ts";
+import { courses } from "./seed.ts";
+import type { Lesson } from "./types.ts";
 
 // shortcut: canned, rule-based "AI" for the demo; replace these functions with real model calls when the backend exists.
 const wait = <T>(value: T) => new Promise<T>((resolve) => setTimeout(() => resolve(value), 800));
 
 export const goals = [
-  { id: "frontend", label: "Frontend developer" },
-  { id: "qa", label: "QA tester" },
-  { id: "unsure", label: "Not sure yet" },
+  { id: "frontend", label: "Frontend Developer" },
+  { id: "backend", label: "Backend Developer" },
+  { id: "fullstack", label: "Full-Stack Developer" },
+  { id: "uiux", label: "UI/UX Designer" },
+  { id: "data", label: "Data Analyst" },
+  { id: "unsure", label: "Not Sure Yet" },
 ];
 
+// shortcut: only starter, frontend and qa courses exist; other goals reuse the closest path until those courses are added.
+export function coursesForGoal(goal: string) {
+  if (goal === "frontend" || goal === "backend" || goal === "uiux") return ["starter", "frontend"];
+  if (goal === "data") return ["starter", "qa"];
+  return ["starter", "frontend", "qa"];
+}
+
+const goalNote: Record<string, string> = {
+  backend: " This demo has no backend course yet, so frontend basics stands in until it does.",
+  uiux: " This demo has no UI/UX course yet, so frontend basics stands in until it does.",
+  data: " This demo has no data course yet, so manual QA stands in until it does.",
+  fullstack: " Full-stack in this demo is the career starter, frontend basics, then manual QA.",
+};
+
 export function makeRoadmap(goal: string, currentSkills: string, hoursPerWeek: number) {
-  const roadmap = goal === "frontend" ? ["starter", "frontend"] : goal === "qa" ? ["starter", "qa"] : ["starter", "frontend", "qa"];
+  const roadmap = coursesForGoal(goal);
   const hours = roadmap.reduce((sum, id) => sum + (courses.find((c) => c.id === id)?.hours ?? 0), 0);
   const weeks = Math.max(1, Math.ceil(hours / Math.max(1, hoursPerWeek)));
   const skip = /html|css/i.test(currentSkills) && roadmap.includes("frontend") ? " You already know some HTML or CSS, so the first frontend lessons should go quickly." : "";
   return wait({
     roadmap,
-    roadmapNote: `About ${hours} hours of learning, roughly ${weeks} week${weeks > 1 ? "s" : ""} at ${hoursPerWeek} hours a week. Start with the career starter so you know how IT teams work.${skip}`,
+    roadmapNote: `About ${hours} hours of learning, roughly ${weeks} week${weeks > 1 ? "s" : ""} at ${hoursPerWeek} hours a week. Start with the career starter so you know how IT teams work.${skip}${goalNote[goal] ?? ""}`,
   });
 }
 

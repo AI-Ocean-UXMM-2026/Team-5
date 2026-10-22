@@ -41,6 +41,10 @@ type Copy = {
   rights: string;
   signupTitle: string;
   signupIntro: string;
+  signupCompany: string;
+  namePlaceholder: string;
+  companyPlaceholder: string;
+  emailPlaceholder: string;
   iAm: string;
   learner: string;
   company: string;
@@ -114,6 +118,10 @@ export const copy: Record<Lang, Copy> = {
     rights: "© 2026 The Citadel · Team 404",
     signupTitle: "Create an account",
     signupIntro: "Learners never pay to apply, take a challenge or interview.",
+    signupCompany: "Meet skilled candidates. Hire with confidence.",
+    namePlaceholder: "Aye Chan",
+    companyPlaceholder: "Golden Pixel Software",
+    emailPlaceholder: "you@email.com",
     iAm: "I am",
     learner: "Learner",
     company: "Company",
@@ -185,6 +193,10 @@ export const copy: Record<Lang, Copy> = {
     rights: "© 2026 The Citadel · Team 404",
     signupTitle: "အကောင့်ဖွင့်ရန်",
     signupIntro: "သင်ယူသူတွေ လျှောက်ထားခြင်း၊ စိန်ခေါ်မှုဖြေခြင်း၊ အင်တာဗျူးတက်ခြင်းအတွက် ငွေမပေးရပါ။",
+    signupCompany: "ကျွမ်းကျင်တဲ့ လျှောက်ထားသူတွေကို တွေ့ပါ။ ယုံကြည်စွာ ခန့်အပ်ပါ။",
+    namePlaceholder: "အေးချမ်း",
+    companyPlaceholder: "Golden Pixel Software",
+    emailPlaceholder: "you@email.com",
     iAm: "ကျွန်ုပ်သည်",
     learner: "သင်ယူသူ",
     company: "ကုမ္ပဏီ",
