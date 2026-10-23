@@ -1,6 +1,7 @@
 // Prices match the locked catalogue. Frontend 45,000 is still a placeholder.
 export const courses = [
   {
+    slug: "starter",
     title: "Career starter: working in IT",
     skill: "IT careers",
     level: "Beginner",
@@ -72,6 +73,7 @@ export const courses = [
     ],
   },
   {
+    slug: "frontend",
     title: "Frontend basics: HTML, CSS and JavaScript",
     skill: "Frontend development",
     level: "Beginner",
@@ -122,6 +124,7 @@ export const courses = [
     ],
   },
   {
+    slug: "qa",
     title: "Manual QA testing",
     skill: "QA testing",
     level: "Beginner",

@@ -5,13 +5,14 @@ import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, LockIcon, PageHeade
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { courseTitle } from "@/lib/i18n";
 import { challengeUnlocked } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { useData } from "@/lib/store";
 
 const statusLabel = { submitted: "Waiting for review", "needs-work": "Feedback to act on", interview: "Interview invite", offered: "Offer received" } as const;
 
 export default function Challenges() {
   const { s, me, lang } = useData();
+  const courses = useCourses();
   const live = s.challenges.filter((c) => s.companies.find((co) => co.id === c.companyId)?.status === "verified");
 
   return (

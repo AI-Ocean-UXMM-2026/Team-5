@@ -7,7 +7,9 @@
     "migrate": "node src/migrate.js",
     "create-staff": "node src/create-staff.js",
     "seed": "node src/seed.js",
-    "test": "node --test"
+    "test": "node --test",
+    "embed": "node src/embed.js",
+    "check-roadmaps": "node src/check-roadmaps.js"
   },
   "dependencies": {
     "busboy": "^1.6.0",

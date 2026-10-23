@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { courseTitle } from "@/lib/i18n";
-import { courses } from "@/lib/seed";
+import { findCourse } from "@/lib/catalogue";
 import { useData } from "@/lib/store";
 import type { Lang, Post, State } from "@/lib/types";
 
@@ -23,6 +23,6 @@ export function Author({ userId, at }: { userId: string; at: string }) {
 }
 
 export const topicName = (s: State, p: Post, lang: Lang) =>
-  p.kind === "course" ? courseTitle(courses.find((c) => c.id === p.topicId), lang) : s.challenges.find((c) => c.id === p.topicId)?.title;
+  p.kind === "course" ? courseTitle(findCourse(p.topicId), lang) : s.challenges.find((c) => c.id === p.topicId)?.title;
 
 export const communityRules = "Be kind. Don't share challenge solutions here — submit those in Challenges. No phone numbers or email addresses.";

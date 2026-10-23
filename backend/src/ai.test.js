@@ -1,11 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readDraft, readLessonSummary, readReview, readRoadmap, requireAi } from "./ai.js";
-
-const courses = [
-  { id: "starter", title: "Career starter" },
-  { id: "frontend", title: "Frontend basics" },
-];
+import { readDraft, readLessonSummary, readReview, requireAi } from "./ai.js";
 
 test("ai stays off until OPENAI_API_KEY is set", () => {
   const saved = process.env.OPENAI_API_KEY;
@@ -15,16 +10,6 @@ test("ai stays off until OPENAI_API_KEY is set", () => {
   } finally {
     if (saved) process.env.OPENAI_API_KEY = saved;
   }
-});
-
-test("a roadmap can only use the given courses", () => {
-  assert.deepEqual(readRoadmap({ courseIds: ["starter", "frontend"], note: "Start with careers." }, courses), {
-    roadmap: ["starter", "frontend"],
-    roadmapNote: "Start with careers.",
-  });
-  assert.equal(readRoadmap({ courseIds: ["starter", "missing"], note: "No." }, courses), null);
-  assert.equal(readRoadmap({ courseIds: ["starter", "starter"], note: "No." }, courses), null);
-  assert.equal(readRoadmap({ courseIds: [], note: "No." }, courses), null);
 });
 
 test("a lesson summary needs a paragraph and at least two points", () => {

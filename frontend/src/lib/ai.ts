@@ -1,4 +1,3 @@
-import { courses } from "./seed.ts";
 import type { Course, Lesson } from "./types.ts";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -38,28 +37,24 @@ export const goals = [
   { id: "unsure", label: "Not Sure Yet" },
 ];
 
-// shortcut: only starter, frontend and qa courses exist; other goals reuse the closest path until those courses are added.
+// Used only when the roadmap API can't be reached; callers drop courses that aren't in the catalogue.
 export function coursesForGoal(goal: string) {
-  if (goal === "frontend" || goal === "backend" || goal === "uiux") return ["starter", "frontend"];
-  if (goal === "data") return ["starter", "qa"];
-  return ["starter", "frontend", "qa"];
+  if (goal === "frontend") return ["starter", "git", "frontend", "react"];
+  if (goal === "backend") return ["starter", "git", "sql", "node-backend"];
+  if (goal === "fullstack") return ["starter", "frontend", "sql", "node-backend", "react"];
+  if (goal === "uiux") return ["starter", "uiux", "figma", "frontend"];
+  if (goal === "data") return ["starter", "spreadsheets", "sql", "python-data"];
+  return ["starter", "computer-basics", "frontend", "qa"];
 }
 
-export function makeRoadmap(goal: string, currentSkills: string, hoursPerWeek: number) {
+/** RAG roadmap: the server searches the published courses and the AI orders the best matches. */
+export function makeRoadmap(goal: string, currentSkills: string, hoursPerWeek: number, comfortable: string[]) {
   const label = goals.find((item) => item.id === goal)?.label ?? goal;
-  return ask("/ai/roadmap", {
-    goal: label,
-    currentSkills,
-    hoursPerWeek,
-    courses: courses.map((course) => ({
-      id: course.id,
-      title: course.title,
-      skill: course.skill,
-      hours: course.hours,
-      level: course.level,
-      description: course.description,
-    })),
-  }) as Promise<{ roadmap: string[]; roadmapNote: string }>;
+  return ask("/ai/roadmap", { goal: label, currentSkills, hoursPerWeek, comfortable }) as Promise<{
+    roadmap: string[];
+    roadmapNote: string;
+    reasons?: Record<string, string>;
+  }>;
 }
 
 export function courseSuggestion(course: Course, doneLessons: string[], certified: boolean, hoursPerWeek: number) {
@@ -85,8 +80,7 @@ export function reviewChallenge(answer: string, link: string, rubric: string[], 
   }>;
 }
 
-export function draftChallenge(courseId: string) {
-  const course = courses.find((item) => item.id === courseId) ?? courses[0];
+export function draftChallenge(course: Course) {
   return ask("/ai/challenge-draft", { title: course.title, skill: course.skill, description: course.description }) as Promise<{
     title: string;
     task: string;

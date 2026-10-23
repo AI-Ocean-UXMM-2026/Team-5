@@ -12,6 +12,7 @@ import {
   addQuizQuestion,
   addTestQuestion,
   createCourse,
+  getCatalogue,
   getCourse,
   listCourses,
   patchCourse,
@@ -19,7 +20,7 @@ import {
   patchQuestion,
   publishCourse,
 } from "./catalogue.js";
-import { gradeQuiz, gradeTest } from "./learn.js";
+import { checkQuiz, checkTest, gradeQuiz, gradeTest } from "./learn.js";
 import { checkout, webhook } from "./payments.js";
 import { downloadCompanyFile, listStaffCompanies, reviewCompany, submitCompany, uploadDocument } from "./companies.js";
 import { createChallenge, rateInterview, replyToOffer, scheduleInterview, sendFeedback, sendOffer, submitWork } from "./hiring.js";
@@ -102,6 +103,7 @@ const routes = [
   { method: "POST", path: "/ai/challenge-review", auth: "none", handle: challengeReview },
   { method: "POST", path: "/ai/challenge-draft", auth: "none", handle: challengeDraft },
   { method: "GET", path: "/skills", auth: "none", handle: listSkills },
+  { method: "GET", path: "/catalogue", auth: "none", handle: getCatalogue },
   { method: "GET", path: "/courses", auth: "optional", handle: listCourses },
   { method: "POST", path: "/courses", auth: "required", handle: createCourse },
   { method: "GET", path: "/courses/:id", auth: "optional", handle: getCourse },
@@ -114,6 +116,8 @@ const routes = [
   { method: "POST", path: "/courses/:id/publish", auth: "required", handle: publishCourse },
   { method: "POST", path: "/lessons/:id/quiz", auth: "required", handle: gradeQuiz },
   { method: "POST", path: "/courses/:id/test", auth: "required", handle: gradeTest },
+  { method: "POST", path: "/lessons/:id/check", auth: "none", handle: checkQuiz },
+  { method: "POST", path: "/courses/:id/check-test", auth: "none", handle: checkTest },
   { method: "POST", path: "/payments/checkout", auth: "required", handle: checkout },
   { method: "POST", path: "/payments/webhook", auth: "none", raw: true, handle: webhook },
   { method: "POST", path: "/companies/me/files", auth: "required", raw: true, handle: uploadDocument },

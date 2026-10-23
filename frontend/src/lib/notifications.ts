@@ -1,5 +1,5 @@
 import { PASS_MARK } from "./rules";
-import { courses } from "./seed";
+import { getCourses } from "./catalogue";
 import type { State } from "./types";
 
 export type Notification = { id: string; title: string; body: string; href: string; at: string };
@@ -7,6 +7,7 @@ export type Notification = { id: string; title: string; body: string; href: stri
 /** Built from the demo data, so a notification appears as soon as its event happens. */
 export function notificationsFor(s: State, userId: string): Notification[] {
   const list: Notification[] = [];
+  const courses = getCourses();
   for (const i of s.interviews) {
     if (i.learnerId !== userId) continue;
     const company = s.companies.find((c) => c.id === i.companyId);

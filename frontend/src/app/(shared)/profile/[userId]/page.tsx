@@ -11,12 +11,13 @@ import { Badge, Card, cardLinkClass, Empty, PageHeader } from "@/components/ui/C
 import { Detail, FieldIcon } from "@/components/ui/Detail";
 import { Input } from "@/components/ui/Field";
 import { courseTitle } from "@/lib/i18n";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { progressOf, setState, useData } from "@/lib/store";
 
 export default function Profile() {
   const { userId } = useParams<{ userId: string }>();
   const { s, me, lang } = useData();
+  const courses = useCourses();
   const user = s.users.find((u) => u.id === userId);
   const [editing, setEditing] = useState(false);
   const [headline, setHeadline] = useState(user?.headline ?? "");

@@ -10,7 +10,7 @@ import { Dialog } from "@/components/ui/Dialog";
 import { Input, Textarea } from "@/components/ui/Field";
 import { courseTitle } from "@/lib/i18n";
 import { applyOffer, rubricMarks } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { nameOf, newId, setState, useData } from "@/lib/store";
 import type { Interview, Submission } from "@/lib/types";
 
@@ -162,6 +162,7 @@ function Review({ sub }: { sub: Submission }) {
 export default function ReviewChallenge() {
   const { challengeId } = useParams<{ challengeId: string }>();
   const { s, company, lang } = useData();
+  const courses = useCourses();
   const challenge = s.challenges.find((c) => c.id === challengeId && c.companyId === company?.id);
   const crumbs = [
     { label: "Challenges", href: "/company/challenges" },

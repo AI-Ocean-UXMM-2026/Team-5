@@ -17,3 +17,19 @@ test("seed catalogue keeps the locked prices and answer keys in range", () => {
     }
   }
 });
+
+test("every seed course has a unique slug and valid questions", async () => {
+  const { moreCourses } = await import("./catalogue-more.js");
+  const all = [...courses, ...moreCourses];
+  const slugs = all.map((course) => course.slug);
+  assert.equal(new Set(slugs).size, slugs.length);
+  for (const slug of slugs) assert.match(slug, /^[a-z0-9-]+$/);
+  assert.equal(new Set(all.map((course) => course.title)).size, all.length);
+  for (const course of all) {
+    assert.ok(course.description.length <= 400);
+    assert.ok(course.hours > 0 && course.priceMmk >= 0);
+    for (const question of [...course.lessons.flatMap((lesson) => lesson.quiz), ...course.test]) {
+      assert.ok(question.answer >= 0 && question.answer < question.options.length);
+    }
+  }
+});

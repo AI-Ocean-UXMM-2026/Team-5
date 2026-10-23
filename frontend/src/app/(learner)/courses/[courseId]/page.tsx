@@ -8,12 +8,13 @@ import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, LockIcon, PageHeade
 import { courseTitle, formatMmk } from "@/lib/i18n";
 import { latestPayment } from "@/lib/payments";
 import { allLessonsDone, challengeUnlocked, lessonIncluded, paidTrackOpen, previewLessonCount } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { progressOf, useData } from "@/lib/store";
 
 export default function CourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
   const { s, me, lang } = useData();
+  const courses = useCourses();
   const course = courses.find((c) => c.id === courseId);
   if (!course) return <Empty action={<LinkButton href="/courses">See all courses</LinkButton>}>Course not found.</Empty>;
 

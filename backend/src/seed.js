@@ -1,9 +1,12 @@
-import { courses } from "./catalogue-data.js";
+import { courses as baseCourses } from "./catalogue-data.js";
+import { moreCourses } from "./catalogue-more.js";
 import { youtubeVideoId } from "./rules.js";
 import { pool, requireDatabaseUrl, withTx } from "./db.js";
 import { hashPassword } from "./password.js";
 
 requireDatabaseUrl();
+
+const courses = [...baseCourses, ...moreCourses];
 
 const [name, emailArg, password] = process.argv.slice(2);
 const email = String(emailArg || "").trim().toLowerCase();
@@ -29,13 +32,14 @@ const teacherId = await withTx(async (client) => {
   for (const course of courses) {
     const existing = await client.query("SELECT id FROM courses WHERE teacher_id = $1 AND title = $2", [teacher.id, course.title]);
     if (existing.rows[0]) {
+      await client.query("UPDATE courses SET slug = $1 WHERE id = $2 AND slug IS NULL", [course.slug, existing.rows[0].id]);
       console.log(`exists ${course.title} ${existing.rows[0].id}`);
       continue;
     }
     const inserted = await client.query(
-      `INSERT INTO courses (teacher_id, title, skill, level, hours, price_mmk, description, published, published_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, true, now()) RETURNING id`,
-      [teacher.id, course.title, course.skill, course.level, course.hours, course.priceMmk, course.description],
+      `INSERT INTO courses (teacher_id, slug, title, skill, level, hours, price_mmk, description, published, published_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, now()) RETURNING id`,
+      [teacher.id, course.slug, course.title, course.skill, course.level, course.hours, course.priceMmk, course.description],
     );
     const courseId = inserted.rows[0].id;
     for (const [index, lesson] of course.lessons.entries()) {
@@ -67,4 +71,5 @@ const teacherId = await withTx(async (client) => {
 });
 
 console.log(`teacher ${email} ${teacherId}`);
+console.log("Run npm run embed to refresh the AI roadmap search (it also runs on the first roadmap request).");
 await pool.end();

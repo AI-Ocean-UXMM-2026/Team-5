@@ -8,11 +8,12 @@ import { Mascot } from "@/components/ui/Mascot";
 import { courseSuggestion, goals } from "@/lib/ai";
 import { courseTitle } from "@/lib/i18n";
 import { challengeUnlocked, counted, roadmapStepOpen } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { progressOf, useData } from "@/lib/store";
 
 export default function Roadmap() {
   const { s, me, lang } = useData();
+  const courses = useCourses();
   const [picked, setPicked] = useState<number | null>(null);
   const p = progressOf(s, me.id);
   const goal = goals.find((g) => g.id === p.goal)?.label ?? "Your goal";
@@ -49,7 +50,8 @@ export default function Roadmap() {
   }
 
   const certifiedIds = s.certificates.filter((x) => x.learnerId === me.id).map((x) => x.courseId);
-  const stepCourses = p.roadmap.map((id) => courses.find((x) => x.id === id)!);
+  // A course can leave the catalogue after the roadmap was made; skip it rather than break the page.
+  const stepCourses = p.roadmap.flatMap((id) => courses.find((x) => x.id === id) ?? []);
   const steps = stepCourses.map((c, i) => ({
     c,
     done: c.lessons.filter((l) => p.doneLessons.includes(l.id)).length,
@@ -108,6 +110,7 @@ export default function Roadmap() {
                       <span className="text-body-sm text-muted">
                         {c.hours} hours · {done} of {c.lessons.length} lessons done
                       </span>
+                      {p.roadmapReasons?.[c.id] && <span className="mt-1 block text-body-sm text-ink">Why: {p.roadmapReasons[c.id]}</span>}
                     </span>
                     {certified ? (
                       <Badge tone="success">Certified</Badge>

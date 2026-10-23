@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Card";
 import { Select } from "@/components/ui/Field";
 import { coursesForGoal, goals, loadSkills, makeRoadmap, type SkillChip } from "@/lib/ai";
+import { getCourses } from "@/lib/catalogue";
 import { emptyProgress } from "@/lib/seed";
 import {
   keepApplicable,
@@ -164,9 +165,13 @@ export default function Onboarding() {
                 if (otherOn && extra) skillLevels[extra] = otherOn.level;
                 try {
                   // If AI is down, use the standard path for the goal so the learner is never stuck here.
-                  const result = await makeRoadmap(goal, skillsForRoadmap(picked, english, extra), hoursPerWeek).catch(() => ({
-                    roadmap: coursesForGoal(goal),
-                    roadmapNote: "AI was not available, so this is the standard path for your goal. You can remake it later.",
+                  const comfortable = Object.entries(skillLevels)
+                    .filter(([, level]) => level === "comfortable")
+                    .map(([name]) => name);
+                  const { reasons, ...result } = await makeRoadmap(goal, skillsForRoadmap(picked, english, extra), hoursPerWeek, comfortable).catch(() => ({
+                    roadmap: coursesForGoal(goal).filter((id) => getCourses().some((c) => c.id === id)),
+                    roadmapNote: "We couldn't reach our course search, so this is the standard path for your goal. You can remake it later.",
+                    reasons: undefined,
                   }));
                   setState((st) => ({
                     ...st,
@@ -182,6 +187,7 @@ export default function Onboarding() {
                         otherSkill: extra,
                         skillLevels,
                         ...result,
+                        roadmapReasons: reasons,
                       },
                     },
                   }));

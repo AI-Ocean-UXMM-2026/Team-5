@@ -2,10 +2,14 @@ export type Role = "learner" | "company";
 
 export type Lang = "en" | "my";
 
-export type Question = { q: string; options: string[]; answer: number };
+/** answer is only known for the built-in fallback courses; courses from the API are checked on the server. */
+export type Question = { q: string; options: string[]; answer?: number };
 
 export type Lesson = {
+  /** "<course id>-<position>", kept stable so saved progress still matches. */
   id: string;
+  /** Database id, set for courses loaded from the API. */
+  uuid?: string;
   title: string;
   body: string[];
   keyPoints: string[];
@@ -16,7 +20,10 @@ export type Lesson = {
 };
 
 export type Course = {
+  /** The course slug, e.g. "frontend". */
   id: string;
+  /** Database id, set for courses loaded from the API. */
+  uuid?: string;
   title: string;
   skill: string;
   level: string;
@@ -134,6 +141,8 @@ export type Progress = {
   skillLevels?: Record<string, "little" | "comfortable">;
   roadmap: string[];
   roadmapNote: string;
+  /** Why the AI picked each roadmap course, by course id. */
+  roadmapReasons?: Record<string, string>;
   doneLessons: string[];
   paidCourseIds: string[];
   notes: Record<string, string>;

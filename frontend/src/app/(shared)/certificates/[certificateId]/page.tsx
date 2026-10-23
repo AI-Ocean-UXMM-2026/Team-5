@@ -7,12 +7,13 @@ import { Button, LinkButton } from "@/components/ui/Button";
 import { Empty } from "@/components/ui/Card";
 import { Mascot } from "@/components/ui/Mascot";
 import { courseTitle } from "@/lib/i18n";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { nameOf, useData } from "@/lib/store";
 
 export default function CertificatePage() {
   const { certificateId } = useParams<{ certificateId: string }>();
   const { s, me, lang } = useData();
+  const courses = useCourses();
   const cert = s.certificates.find((c) => c.id === certificateId);
   const course = courses.find((c) => c.id === cert?.courseId);
   if (!cert || !course) return <Empty action={<LinkButton href={me.role === "learner" ? "/courses" : "/company/candidates"}>Go back</LinkButton>}>Certificate not found.</Empty>;

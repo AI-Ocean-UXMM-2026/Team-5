@@ -5,11 +5,12 @@ import { LinkButton } from "@/components/ui/Button";
 import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, PageHeader } from "@/components/ui/Card";
 import { courseTitle } from "@/lib/i18n";
 import { counted } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { useData } from "@/lib/store";
 
 export default function CompanyChallenges() {
   const { s, company, lang } = useData();
+  const courses = useCourses();
   const mine = s.challenges.filter((c) => c.companyId === company?.id);
 
   return (

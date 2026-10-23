@@ -76,7 +76,7 @@ async function ownedCourse(courseId, teacherId) {
 export async function listCourses({ res, user, send }) {
   const teacherId = user?.role === "teacher" ? user.id : null;
   const { rows } = await pool.query(
-    `SELECT id, title, skill, level, hours, price_mmk, description, published
+    `SELECT id, slug, title, skill, level, hours, price_mmk, description, published
      FROM courses
      WHERE published OR ($1::uuid IS NOT NULL AND teacher_id = $1::uuid)
      ORDER BY created_at DESC`,
@@ -85,6 +85,7 @@ export async function listCourses({ res, user, send }) {
   send(res, 200, {
     courses: rows.map((row) => ({
       id: row.id,
+      slug: row.slug,
       title: row.title,
       skill: row.skill,
       level: row.level,
@@ -110,7 +111,7 @@ export async function createCourse({ res, user, body, send }) {
 export async function getCourse({ res, user, params, send }) {
   const { rows } = await pool.query(
     `SELECT id, teacher_id, title, skill, level, hours, price_mmk, description, published
-     FROM courses WHERE id = $1`,
+     FROM courses WHERE id::text = $1 OR slug = $1`,
     [params.id],
   );
   const course = rows[0];
@@ -260,4 +261,52 @@ export async function publishCourse({ res, user, params, send }) {
   );
   if (!rowCount) throw fail(404, "Course was not found.");
   send(res, 200, { ok: true });
+}
+
+// Everything the website needs to show published courses, in one request. Answers stay on the server.
+export async function getCatalogue({ res, send }) {
+  const courses = await pool.query(
+    `SELECT id, slug, title, skill, level, hours, price_mmk, description
+     FROM courses WHERE published AND slug IS NOT NULL ORDER BY published_at, created_at`,
+  );
+  const ids = courses.rows.map((c) => c.id);
+  const [lessons, questions] = await Promise.all([
+    pool.query(
+      `SELECT id, course_id, position, title, body, key_points, summary, video_id
+       FROM lessons WHERE course_id = ANY($1::uuid[]) ORDER BY position`,
+      [ids],
+    ),
+    pool.query(
+      `SELECT q.id, q.kind, q.position, q.prompt, q.options, q.lesson_id, coalesce(q.course_id, l.course_id) AS course_id
+       FROM questions q LEFT JOIN lessons l ON l.id = q.lesson_id
+       WHERE coalesce(q.course_id, l.course_id) = ANY($1::uuid[]) ORDER BY q.position`,
+      [ids],
+    ),
+  ]);
+  const question = (q) => ({ id: q.id, prompt: q.prompt, options: q.options });
+  send(res, 200, {
+    courses: courses.rows.map((c) => ({
+      id: c.id,
+      slug: c.slug,
+      title: c.title,
+      skill: c.skill,
+      level: c.level,
+      hours: c.hours,
+      priceMmk: c.price_mmk,
+      description: c.description,
+      lessons: lessons.rows
+        .filter((l) => l.course_id === c.id)
+        .map((l) => ({
+          id: l.id,
+          position: l.position,
+          title: l.title,
+          body: l.body,
+          keyPoints: l.key_points,
+          summary: l.summary,
+          videoId: l.video_id,
+          quiz: questions.rows.filter((q) => q.lesson_id === l.id).map(question),
+        })),
+      test: questions.rows.filter((q) => q.kind === "test" && q.course_id === c.id).map(question),
+    })),
+  });
 }

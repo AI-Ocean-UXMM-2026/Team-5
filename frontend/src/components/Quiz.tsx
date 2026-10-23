@@ -1,26 +1,56 @@
 "use client";
 
 import { useState } from "react";
+import type { Graded } from "@/lib/answers";
 import type { Question } from "@/lib/types";
 import { Button } from "./ui/Button";
 
-export function Quiz({ questions, submitLabel, onChecked, retry = true, className = "", children }: { questions: Question[]; submitLabel: string; onChecked: (correct: number) => void; retry?: boolean; className?: string; children?: React.ReactNode }) {
+export function Quiz({
+  questions,
+  submitLabel,
+  grade,
+  onChecked,
+  retry = true,
+  className = "",
+  children,
+}: {
+  questions: Question[];
+  submitLabel: string;
+  /** Checks the picked option per question, on the server or locally. */
+  grade: (picked: number[]) => Promise<Graded>;
+  onChecked: (correct: number) => void;
+  retry?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}) {
   const [picked, setPicked] = useState<(number | null)[]>(() => questions.map(() => null));
-  const [checked, setChecked] = useState(false);
+  const [graded, setGraded] = useState<Graded | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const checked = graded !== null;
 
   return (
     <form
       className={`flex flex-col gap-6 ${className}`}
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        setChecked(true);
-        onChecked(questions.filter((q, i) => picked[i] === q.answer).length);
+        setBusy(true);
+        setError("");
+        try {
+          const result = await grade(picked.map((p) => p ?? -1));
+          setGraded(result);
+          onChecked(result.correct);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "We couldn't check your answers. Try again.");
+        } finally {
+          setBusy(false);
+        }
       }}
     >
       {questions.map((q, i) => {
-        const right = picked[i] === q.answer;
+        const result = graded?.results?.[i];
         return (
-          <fieldset key={q.q} disabled={checked}>
+          <fieldset key={q.q} disabled={checked || busy}>
             <legend className="mb-2 font-medium">
               {i + 1}. {q.q}
             </legend>
@@ -39,9 +69,13 @@ export function Quiz({ questions, submitLabel, onChecked, retry = true, classNam
                 </label>
               ))}
             </div>
-            {checked && (
-              <p className={`mt-2 text-body-sm font-medium ${right ? "text-success" : "text-danger"}`}>
-                {right ? "✓ Correct" : `✕ Not quite. The answer is “${q.options[q.answer]}”.`}
+            {result && (
+              <p className={`mt-2 text-body-sm font-medium ${result.correct ? "text-success" : "text-danger"}`}>
+                {result.correct
+                  ? "✓ Correct"
+                  : result.answerIndex !== undefined
+                    ? `✕ Not quite. The answer is “${q.options[result.answerIndex]}”.`
+                    : "✕ Not quite."}
               </p>
             )}
           </fieldset>
@@ -54,17 +88,18 @@ export function Quiz({ questions, submitLabel, onChecked, retry = true, classNam
             className={children ? "mr-auto" : ""}
             onClick={() => {
               setPicked(questions.map(() => null));
-              setChecked(false);
+              setGraded(null);
             }}
           >
             Try again
           </Button>
         ) : checked ? null : (
-          <Button type="submit" className={children ? "mr-auto" : ""}>
-            {submitLabel}
+          <Button type="submit" disabled={busy} className={children ? "mr-auto" : ""}>
+            {busy ? "Checking…" : submitLabel}
           </Button>
         )}
         {children}
+        {error && <p className="w-full text-body-sm text-danger">{error}</p>}
       </div>
     </form>
   );

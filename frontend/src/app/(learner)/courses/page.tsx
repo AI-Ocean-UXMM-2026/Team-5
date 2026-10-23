@@ -6,7 +6,7 @@ import { cardLinkClass, cardLinkStretch, PageHeader } from "@/components/ui/Card
 import { SearchBar } from "@/components/ui/SearchBar";
 import { copy, courseTitle, formatMmk } from "@/lib/i18n";
 import { counted } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { progressOf, useData } from "@/lib/store";
 
 const iconPaths = {
@@ -16,19 +16,56 @@ const iconPaths = {
   frontend: "M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14",
   // bug
   qa: "M9 7a3 3 0 0 1 6 0M8 9h8v5a4 4 0 0 1-8 0V9Zm-3 2h3m8 0h3M5 16h3m8 0h3M12 11v7",
+  // monitor
+  "computer-basics": "M4 5h16v11H4V5Zm5 15h6m-3-4v4",
+  // speech bubble
+  "english-it": "M5 5h14v10H10l-4 4v-4H5V5Zm4 4h6m-6 3h4",
+  // branch
+  git: "M7 4v10m0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm10-4a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0c0 4-10 2-10 6",
+  // atom
+  react: "M12 12h.01M12 4c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8Zm-6.9 4 13.8 8m-13.8 0 13.8-8",
+  // server rack
+  "node-backend": "M4 5h16v5H4V5Zm0 9h16v5H4v-5Zm3-6.5h.01M7 16.5h.01",
+  // database
+  sql: "M5 6c0-1.7 3.1-3 7-3s7 1.3 7 3-3.1 3-7 3-7-1.3-7-3Zm0 0v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3",
+  // layout
+  uiux: "M4 4h16v16H4V4Zm0 5h16M9 9v11",
+  // pen nib
+  figma: "M12 3 5 10l4 11h6l4-11-7-7Zm0 0v8m0 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3",
+  // grid
+  spreadsheets: "M4 4h16v16H4V4Zm0 5h16M4 14h16M10 4v16",
+  // bar chart
+  "python-data": "M4 20h16M7 16v-4m5 4V8m5 8v-7",
+  // wrench
+  "it-support": "M14.5 6.5a4 4 0 0 0-5.3 5.3L4 17l3 3 5.2-5.2a4 4 0 0 0 5.3-5.3L15 12l-3-3 2.5-2.5Z",
+  // shield
+  security: "M12 3 5 6v6c0 4.4 3 7.6 7 9 4-1.4 7-4.6 7-9V6l-7-3Zm-3 9 2 2 4-4",
   // open book
   other: "M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5V5.5ZM12 6v13.5",
 };
 
-// Each course gets its own cover colour; new courses fall back to yellow.
+// Each course gets its own cover colour by area; courses not listed here fall back to yellow.
 const covers: Record<string, string> = {
   starter: "bg-success-tint text-success",
+  "computer-basics": "bg-success-tint text-success",
+  "english-it": "bg-success-tint text-success",
+  git: "bg-success-tint text-success",
   frontend: "bg-burgundy-tint text-burgundy",
+  react: "bg-burgundy-tint text-burgundy",
+  "node-backend": "bg-burgundy-tint text-burgundy",
+  sql: "bg-burgundy-tint text-burgundy",
+  uiux: "bg-yellow-tint text-ink",
+  figma: "bg-yellow-tint text-ink",
+  spreadsheets: "bg-ai text-ai-ink",
+  "python-data": "bg-ai text-ai-ink",
   qa: "bg-ai text-ai-ink",
+  "it-support": "bg-surface text-ink",
+  security: "bg-surface text-ink",
 };
 
 export default function Courses() {
   const { s, me, lang } = useData();
+  const courses = useCourses();
   const t = copy[lang];
   const [q, setQ] = useState("");
   const p = progressOf(s, me.id);

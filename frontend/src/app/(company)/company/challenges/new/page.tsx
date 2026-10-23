@@ -10,13 +10,14 @@ import { Input, Select, Textarea } from "@/components/ui/Field";
 import { draftChallenge } from "@/lib/ai";
 import { courseTitle } from "@/lib/i18n";
 import { canPostAsCompany } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { newId, setState, today, useData } from "@/lib/store";
 
 export default function NewChallenge() {
   const { company, lang } = useData();
+  const courses = useCourses();
   const router = useRouter();
-  const [courseId, setCourseId] = useState(courses[1].id);
+  const [courseId, setCourseId] = useState((courses.find((c) => c.id === "frontend") ?? courses[0]).id);
   const [title, setTitle] = useState("");
   const [task, setTask] = useState("");
   const [rubric, setRubric] = useState("");
@@ -63,7 +64,7 @@ export default function NewChallenge() {
               setDrafting(true);
               setError("");
               try {
-                const d = await draftChallenge(courseId);
+                const d = await draftChallenge(courses.find((c) => c.id === courseId) ?? courses[0]);
                 setTitle(d.title);
                 setTask(d.task);
                 setRubric(d.rubric.join("\n"));

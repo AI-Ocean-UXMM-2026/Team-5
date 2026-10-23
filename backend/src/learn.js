@@ -98,3 +98,32 @@ export async function gradeTest({ res, user, body, params, send }) {
     results: graded.results,
   });
 }
+
+// Public answer checks for the website, which keeps progress in the browser. Nothing is saved here.
+export async function checkQuiz({ res, body, params, send }) {
+  const questions = await pool.query(
+    `SELECT q.position, q.options, q.answer_index FROM questions q
+     JOIN lessons l ON l.id = q.lesson_id JOIN courses c ON c.id = l.course_id
+     WHERE q.lesson_id = $1 AND q.kind = 'quiz' AND c.published ORDER BY q.position`,
+    [params.id],
+  );
+  if (!questions.rows.length) throw fail(404, "Lesson was not found.");
+  const graded = gradeAnswers(questions.rows, body.answers);
+  if (!graded) throw fail(400, "Answer every question.");
+  // A lesson quiz is practice, so it shows the right answers.
+  send(res, 200, { correct: graded.correct, total: graded.total, passed: graded.perfect, results: graded.results });
+}
+
+export async function checkTest({ res, body, params, send }) {
+  const questions = await pool.query(
+    `SELECT q.position, q.options, q.answer_index FROM questions q JOIN courses c ON c.id = q.course_id
+     WHERE (c.id::text = $1 OR c.slug = $1) AND c.published AND q.kind = 'test' ORDER BY q.position`,
+    [params.id],
+  );
+  if (!questions.rows.length) throw fail(404, "Course was not found.");
+  const graded = gradeAnswers(questions.rows, body.answers);
+  if (!graded) throw fail(400, "Answer every question.");
+  const scored = testScore(graded.correct, graded.total);
+  // The final test never reveals which answers were right.
+  send(res, 200, { correct: graded.correct, total: graded.total, score: scored.score, passed: scored.passed });
+}

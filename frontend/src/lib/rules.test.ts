@@ -166,13 +166,13 @@ test("community posts block private contact details", () => {
   assert.equal(hasContactDetails("Lesson 3 in 2026 was hard"), false);
 });
 
-test("each career goal uses a real demo course path", () => {
-  assert.deepEqual(coursesForGoal("frontend"), ["starter", "frontend"]);
-  assert.deepEqual(coursesForGoal("backend"), ["starter", "frontend"]);
-  assert.deepEqual(coursesForGoal("uiux"), ["starter", "frontend"]);
-  assert.deepEqual(coursesForGoal("data"), ["starter", "qa"]);
-  assert.deepEqual(coursesForGoal("fullstack"), ["starter", "frontend", "qa"]);
-  assert.deepEqual(coursesForGoal("unsure"), ["starter", "frontend", "qa"]);
+test("each career goal has its own fallback course path", () => {
+  assert.deepEqual(coursesForGoal("frontend"), ["starter", "git", "frontend", "react"]);
+  assert.deepEqual(coursesForGoal("backend"), ["starter", "git", "sql", "node-backend"]);
+  assert.deepEqual(coursesForGoal("uiux"), ["starter", "uiux", "figma", "frontend"]);
+  assert.deepEqual(coursesForGoal("data"), ["starter", "spreadsheets", "sql", "python-data"]);
+  assert.deepEqual(coursesForGoal("fullstack"), ["starter", "frontend", "sql", "node-backend", "react"]);
+  assert.deepEqual(coursesForGoal("unsure"), ["starter", "computer-basics", "frontend", "qa"]);
 });
 
 test("a company offer marks the submission and adds or updates the interview", () => {

@@ -5,13 +5,14 @@ import { useState } from "react";
 import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, PageHeader } from "@/components/ui/Card";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { courseTitle } from "@/lib/i18n";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { useData } from "@/lib/store";
 
 const challengeStatus = { submitted: "Waiting for review", "needs-work": "Needs another try", interview: "Interview invited", offered: "Offer sent" } as const;
 
 export default function Candidates() {
   const { s, company, lang } = useData();
+  const courses = useCourses();
   const [q, setQ] = useState("");
   const certified = s.users
     .filter((u) => u.role === "learner")

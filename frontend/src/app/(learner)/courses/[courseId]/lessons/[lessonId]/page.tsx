@@ -13,7 +13,8 @@ import { Mascot } from "@/components/ui/Mascot";
 import { summarizeLesson } from "@/lib/ai";
 import { courseTitle } from "@/lib/i18n";
 import { lessonIncluded } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { gradeLessonQuiz } from "@/lib/answers";
+import { useCourses } from "@/lib/catalogue";
 import { progressOf, updateProgress, useData } from "@/lib/store";
 
 function LessonVideo({ videoId, title }: { videoId?: string; title: string }) {
@@ -54,6 +55,7 @@ function LessonNotes({ lessonId, saved, userId }: { lessonId: string; saved: str
 export default function LessonPage() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const { s, me, lang } = useData();
+  const courses = useCourses();
   const [result, setResult] = useState<{ lessonId: string; keyPoints: string[]; summary: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [summaryError, setSummaryError] = useState("");
@@ -114,6 +116,7 @@ export default function LessonPage() {
                   key={lesson.id}
                   questions={lesson.quiz}
                   submitLabel="Check answers"
+                  grade={(picked) => gradeLessonQuiz(lesson, picked)}
                   className="flex-1"
                   retry={passedId !== lesson.id}
                   onChecked={(correct) => {

@@ -9,7 +9,7 @@ import { ReportButton } from "@/components/ui/ReportButton";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { canPostAsCompany, communityPostKind, companyChallengeIds, hasContactDetails } from "@/lib/rules";
 import { courseTitle } from "@/lib/i18n";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { newId, setState, today, useData } from "@/lib/store";
 import { Author, communityRules, topicName } from "./Author";
 
@@ -21,6 +21,7 @@ const tabs = [
 
 export default function Community() {
   const { s, me, company, lang } = useData();
+  const courses = useCourses();
   const [tab, setTab] = useState<(typeof tabs)[number][0]>("all");
   const [q, setQ] = useState("");
   const [topicId, setTopicId] = useState(courses[0].id);

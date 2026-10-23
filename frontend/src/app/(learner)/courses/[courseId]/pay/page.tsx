@@ -9,12 +9,13 @@ import { Input, Textarea } from "@/components/ui/Field";
 import { courseTitle, formatMmk } from "@/lib/i18n";
 import { compressImage, latestPayment, methodName, paymentAccounts, reviewPayment } from "@/lib/payments";
 import { paidTrackOpen } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { newId, progressOf, setState, today, useData } from "@/lib/store";
 
 export default function PayForCourse() {
   const { courseId } = useParams<{ courseId: string }>();
   const { s, me, lang } = useData();
+  const courses = useCourses();
   const course = courses.find((c) => c.id === courseId);
   const [method, setMethod] = useState<string>(paymentAccounts[0].id);
   const [reference, setReference] = useState("");

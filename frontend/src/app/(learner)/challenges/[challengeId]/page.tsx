@@ -13,12 +13,13 @@ import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { reviewChallenge } from "@/lib/ai";
 import { courseTitle } from "@/lib/i18n";
 import { challengeUnlocked, rubricMarks } from "@/lib/rules";
-import { courses } from "@/lib/seed";
+import { useCourses } from "@/lib/catalogue";
 import { newId, setState, today, useData } from "@/lib/store";
 
 export default function ChallengeDetail() {
   const { challengeId } = useParams<{ challengeId: string }>();
   const { s, me, lang } = useData();
+  const courses = useCourses();
   const challenge = s.challenges.find((c) => c.id === challengeId);
   const sub = s.submissions.find((x) => x.challengeId === challengeId && x.learnerId === me.id);
   const [answer, setAnswer] = useState(sub?.answer ?? "");
