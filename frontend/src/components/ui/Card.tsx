@@ -58,11 +58,12 @@ export function PageHeader({ title, intro, pose, media, badge, children }: { tit
   );
 }
 
-export function Empty({ pose = "peek", children }: { pose?: Pose; children: React.ReactNode }) {
+export function Empty({ pose = "peek", action, children }: { pose?: Pose; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-line bg-white p-8 text-center text-muted">
       <Mascot pose={pose} size={120} />
       <p>{children}</p>
+      {action && <div className="mt-2">{action}</div>}
     </div>
   );
 }

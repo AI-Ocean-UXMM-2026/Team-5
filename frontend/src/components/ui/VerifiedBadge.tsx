@@ -13,7 +13,7 @@ const checks = [
   "Never asks learners for money, a passport or an ID card",
 ];
 
-export function VerifiedBadge({ company }: { company: Company }) {
+export function VerifiedBadge({ company, label = "Verified" }: { company: Company; label?: string }) {
   const [open, setOpen] = useState(false);
   if (company.status !== "verified") return null;
   return (
@@ -23,7 +23,7 @@ export function VerifiedBadge({ company }: { company: Company }) {
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-1 rounded-lg bg-burgundy-tint px-2 py-0.5 text-caption font-semibold text-burgundy hover:bg-burgundy hover:text-white"
       >
-        <span aria-hidden>✓</span> Verified
+        <span aria-hidden>✓</span> {label}
       </button>
       <Dialog open={open} onClose={() => setOpen(false)} title={`${company.name} is verified`}>
         <p className="mb-3 text-muted">Our team checked this company{company.verifiedAt ? ` on ${company.verifiedAt}` : ""}:</p>

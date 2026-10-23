@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Button } from "@/components/ui/Button";
+import { Button, LinkButton } from "@/components/ui/Button";
 import { Empty } from "@/components/ui/Card";
 import { Mascot } from "@/components/ui/Mascot";
 import { courseTitle } from "@/lib/i18n";
@@ -12,20 +12,25 @@ import { nameOf, useData } from "@/lib/store";
 
 export default function CertificatePage() {
   const { certificateId } = useParams<{ certificateId: string }>();
-  const { s, lang } = useData();
+  const { s, me, lang } = useData();
   const cert = s.certificates.find((c) => c.id === certificateId);
   const course = courses.find((c) => c.id === cert?.courseId);
-  if (!cert || !course) return <Empty>Certificate not found.</Empty>;
+  if (!cert || !course) return <Empty action={<LinkButton href={me.role === "learner" ? "/courses" : "/company/candidates"}>Go back</LinkButton>}>Certificate not found.</Empty>;
 
   return (
     <div className="mx-auto max-w-3xl">
+      {/* Companies check a candidate's certificate here but can't open course pages. */}
       <Breadcrumb
         className="print:hidden"
-        items={[
-          { label: "Courses", href: "/courses" },
-          { label: courseTitle(course, lang), href: `/courses/${course.id}` },
-          { label: "Certificate" },
-        ]}
+        items={
+          me.role === "learner"
+            ? [
+                { label: "Courses", href: "/courses" },
+                { label: courseTitle(course, lang), href: `/courses/${course.id}` },
+                { label: "Certificate" },
+              ]
+            : [{ label: nameOf(s, cert.learnerId), href: `/profile/${cert.learnerId}` }, { label: "Certificate" }]
+        }
       />
       <article className="rounded-3xl border-2 border-burgundy bg-white p-10 text-center sm:p-14">
         <Image src="/logo/the-citadel-logo-primary.png" alt="The Citadel" width={112} height={112} className="mx-auto -mt-4 mb-2 size-28" />
@@ -50,9 +55,12 @@ export default function CertificatePage() {
           </div>
         </dl>
       </article>
-      <Button variant="secondary" className="mt-6 print:hidden" onClick={() => window.print()}>
-        Print or save as PDF
-      </Button>
+      <div className="mt-6 flex flex-wrap gap-3 print:hidden">
+        {me.role === "learner" ? <LinkButton href="/roadmap">Back to your roadmap</LinkButton> : <LinkButton href={`/profile/${cert.learnerId}`}>View profile</LinkButton>}
+        <Button variant="secondary" onClick={() => window.print()}>
+          Print or save as PDF
+        </Button>
+      </div>
     </div>
   );
 }

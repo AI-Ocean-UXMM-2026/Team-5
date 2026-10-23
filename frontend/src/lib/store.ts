@@ -5,7 +5,7 @@ import { defaultLang } from "./i18n";
 import { emptyProgress, seed } from "./seed";
 import type { Lang, Progress, State } from "./types";
 
-const KEY = "citadel-demo-v2";
+const KEY = "citadel-demo-v3";
 let state: State | null = null;
 const listeners = new Set<() => void>();
 

@@ -3,25 +3,26 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Button, LinkButton } from "@/components/ui/Button";
+import { LinkButton } from "@/components/ui/Button";
 import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, LockIcon, PageHeader } from "@/components/ui/Card";
-import { courseTitle } from "@/lib/i18n";
+import { courseTitle, formatMmk } from "@/lib/i18n";
+import { latestPayment } from "@/lib/payments";
 import { allLessonsDone, challengeUnlocked, lessonIncluded, paidTrackOpen, previewLessonCount } from "@/lib/rules";
 import { courses } from "@/lib/seed";
-import { progressOf, updateProgress, useData } from "@/lib/store";
+import { progressOf, useData } from "@/lib/store";
 
 export default function CourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
   const { s, me, lang } = useData();
   const course = courses.find((c) => c.id === courseId);
-  if (!course) return <Empty>Course not found.</Empty>;
+  if (!course) return <Empty action={<LinkButton href="/courses">See all courses</LinkButton>}>Course not found.</Empty>;
 
   const p = progressOf(s, me.id);
   const lessonsDone = allLessonsDone(p.doneLessons, course);
   const cert = s.certificates.find((c) => c.learnerId === me.id && c.courseId === course.id);
   const trackOpen = paidTrackOpen(course, p.paidCourseIds, !!cert);
   const unlocked = challengeUnlocked(s.certificates, me.id, course.id);
-  const unlock = () => updateProgress(me.id, (pr) => ({ ...pr, paidCourseIds: [...new Set([...(pr.paidCourseIds ?? []), course.id])] }));
+  const payment = latestPayment(s, me.id, course.id);
   const challenges = s.challenges.filter((c) => c.courseId === course.id);
 
   const title = courseTitle(course, lang);
@@ -66,9 +67,19 @@ export default function CourseDetail() {
               <p className="text-body-sm text-muted">
                 {previewLessonCount(course) === 1 ? "The first lesson is free." : `The first ${previewLessonCount(course)} lessons are free.`} The rest of this course, the final test and the certificate are on the paid track.
               </p>
-              <Button className="mt-3" onClick={unlock}>
-                Unlock the rest
-              </Button>
+              {payment?.status === "pending" ? (
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <Badge tone="highlight">Payment being checked</Badge>
+                  <LinkButton href={`/courses/${course.id}/pay`} variant="secondary">
+                    See payment
+                  </LinkButton>
+                </div>
+              ) : (
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <LinkButton href={`/courses/${course.id}/pay`}>Buy the full course · {formatMmk(course.priceMmk)}</LinkButton>
+                  {payment?.status === "rejected" && <Badge tone="danger">Last payment not confirmed</Badge>}
+                </div>
+              )}
             </div>
           )}
         </Card>

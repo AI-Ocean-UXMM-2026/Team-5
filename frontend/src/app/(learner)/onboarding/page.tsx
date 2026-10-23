@@ -1,16 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BackLink } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
+import { Card, PageHeader } from "@/components/ui/Card";
 import { Select } from "@/components/ui/Field";
-import { Mascot } from "@/components/ui/Mascot";
-import { goals, loadSkills, makeRoadmap, type SkillChip } from "@/lib/ai";
+import { coursesForGoal, goals, loadSkills, makeRoadmap, type SkillChip } from "@/lib/ai";
 import { emptyProgress } from "@/lib/seed";
 import {
-  coachStep,
   keepApplicable,
   NOTHING,
   OTHER,
@@ -43,13 +42,8 @@ const copy = {
     make: "Make my roadmap",
     remake: "Remake my roadmap",
     busy: "AI is making your roadmap…",
-    begin: "Let's Begin",
-    bubbleGoal: "Pick a goal to start.",
-    bubbleChosen: "Nice choice. What do you know already?",
-    bubbleSkills: "Good start. Now pick your study hours.",
-    bubbleReady: "Let's build your roadmap.",
+    begin: "Let's begin",
     loadError: "Skills could not be loaded.",
-    mascot: "The Citadel mascot",
   },
   my: {
     title: "အသက်မွေးမှု ပန်းတိုင် သတ်မှတ်ပါ",
@@ -70,12 +64,7 @@ const copy = {
     remake: "လမ်းပြမြေပုံ ပြန်ဆွဲမည်",
     busy: "AI က လမ်းပြမြေပုံ ဆွဲနေသည်…",
     begin: "စတင်ကြစို",
-    bubbleGoal: "ပန်းတိုင်တစ်ခု ရွေးပြီး စပါ။",
-    bubbleChosen: "ရွေးချယ်မှု ကောင်းပါတယ်။ ဘာတွေ တတ်ပြီးပြီလဲ။",
-    bubbleSkills: "အစကောင်းပါတယ်။ အခု လေ့လာမည့် အချိန်ကို ရွေးပါ။",
-    bubbleReady: "လမ်းပြမြေပုံကို ဆွဲကြပါစို့။",
     loadError: "အတတ်စာရင်းကို မဖွင့်နိုင်ပါ။",
-    mascot: "The Citadel mascot",
   },
 };
 
@@ -126,8 +115,6 @@ export default function Onboarding() {
     setPicked((prev) => keepApplicable(prev, allowed));
   }, [catalogue, goal]);
 
-  const step = coachStep(goal, picked.length, hours);
-  const bubble = { goal: t.bubbleGoal, chosen: t.bubbleChosen, skills: t.bubbleSkills, ready: t.bubbleReady }[step];
   const label = (row: SkillChip) => (lang === "my" ? row.my : row.en);
   const english = (id: string) => catalogue.find((row) => row.id === id)?.en ?? id;
 
@@ -156,11 +143,9 @@ export default function Onboarding() {
   return (
     <>
       {remake && <BackLink href="/roadmap">Roadmap</BackLink>}
-      <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[3fr_2fr]">
-        <div className="order-2 min-w-0 lg:order-1">
-          <h1 className="text-h2">{remake ? t.reset : t.title}</h1>
-          <p className="mt-2 mb-6 text-body-lg text-muted">{t.intro}</p>
-          <Card>
+      <PageHeader title={remake ? t.reset : t.title} intro={t.intro} />
+      <div className="grid min-w-0 items-stretch gap-6 lg:grid-cols-[minmax(0,1fr)_auto]">
+        <Card>
             <form
               className="flex min-w-0 flex-col gap-5"
               onSubmit={async (e) => {
@@ -178,7 +163,11 @@ export default function Onboarding() {
                 }
                 if (otherOn && extra) skillLevels[extra] = otherOn.level;
                 try {
-                  const result = await makeRoadmap(goal, skillsForRoadmap(picked, english, extra), hoursPerWeek);
+                  // If AI is down, use the standard path for the goal so the learner is never stuck here.
+                  const result = await makeRoadmap(goal, skillsForRoadmap(picked, english, extra), hoursPerWeek).catch(() => ({
+                    roadmap: coursesForGoal(goal),
+                    roadmapNote: "AI was not available, so this is the standard path for your goal. You can remake it later.",
+                  }));
                   setState((st) => ({
                     ...st,
                     users: st.users.map((user) => (user.id === me.id ? { ...user, skills: names } : user)),
@@ -265,15 +254,12 @@ export default function Onboarding() {
               </Button>
               {error ? <p className="text-body-sm text-danger">{error}</p> : null}
             </form>
-          </Card>
+        </Card>
+        <div className="flex min-h-72 items-center justify-center lg:h-full lg:items-end">
+          {/* The PNG has a white background (multiply blends it in) and its bottom 20% is empty,
+              so the shift puts the mascot's feet on the card's bottom edge. */}
+          <Image src="/mascot/lets-begin.png" alt={t.begin} width={1080} height={1080} priority className="h-72 w-72 mix-blend-multiply lg:h-[28rem] lg:w-[28rem] lg:translate-y-[20%]" />
         </div>
-        <aside className="order-1 min-w-0 lg:order-2">
-          <div className="flex flex-col items-center rounded-3xl bg-burgundy-tint px-6 py-8 text-center">
-            <p className="font-heading text-h1 font-semibold">{t.begin}</p>
-            <Mascot pose="ready" size={260} alt={t.mascot} priority className="mt-4 h-40 w-40 lg:h-[260px] lg:w-[260px]" />
-            <p className="mt-4 max-w-xs rounded-2xl bg-white px-4 py-3 text-body shadow-sm">{bubble}</p>
-          </div>
-        </aside>
       </div>
     </>
   );

@@ -6,7 +6,6 @@ import { Button, LinkButton } from "@/components/ui/Button";
 import { Badge, Card, PageHeader } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Field";
 import { registrationView } from "@/lib/rules";
-import { isPitchUser } from "@/lib/seed";
 import { setState, today, useData } from "@/lib/store";
 import type { Company } from "@/lib/types";
 import { useEffect, useState } from "react";
@@ -21,7 +20,7 @@ const viewCopy = {
 };
 
 export default function RegistrationStatus() {
-  const { me, company } = useData();
+  const { company } = useData();
   const [note, setNote] = useState("Please upload a clearer copy of your registration document.");
   const view = registrationView(company);
   const update = (patch: Partial<Company>) => setState((st) => ({ ...st, companies: st.companies.map((c) => (c.id === company!.id ? { ...c, ...patch } : c)) }));
@@ -81,7 +80,7 @@ export default function RegistrationStatus() {
           )}
           {view === "live" && <LinkButton href="/company/challenges">Go to your challenges</LinkButton>}
         </Card>
-        {isPitchUser(me.id) && view !== "live" && (
+        {view !== "live" && (
           <Card tone="dashed">
             <h2 className="mb-1 text-h4">Demo controls</h2>
             <p className="mb-4 text-muted">In the real product our team does this. Use these to continue the demo.</p>

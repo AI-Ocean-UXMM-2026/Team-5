@@ -138,6 +138,8 @@ export type Progress = {
   paidCourseIds: string[];
   notes: Record<string, string>;
   testScores: Record<string, number>;
+  /** Day of the latest final test per course id. */
+  testDates?: Record<string, string>;
 };
 
 export type State = {
@@ -153,4 +155,25 @@ export type State = {
   reports: Report[];
   certificates: Certificate[];
   progress: Record<string, Progress>;
+  /** Notification ids each user has opened, by user id. */
+  seenNotifications?: Record<string, string[]>;
+  /** Course payments sent by bank transfer, checked by our staff. */
+  payments?: CoursePayment[];
+};
+
+export type CoursePayment = {
+  id: string;
+  learnerId: string;
+  courseId: string;
+  amountMmk: number;
+  /** Id from paymentAccounts, e.g. "kpay". */
+  method: string;
+  /** Transaction number the learner typed, if any. */
+  reference: string;
+  /** Receipt screenshot as a compressed JPEG data URL. */
+  receipt: string;
+  status: "pending" | "approved" | "rejected";
+  staffNote?: string;
+  submittedAt: string;
+  reviewedAt?: string;
 };

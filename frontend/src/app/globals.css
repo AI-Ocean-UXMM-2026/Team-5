@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Hogfish DEMO";
+  src: url("/fonts/HogfishDEMO.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-burgundy: #963d50;
   --color-burgundy-dark: #7c3142;
@@ -25,6 +33,7 @@
 
   --font-sans: "Plus Jakarta Sans", "Myanmar Text", "Noto Sans Myanmar", "Pyidaungsu", var(--font-jakarta), sans-serif;
   --font-heading: var(--font-sora), sans-serif;
+  --font-hogfish: "Hogfish DEMO", var(--font-heading), sans-serif;
 
   --text-display: 48px;
   --text-display--line-height: 56px;

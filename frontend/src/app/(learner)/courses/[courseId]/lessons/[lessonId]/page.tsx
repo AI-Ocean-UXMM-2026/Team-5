@@ -20,7 +20,7 @@ function LessonVideo({ videoId, title }: { videoId?: string; title: string }) {
   if (!videoId) {
     return (
       <div className="mb-6 flex aspect-video items-center justify-center rounded-xl border border-line bg-surface px-6 text-center text-muted">
-        This lesson's YouTube video will play here.
+        This lesson&apos;s YouTube video will play here.
       </div>
     );
   }
@@ -60,7 +60,7 @@ export default function LessonPage() {
   const [passedId, setPassedId] = useState<string | null>(null);
   const course = courses.find((c) => c.id === courseId);
   const index = course?.lessons.findIndex((l) => l.id === lessonId) ?? -1;
-  if (!course || index < 0) return <Empty>Lesson not found.</Empty>;
+  if (!course || index < 0) return <Empty action={<LinkButton href="/courses">See all courses</LinkButton>}>Lesson not found.</Empty>;
 
   const lesson = course.lessons[index];
   const p = progressOf(s, me.id);
@@ -76,7 +76,7 @@ export default function LessonPage() {
     return (
       <>
         <Breadcrumb items={crumbs} />
-        <Empty>This lesson is on the paid track.</Empty>
+        <Empty action={<LinkButton href={`/courses/${course.id}`}>Unlock on the course page</LinkButton>}>This lesson is on the paid track.</Empty>
       </>
     );
   const done = p.doneLessons.includes(lesson.id);
@@ -114,6 +114,7 @@ export default function LessonPage() {
                   key={lesson.id}
                   questions={lesson.quiz}
                   submitLabel="Check answers"
+                  className="flex-1"
                   retry={passedId !== lesson.id}
                   onChecked={(correct) => {
                     const perfect = correct === lesson.quiz.length;

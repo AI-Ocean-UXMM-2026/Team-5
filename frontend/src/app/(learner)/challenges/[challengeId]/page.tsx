@@ -12,7 +12,7 @@ import { Mascot } from "@/components/ui/Mascot";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { reviewChallenge } from "@/lib/ai";
 import { courseTitle } from "@/lib/i18n";
-import { challengeUnlocked } from "@/lib/rules";
+import { challengeUnlocked, rubricMarks } from "@/lib/rules";
 import { courses } from "@/lib/seed";
 import { newId, setState, today, useData } from "@/lib/store";
 
@@ -61,7 +61,16 @@ export default function ChallengeDetail() {
     setBusy("submit");
     setError("");
     try {
-      const review = await reviewChallenge(answer, link, challenge!.rubric, challenge!.task);
+      // AI only pre-screens, so an AI outage must not block the submission: fall back to the keyword check.
+      const review = await reviewChallenge(answer, link, challenge!.rubric, challenge!.task).catch(() => {
+        const marks = rubricMarks(answer, challenge!.rubric);
+        return {
+          feedback: [],
+          aiScore: Math.round((marks.filter((m) => m.met).length / Math.max(1, marks.length)) * 100),
+          aiSummary: "AI was not available. This score is a simple keyword check, so read the answer yourself.",
+          aiRubric: marks,
+        };
+      });
       setState((st) => {
         const next = { answer: answer.trim(), link: link.trim(), aiFeedback: review.feedback, aiScore: review.aiScore, aiSummary: review.aiSummary, aiRubric: review.aiRubric, status: "submitted" as const, companyFeedback: undefined, submittedAt: today() };
         return {

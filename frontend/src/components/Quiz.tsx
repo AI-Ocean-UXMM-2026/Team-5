@@ -4,13 +4,13 @@ import { useState } from "react";
 import type { Question } from "@/lib/types";
 import { Button } from "./ui/Button";
 
-export function Quiz({ questions, submitLabel, onChecked, retry = true, children }: { questions: Question[]; submitLabel: string; onChecked: (correct: number) => void; retry?: boolean; children?: React.ReactNode }) {
+export function Quiz({ questions, submitLabel, onChecked, retry = true, className = "", children }: { questions: Question[]; submitLabel: string; onChecked: (correct: number) => void; retry?: boolean; className?: string; children?: React.ReactNode }) {
   const [picked, setPicked] = useState<(number | null)[]>(() => questions.map(() => null));
   const [checked, setChecked] = useState(false);
 
   return (
     <form
-      className="flex flex-col gap-6"
+      className={`flex flex-col gap-6 ${className}`}
       onSubmit={(e) => {
         e.preventDefault();
         setChecked(true);
@@ -47,7 +47,7 @@ export function Quiz({ questions, submitLabel, onChecked, retry = true, children
           </fieldset>
         );
       })}
-      <div className="flex flex-wrap items-center justify-end gap-3">
+      <div className="mt-auto flex flex-wrap items-center justify-end gap-3">
         {checked && retry ? (
           <Button
             variant="secondary"

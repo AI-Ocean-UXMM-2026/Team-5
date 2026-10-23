@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Quiz } from "@/components/Quiz";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -14,11 +14,10 @@ import { progressOf, setState, today, updateProgress, useData } from "@/lib/stor
 
 export default function TestPage() {
   const { courseId } = useParams<{ courseId: string }>();
-  const router = useRouter();
   const { s, me, lang } = useData();
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
   const course = courses.find((c) => c.id === courseId);
-  if (!course) return <Empty>Course not found.</Empty>;
+  if (!course) return <Empty action={<LinkButton href="/courses">See all courses</LinkButton>}>Course not found.</Empty>;
   const title = courseTitle(course, lang);
   const crumbs = [
     { label: "Courses", href: "/courses" },
@@ -31,26 +30,25 @@ export default function TestPage() {
     return (
       <>
         <Breadcrumb items={crumbs} />
-        <Empty>The final test is included with the paid track.</Empty>
+        <Empty action={<LinkButton href={`/courses/${course.id}/pay`}>Buy the full course</LinkButton>}>The final test is included with the paid track.</Empty>
       </>
     );
   if (!allLessonsDone(progress.doneLessons, course))
     return (
       <>
         <Breadcrumb items={crumbs} />
-        <Empty>Finish every lesson quiz before you take the test.</Empty>
+        <Empty action={<LinkButton href={`/courses/${course.id}`}>Back to the course</LinkButton>}>Finish every lesson quiz before you take the test.</Empty>
       </>
     );
 
-  const certId = `cert-${me.id}-${course.id}`;
-  const issueCertificate = (score: number) => {
+  const certId = cert?.id ?? `cert-${me.id}-${course.id}`;
+  // Issued the moment the learner passes, so leaving the page can't lose it.
+  const issueCertificate = (score: number) =>
     setState((st) =>
-      st.certificates.some((c) => c.id === certId)
+      st.certificates.some((c) => c.learnerId === me.id && c.courseId === course.id)
         ? st
         : { ...st, certificates: [...st.certificates, { id: certId, learnerId: me.id, courseId: course.id, score, issuedAt: today() }] },
     );
-    router.push(`/certificates/${certId}`);
-  };
 
   return (
     <>
@@ -63,16 +61,17 @@ export default function TestPage() {
           <p className="font-heading text-h1 font-semibold">{result.score}%</p>
           <p className="max-w-md text-muted">
             {result.passed
-              ? "Your score is ready. Get your certificate, then try this course's company challenge."
+              ? "Your certificate is ready. Next, try this course's company challenge."
               : "You need 70% or more. Go back over the lessons, then try the test again."}
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             {result.passed ? (
-              cert ? (
-                <LinkButton href={`/certificates/${cert.id}`}>View certificate</LinkButton>
-              ) : (
-                <Button onClick={() => issueCertificate(result.score)}>Get certificate</Button>
-              )
+              <>
+                <LinkButton href={`/certificates/${certId}`}>View certificate</LinkButton>
+                <LinkButton href={`/courses/${course.id}`} variant="secondary">
+                  See company challenges
+                </LinkButton>
+              </>
             ) : (
               <Button variant="secondary" onClick={() => setResult(null)}>
                 Try again
@@ -90,7 +89,8 @@ export default function TestPage() {
               const score = Math.round((correct / course.test.length) * 100);
               const passed = testPassed(correct, course.test.length);
               setResult({ score, passed });
-              updateProgress(me.id, (p) => ({ ...p, testScores: { ...p.testScores, [course.id]: score } }));
+              if (passed) issueCertificate(score);
+              updateProgress(me.id, (p) => ({ ...p, testScores: { ...p.testScores, [course.id]: score }, testDates: { ...p.testDates, [course.id]: today() } }));
             }}
           />
         </Card>

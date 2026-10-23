@@ -32,13 +32,13 @@ export default function Internships() {
     <>
       <PageHeader title="Internships" intro="Interviews and offers from companies whose challenge you passed. Applying and interviewing are always free." pose="journey" />
       {!mine.length && <Empty pose="sleep">No interviews yet. Pass a company challenge and take the next step toward your interview.</Empty>}
-      <div className="flex flex-col gap-4">
+      <div className="flex max-w-3xl flex-col gap-4">
         {mine.map((i) => {
           const company = s.companies.find((c) => c.id === i.companyId)!;
           const companyUser = s.users.find((u) => u.companyId === company.id);
           const challenge = s.challenges.find((c) => c.id === i.challengeId);
           return (
-            <Card key={i.id} className="flex flex-col gap-4">
+            <Card key={i.id} className="flex flex-col gap-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="flex flex-wrap items-center gap-2 text-h4">
@@ -52,7 +52,7 @@ export default function Internships() {
                     )}{" "}
                     <VerifiedBadge company={company} />
                   </h2>
-                  <p className="text-muted">
+                  <p className="mt-2 text-muted">
                     From the challenge “{challenge?.title}”{i.when && ` · Interview ${i.when.replace("T", " at ")}`}
                   </p>
                 </div>
@@ -70,7 +70,7 @@ export default function Internships() {
                 </Detail>
               </dl>
               {i.status === "offered" && (
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 pt-2">
                   <Button onClick={() => setConfirming(i.id)}>Accept offer</Button>
                   <Button variant="secondary" onClick={() => setState((st) => replyToOffer(st, i.id, false))}>
                     Decline

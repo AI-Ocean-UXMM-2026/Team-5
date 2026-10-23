@@ -51,10 +51,3 @@ export function profileSkillNames(picked: PickedSkill[], labelOf: (id: string) =
   if (picked.some((item) => item.id === OTHER) && extra) names.push(extra);
   return names;
 }
-
-export function coachStep(goal: string, pickedCount: number, hours: number | null) {
-  if (!goal) return "goal" as const;
-  if (hours == null && pickedCount === 0) return "chosen" as const;
-  if (hours == null) return "skills" as const;
-  return "ready" as const;
-}

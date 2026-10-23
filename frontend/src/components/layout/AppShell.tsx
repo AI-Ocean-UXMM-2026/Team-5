@@ -9,6 +9,7 @@ import { copy } from "@/lib/i18n";
 import { isPitchUser } from "@/lib/seed";
 import { resetDemo, setState, useStore } from "@/lib/store";
 import type { Lang, State } from "@/lib/types";
+import { Notifications } from "./Notifications";
 
 function navFor(s: State) {
   const me = s.users.find((u) => u.id === s.sessionUserId);
@@ -129,6 +130,7 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
             </nav>
           )}
           <div className="ml-auto flex items-center gap-2 text-sm sm:gap-3">
+            {me && nav.length > 0 && <Notifications s={s} userId={me.id} />}
             {nav.length > 0 && (
               <button
                 type="button"

@@ -35,7 +35,9 @@ export default function Community() {
       ? courses.map((c) => [c.id, courseTitle(c, lang)] as const)
       : s.challenges.filter((c) => challengeIds.includes(c.id)).map((c) => [c.id, c.title] as const);
   const selectedTopic = topics.some(([id]) => id === topicId) ? topicId : (topics[0]?.[0] ?? "");
-  const showForm = postingKind === "course" ? me.role === "learner" : challengeIds.length > 0;
+  // The form follows the tab ("All" shows your own kind); learners post course discussions, companies post challenge notes.
+  const formKind = tab === "all" ? postingKind : tab;
+  const showForm = formKind === postingKind && (postingKind === "course" ? me.role === "learner" : challengeIds.length > 0);
   const contactError = tried && hasContactDetails(`${title} ${body}`) ? "Remove phone numbers and email addresses. Keep contact on the platform." : undefined;
   const posts = s.posts
     .filter((p) => tab === "all" || p.kind === tab)
@@ -100,7 +102,7 @@ export default function Community() {
         </div>
 
         <Card className="self-start lg:col-start-2 lg:row-start-2">
-          <h2 className="mb-1 text-h4">{postingKind === "course" ? "Start a course discussion" : "Post about a challenge"}</h2>
+          <h2 className="mb-1 text-h4">{formKind === "course" ? "Start a course discussion" : "Post about a challenge"}</h2>
           <p className="mb-4 text-body-sm text-muted">{communityRules}</p>
           {showForm ? (
             <form
@@ -148,7 +150,13 @@ export default function Community() {
             </form>
           ) : (
             <p className="text-muted">
-              {canPostAsCompany(company) ? "Post a challenge first, then you can write about it here." : "Only a verified company can post about its own challenge. Learners discuss courses here, and ask challenge questions in a reply."}
+              {formKind === "course"
+                ? "Learners start course discussions. You can still add a comment to any post."
+                : me.role === "learner"
+                  ? "Only a verified company can post about its own challenge. Ask your challenge questions in a reply."
+                  : canPostAsCompany(company)
+                    ? "Post a challenge first, then you can write about it here."
+                    : "Only a verified company can post about its own challenge."}
             </p>
           )}
         </Card>

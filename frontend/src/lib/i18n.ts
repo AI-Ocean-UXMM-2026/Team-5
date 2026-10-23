@@ -5,9 +5,19 @@ type Copy = {
   eyebrow: string;
   heroTitle: string;
   heroLead: string;
+  promoLabel: string;
+  promoBody: string;
+  promoPoints: string[];
+  promoHow: string;
+  promoCourse: string;
+  promoChallenge: string;
+  verified: string;
+  instructorsTitle: string;
+  instructorsLead: string;
+  teaches: string;
+  yearsExp: string;
   createAccount: string;
   logIn: string;
-  step: string;
   how: string;
   steps: string[];
   freeStrip: string;
@@ -72,9 +82,23 @@ export const copy: Record<Lang, Copy> = {
     eyebrow: "For young people in Myanmar and the IT companies that hire them.",
     heroTitle: "Skills that get you in",
     heroLead: "Learn IT skills, get certified, solve a real company task, and get an interview. Free to start.",
+    promoLabel: "The Citadel",
+    promoBody: "Learn IT skills, get certified, and solve a real task from a verified company. Then get an interview and an internship.",
+    promoPoints: [
+      "Free to start. The first 25% of every course is free.",
+      "A certificate you earn by passing a real test.",
+      "Real challenges from verified companies, then an interview.",
+    ],
+    promoHow: "See how it works",
+    promoCourse: "Frontend basics",
+    promoChallenge: "Build a responsive pricing card",
+    verified: "Verified",
+    instructorsTitle: "Meet our instructors",
+    instructorsLead: "Every course is taught by someone who works in the field.",
+    teaches: "Teaches",
+    yearsExp: "+ yrs experience",
     createAccount: "Start free",
     logIn: "Log in",
-    step: "Step",
     how: "How it works",
     steps: [
       "Set a goal and get an AI roadmap",
@@ -147,9 +171,23 @@ export const copy: Record<Lang, Copy> = {
     eyebrow: "မြန်မာနိုင်ငံက လူငယ်တွေနဲ့ သူတို့ကို ခန့်မယ့် IT ကုမ္ပဏီတွေအတွက်။",
     heroTitle: "အလုပ်ဝင်နိုင်မယ့် ကျွမ်းကျင်မှု",
     heroLead: "IT ကျွမ်းကျင်မှု သင်ယူပါ၊ လက်မှတ်ရယူပါ၊ ကုမ္ပဏီရဲ့ တကယ့်အလုပ်ကို ဖြေရှင်းပြီး အင်တာဗျူးရယူပါ။ အခမဲ့ စတင်နိုင်ပါတယ်။",
+    promoLabel: "စီတာဒယ်",
+    promoBody: "IT ကျွမ်းကျင်မှု သင်ယူပါ၊ လက်မှတ်ရယူပါ၊ အတည်ပြုထားသော ကုမ္ပဏီရဲ့ တကယ့်အလုပ်ကို ဖြေရှင်းပါ။ ပြီးရင် အင်တာဗျူးနဲ့ အလုပ်သင် ရယူပါ။",
+    promoPoints: [
+      "အခမဲ့ စတင်နိုင်ပါတယ်။ သင်တန်းတိုင်းရဲ့ ပထမ ၂၅% က အခမဲ့ပါ။",
+      "တကယ့် စာမေးပွဲ အောင်မှ ရတဲ့ လက်မှတ်။",
+      "အတည်ပြုထားသော ကုမ္ပဏီတွေရဲ့ တကယ့် စိန်ခေါ်မှု၊ ပြီးရင် အင်တာဗျူး။",
+    ],
+    promoHow: "ဘယ်လို လုပ်သလဲ ကြည့်ရန်",
+    promoCourse: "Frontend အခြေခံ",
+    promoChallenge: "ဖုန်းနဲ့ ကိုက်ညီသော ဈေးနှုန်းကတ် တည်ဆောက်ပါ",
+    verified: "အတည်ပြုပြီး",
+    instructorsTitle: "ကျွန်ုပ်တို့ရဲ့ ဆရာများကို တွေ့ဆုံပါ",
+    instructorsLead: "သင်တန်းတိုင်းကို လုပ်ငန်းခွင်ထဲမှာ အလုပ်လုပ်နေသူက သင်ပေးပါတယ်။",
+    teaches: "သင်ပေးသည်",
+    yearsExp: "+ နှစ် အတွေ့အကြုံ",
     createAccount: "အခမဲ့ စတင်ရန်",
     logIn: "အကောင့်ဝင်ရန်",
-    step: "အဆင့်",
     how: "ဘယ်လို လုပ်သလဲ",
     steps: [
       "ပန်းတိုင်သတ်မှတ်ပြီး AI လမ်းကြောင်း ရယူပါ",
