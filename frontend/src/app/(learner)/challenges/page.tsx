@@ -106,21 +106,34 @@ export default function Challenges() {
           // Locked challenges lead to the course that unlocks them, so the card is never a dead end.
           const href = state === "locked" ? `/courses/${c.courseId}` : `/challenges/${c.id}`;
           const action = state === "open" ? "Start challenge" : state === "locked" ? "Go to course" : sub?.status === "needs-work" ? "Improve answer" : "View submission";
+          // Only an unlocked challenge makes the whole card a link; a locked one keeps just its "Go to course" button.
+          const locked = state === "locked";
+          const companyUser = s.users.find((u) => u.companyId === company.id);
           return (
             <li key={c.id}>
-              <Card className={`${cardLinkClass} flex flex-col gap-4 !p-5 sm:flex-row sm:items-center`}>
+              <Card className={`${locked ? "" : cardLinkClass} flex flex-col gap-4 !p-5 sm:flex-row sm:items-center`}>
                 <CompanyMark company={company} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 text-body-sm text-muted">
-                    {company.name}
+                    {companyUser ? (
+                      <Link href={`/profile/${companyUser.id}`} className="relative z-10 rounded font-medium text-ink hover:text-burgundy hover:underline">
+                        {company.name}
+                      </Link>
+                    ) : (
+                      company.name
+                    )}
                     <span className="relative z-10">
                       <VerifiedBadge company={company} />
                     </span>
                   </div>
                   <h2 className="mt-1 text-h4">
-                    <Link href={href} className={`${cardLinkStretch} group-hover:text-burgundy`}>
-                      {c.title}
-                    </Link>
+                    {locked ? (
+                      c.title
+                    ) : (
+                      <Link href={href} className={`${cardLinkStretch} group-hover:text-burgundy`}>
+                        {c.title}
+                      </Link>
+                    )}
                   </h2>
                   <p className="mt-1 line-clamp-2 text-body-sm text-muted">{c.task}</p>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
