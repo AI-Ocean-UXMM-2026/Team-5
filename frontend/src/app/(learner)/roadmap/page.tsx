@@ -37,7 +37,7 @@ export default function Home() {
     return (
       <div className="mx-auto flex max-w-xl flex-col items-center gap-4 py-10 text-center">
         <Mascot pose="peek" size={140} />
-        <h1 className="text-h2">{x("Let's find your direction", "သင့်လမ်းကြောင်းကို ရှာကြမယ်")}</h1>
+        <h1 className="text-h3 tracking-[-0.02em] sm:text-h2">{x("Let's find your direction", "သင့်လမ်းကြောင်းကို ရှာကြမယ်")}</h1>
         <p className="text-body-lg text-muted">
           {x("Pick a career goal and AI puts the right courses in order for you.", "ပန်းတိုင်ရွေးလိုက်ရင် AI က သင့်တော်တဲ့ သင်တန်းတွေကို အစီအစဉ်ချပေးပါမယ်။")}
         </p>

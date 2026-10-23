@@ -44,7 +44,7 @@ export default function PostPage() {
           <Author userId={post.authorId} at={post.at} />
           <Badge tone={post.kind === "challenge" ? "highlight" : "neutral"}>{topicName(s, post, lang)}</Badge>
         </div>
-        <h1 className="text-h2">{post.title}</h1>
+        <h1 className="text-h3 tracking-[-0.02em] sm:text-h2">{post.title}</h1>
         <p className="whitespace-pre-wrap text-body-lg">{post.body}</p>
         <div className="flex justify-end">
           <ReportButton targetId={post.id} authorId={post.authorId} />

@@ -164,9 +164,9 @@
 }
 .lh-heroCopy h1 {
   margin-top: 4px;
-  font-size: clamp(28px, 3.4vw, 38px);
-  line-height: 1.15;
-  letter-spacing: -0.035em;
+  font-size: clamp(22px, 2.6vw, 28px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   color: #fff;
 }
 .lh-heroChips {

@@ -78,12 +78,12 @@ export function CompanyProfile({ company, own }: { company: Company; own: boolea
 
   return (
     <>
+      {!own && <Breadcrumb items={[{ label: company.name }]} />}
       {editing ? (
-        <div className="mb-8">
-          <Breadcrumb items={[{ label: "Profile", onClick: close }, { label: "Edit profile" }]} />
-          <h1 className="text-h2">Edit profile</h1>
-          <p className="mt-2 font-heading text-h4 font-medium text-muted">{company.name}</p>
-        </div>
+        <>
+          <Breadcrumb items={[{ label: "Company page", onClick: close }, { label: "Edit profile" }]} />
+          <PageHeader title="Edit profile" intro={company.name} />
+        </>
       ) : (
         <PageHeader title={company.name} intro={company.about} media={<CompanyLogo company={company} own={own} />} badge={<VerifiedBadge company={company} />}>
           {own && (

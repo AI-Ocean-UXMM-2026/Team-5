@@ -33,18 +33,18 @@ export function Badge({ tone = "neutral", children }: { tone?: keyof typeof tone
 
 export { LockIcon } from "./LockIcon";
 
-/** The one page header used across the signed-in app: title, optional intro and actions, then a divider. */
+/** The one page header used across the signed-in app: title, optional intro and actions. The breadcrumb lives in the top bar. */
 export function PageHeader({ title, intro, media, badge, children }: { title: string; intro?: string; pose?: Pose; media?: React.ReactNode; badge?: React.ReactNode; children?: React.ReactNode }) {
   return (
-    <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="flex min-w-0 items-center gap-4">
         {media}
         <div className="min-w-0">
-          <h1 className="flex flex-wrap items-center gap-3 text-h2 tracking-[-0.03em] sm:text-h1">
+          <h1 className="flex flex-wrap items-center gap-3 text-h3 tracking-[-0.02em] sm:text-h2">
             {title}
             {badge}
           </h1>
-          {intro && <p className="mt-2 max-w-2xl text-body-lg text-muted">{intro}</p>}
+          {intro && <p className="mt-1.5 max-w-2xl text-body text-muted">{intro}</p>}
         </div>
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}

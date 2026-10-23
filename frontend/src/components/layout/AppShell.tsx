@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { type Area, homePath, redirectFor } from "@/lib/access";
+import { CrumbProvider, CrumbTrail, type Crumb } from "@/components/ui/Breadcrumb";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { copy } from "@/lib/i18n";
 import { useCourses } from "@/lib/catalogue";
@@ -267,6 +268,7 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
   const lang: Lang = s?.lang === "my" ? "my" : "en";
   const [drawer, setDrawer] = useState({ pathname, open: false });
   const [confirmReset, setConfirmReset] = useState(false);
+  const [pageCrumbs, setPageCrumbs] = useState<Crumb[] | null>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const drawerOpen = drawer.pathname === pathname && drawer.open;
   const setDrawerOpen = (open: boolean) => setDrawer({ pathname, open });
@@ -296,12 +298,17 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
   const me = s.users.find((u) => u.id === s.sessionUserId);
   const nav = navFor(s, lang);
   const t = copy[lang];
-  // Profiles sit outside the sidebar groups (they open from the account card), so they get their own label.
-  const current =
-    nav.flatMap((g) => g.items.map((item) => ({ group: g.label, item }))).find(({ item }) => isActive(pathname, item)) ??
-    (pathname.startsWith("/profile/")
-      ? { group: lang === "my" ? "အကောင့်" : "Account", item: { href: pathname, icon: "users" as const, label: lang === "my" ? "ကိုယ်ရေးအကျဉ်း" : "Profile" } }
-      : undefined);
+  // Pages with a deeper path set their own trail through <Breadcrumb>; the rest show the section they belong to.
+  const section = nav.flatMap((g) => g.items).find((item) => isActive(pathname, item));
+  const crumbs: Crumb[] =
+    pageCrumbs ??
+    (section
+      ? [{ label: section.label }]
+      : pathname.startsWith("/profile/")
+        ? [{ label: lang === "my" ? "ကိုယ်ရေးအကျဉ်း" : "Profile" }]
+        : pathname.startsWith("/legal")
+          ? [{ label: t.trustHelp }]
+          : []);
   const footer = (
     <footer className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-5 text-caption text-muted md:px-8 lg:px-10">
       <p>{t.rights}</p>
@@ -337,7 +344,7 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-8 md:px-8 lg:px-10">{children}</main>
+        <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 pt-6 pb-10 md:px-8 lg:px-10">{children}</main>
         {footer}
       </div>
     );
@@ -359,7 +366,7 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[248px_minmax(0,1fr)]">
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-white md:flex">{sidebar()}</aside>
+      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-white md:flex print:hidden">{sidebar()}</aside>
 
       {drawerOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
@@ -371,7 +378,7 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur print:hidden">
           <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-3 px-4 md:px-8 lg:px-10">
             <button
               type="button"
@@ -386,19 +393,16 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
             <Link href={homePath(s)} className="shrink-0 md:hidden" aria-label="The Citadel home">
               <Image src="/logo/the-citadel-icon-primary.png" alt="" width={32} height={32} className="size-8" />
             </Link>
-            {current && (
-              <p className="min-w-0 truncate text-sm">
-                <span className="hidden text-muted sm:inline">{current.group} / </span>
-                <span className="font-semibold">{current.item.label}</span>
-              </p>
-            )}
-            <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            {crumbs.length > 0 && <CrumbTrail items={crumbs} className="flex-1" />}
+            <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
               {me && nav.length > 0 && <Notifications s={s} userId={me.id} />}
               <LanguageSwitch lang={lang} label={t.language} />
             </div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-8 md:px-8 lg:px-10">{children}</main>
+        <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 pt-6 pb-10 md:px-8 lg:px-10">
+          <CrumbProvider value={setPageCrumbs}>{children}</CrumbProvider>
+        </main>
         {footer}
       </div>
 

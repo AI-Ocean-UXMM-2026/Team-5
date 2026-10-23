@@ -9,7 +9,6 @@ import {
   AuthFrame,
   AuthIcon,
   AuthInput,
-  AuthNote,
 } from "@/components/auth/AuthFrame";
 import { Mascot } from "@/components/ui/Mascot";
 import { copy } from "@/lib/i18n";
@@ -27,8 +26,6 @@ export default function Login() {
   const [error, setError] = useState("");
   const company = role === "company";
   const logIn = (id: string) => setState((st) => ({ ...st, sessionUserId: id }));
-  // Demo accounts have no passwords, so each role lists its accounts to sign in with one tap.
-  const demoAccounts = s.users.filter((u) => u.role === role);
 
   return (
     <AuthFrame>
@@ -136,32 +133,6 @@ export default function Login() {
           {company ? x("Register your company", "ကုမ္ပဏီ မှတ်ပုံတင်ပါ") : x("Create an account", "အကောင့်ဖန်တီးပါ")}
         </Link>
       </p>
-      <div className="ca-loginFoot">
-        <AuthNote>
-          {x(
-            "Demo access · no password required.",
-            "နမူနာအသုံးပြုမှု · စကားဝှက်မလိုအပ်ပါ။",
-          )}
-        </AuthNote>
-        {demoAccounts.length > 0 && (
-          <ul className="ca-demoAccounts" aria-label={x("Demo accounts", "နမူနာအကောင့်များ")}>
-            {demoAccounts.map((u) => {
-              const status = s.companies.find((c) => c.id === u.companyId)?.status;
-              return (
-                <li key={u.id}>
-                  <button type="button" onClick={() => logIn(u.id)}>
-                    <strong>{u.name}</strong>
-                    <small>
-                      {u.email}
-                      {company && (status === "verified" ? x(" · Verified", " · အတည်ပြုပြီး") : x(" · Not verified yet", " · မအတည်ပြုရသေး"))}
-                    </small>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
     </AuthFrame>
   );
 }

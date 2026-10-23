@@ -45,12 +45,13 @@ export default function Profile() {
 
   return (
     <>
+      {/* Someone else's profile: companies usually arrive from Candidates. */}
+      {!own && <Breadcrumb items={me.role === "company" ? [{ label: "Candidates", href: "/company/candidates" }, { label: user.name }] : [{ label: user.name }]} />}
       {editing ? (
-        <div className="mb-8">
+        <>
           <Breadcrumb items={[{ label: "Profile", onClick: closeEdit }, { label: "Edit profile" }]} />
-          <h1 className="text-h2">Edit profile</h1>
-          <p className="mt-2 font-heading text-h4 font-medium text-muted">{user.name}</p>
-        </div>
+          <PageHeader title="Edit profile" intro={user.name} />
+        </>
       ) : (
         <PageHeader title={user.name} intro={user.headline}>
           {own && (

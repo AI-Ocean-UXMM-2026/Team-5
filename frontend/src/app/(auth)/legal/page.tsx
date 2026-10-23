@@ -9,7 +9,7 @@ export default function Legal() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-10">
-      <h1 className="text-h2">{t.trustHelp}</h1>
+      <h1 className="text-h3 tracking-[-0.02em] sm:text-h2">{t.trustHelp}</h1>
       <section id="how" className="scroll-mt-8">
         <h2 className="text-h3">{t.how}</h2>
         <ol className="mt-3 flex list-decimal flex-col gap-2 pl-5 text-body-lg">

@@ -1,23 +1,29 @@
+"use client";
+
 import Link from "next/link";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef } from "react";
 
-type Crumb = { label: string; href?: string; onClick?: () => void };
+export type Crumb = { label: string; href?: string; onClick?: () => void };
 
-export function Breadcrumb({ items, className = "" }: { items: Crumb[]; className?: string }) {
+/** The trail itself. The app shell shows it in the top bar; pages hand it their crumbs through <Breadcrumb>. */
+export function CrumbTrail({ items, className = "" }: { items: Crumb[]; className?: string }) {
   return (
-    <nav aria-label="Breadcrumb" className={`mb-4 ${className}`}>
-      <ol className="flex flex-wrap items-center gap-2 text-body-sm">
+    <nav aria-label="Breadcrumb" className={`min-w-0 ${className}`}>
+      <ol className="flex min-w-0 items-center gap-2 text-body-sm">
         {items.flatMap((item, i) => {
           const last = i === items.length - 1;
+          // Phones only have room for the page and the step above it.
+          const hideOnPhone = i < items.length - 2 ? "hidden sm:flex" : "flex";
           const crumb = (
-            <li key={i} aria-current={last ? "page" : undefined} className={last ? "font-medium" : undefined}>
+            <li key={i} aria-current={last ? "page" : undefined} className={`${hideOnPhone} min-w-0 ${last ? "font-semibold" : "shrink-0"}`}>
               {last ? (
-                item.label
+                <span className="truncate">{item.label}</span>
               ) : item.href ? (
-                <Link href={item.href} className="text-muted hover:text-burgundy">
+                <Link href={item.href} className="truncate text-muted hover:text-burgundy">
                   {item.label}
                 </Link>
               ) : (
-                <button type="button" onClick={item.onClick} className="text-muted hover:text-burgundy">
+                <button type="button" onClick={item.onClick} className="truncate text-muted hover:text-burgundy">
                   {item.label}
                 </button>
               )}
@@ -25,7 +31,7 @@ export function Breadcrumb({ items, className = "" }: { items: Crumb[]; classNam
           );
           if (i === 0) return [crumb];
           return [
-            <li key={`sep-${i}`} aria-hidden className="text-subtle">
+            <li key={`sep-${i}`} aria-hidden className={`${hideOnPhone} shrink-0 text-subtle`}>
               /
             </li>,
             crumb,
@@ -34,6 +40,28 @@ export function Breadcrumb({ items, className = "" }: { items: Crumb[]; classNam
       </ol>
     </nav>
   );
+}
+
+const CrumbSlot = createContext<((items: Crumb[] | null) => void) | null>(null);
+
+export const CrumbProvider = CrumbSlot.Provider;
+
+/** Sets the page's breadcrumb in the app shell's top bar. Outside the shell it renders in place. */
+export function Breadcrumb({ items, className = "" }: { items: Crumb[]; className?: string }) {
+  const set = useContext(CrumbSlot);
+  const latest = useRef(items);
+  useLayoutEffect(() => {
+    latest.current = items;
+  });
+  // Re-send only when the trail itself changes; click handlers always call the page's latest one.
+  const key = items.map((item) => `${item.label}|${item.href ?? ""}|${item.onClick ? 1 : 0}`).join("/");
+  useEffect(() => {
+    if (!set) return;
+    set(latest.current.map((item, i) => (item.onClick ? { ...item, onClick: () => latest.current[i]?.onClick?.() } : item)));
+    return () => set(null);
+  }, [set, key]);
+  if (set) return null;
+  return <CrumbTrail items={items} className={`mb-4 ${className}`} />;
 }
 
 export function BackLink({ href, children }: { href: string; children: React.ReactNode }) {
