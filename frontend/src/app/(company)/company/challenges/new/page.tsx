@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AiPanel } from "@/components/ui/AiPanel";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Card";
 import { Input, Select, Textarea } from "@/components/ui/Field";
@@ -24,6 +25,7 @@ export default function NewChallenge() {
 
   return (
     <>
+      <Breadcrumb items={[{ label: "Challenges", href: "/company/challenges" }, { label: "Post a challenge" }]} />
       <PageHeader title="Post a challenge" intro="Pick the skill you need. AI drafts a task and rubric that you can edit before posting." />
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
         <Card>

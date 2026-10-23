@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { LinkButton } from "@/components/ui/Button";
-import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, PageHeader } from "@/components/ui/Card";
 import { courseTitle } from "@/lib/i18n";
 import { counted } from "@/lib/rules";
 import { courses } from "@/lib/seed";
@@ -23,10 +23,10 @@ export default function CompanyChallenges() {
           const subs = s.submissions.filter((x) => x.challengeId === c.id);
           const waiting = subs.filter((x) => x.status === "submitted").length;
           return (
-            <Card key={c.id} className="group relative flex flex-col gap-4 transition-shadow hover:shadow-md">
+            <Card key={c.id} className={`${cardLinkClass} flex flex-col gap-4`}>
               <div>
                 <h2 className="text-h4">
-                  <Link href={`/company/challenges/${c.id}`} className="group-hover:text-burgundy after:absolute after:inset-0 after:rounded-2xl">
+                  <Link href={`/company/challenges/${c.id}`} className={`${cardLinkStretch} group-hover:text-burgundy`}>
                     {c.title}
                   </Link>
                 </h2>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Badge, Card, Empty, LockIcon, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, LockIcon, PageHeader } from "@/components/ui/Card";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { courseTitle } from "@/lib/i18n";
 import { challengeUnlocked } from "@/lib/rules";
@@ -25,7 +25,7 @@ export default function Challenges() {
           const unlocked = challengeUnlocked(s.certificates, me.id, c.courseId);
           const sub = s.submissions.find((x) => x.challengeId === c.id && x.learnerId === me.id);
           return (
-            <Card key={c.id} className={`relative flex flex-col gap-2 ${unlocked ? "group transition-shadow hover:shadow-md" : ""}`}>
+            <Card key={c.id} className={`flex flex-col gap-2 ${unlocked ? cardLinkClass : ""}`}>
               <div className="flex flex-wrap items-center gap-2 text-body-sm text-muted">
                 {company.name}
                 <span className="relative z-10">
@@ -35,7 +35,7 @@ export default function Challenges() {
               <h2 className="text-h4">
                 {unlocked ? (
                   // The link's ::after covers the whole card so the card is clickable.
-                  <Link href={`/challenges/${c.id}`} className="group-hover:text-burgundy after:absolute after:inset-0 after:rounded-2xl">
+                  <Link href={`/challenges/${c.id}`} className={`${cardLinkStretch} group-hover:text-burgundy`}>
                     {c.title}
                   </Link>
                 ) : (

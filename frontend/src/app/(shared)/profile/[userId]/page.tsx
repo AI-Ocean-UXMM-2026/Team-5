@@ -1,16 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { CompanyProfile } from "@/components/CompanyProfile";
 import { RatingsList } from "@/components/RatingForm";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
-import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, cardLinkClass, Empty, PageHeader } from "@/components/ui/Card";
 import { Detail, FieldIcon } from "@/components/ui/Detail";
 import { Input } from "@/components/ui/Field";
 import { courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
-import { setState, useData } from "@/lib/store";
+import { progressOf, setState, useData } from "@/lib/store";
 
 export default function Profile() {
   const { userId } = useParams<{ userId: string }>();
@@ -33,21 +35,7 @@ export default function Profile() {
     <>
       {editing ? (
         <div className="mb-8">
-          <nav aria-label="Breadcrumb" className="mb-4">
-            <ol className="flex items-center gap-2 text-body-sm">
-              <li>
-                <button type="button" onClick={closeEdit} className="text-muted hover:text-burgundy">
-                  Profile
-                </button>
-              </li>
-              <li aria-hidden className="text-subtle">
-                /
-              </li>
-              <li aria-current="page" className="font-medium">
-                Edit profile
-              </li>
-            </ol>
-          </nav>
+          <Breadcrumb items={[{ label: "Profile", onClick: closeEdit }, { label: "Edit profile" }]} />
           <h1 className="text-h2">Edit profile</h1>
           <p className="mt-2 font-heading text-h4 font-medium text-muted">{user.name}</p>
         </div>
@@ -104,11 +92,15 @@ export default function Profile() {
           <h2 className="mt-6 mb-3 text-h4">Skills</h2>
           <div className="flex flex-wrap gap-2">
             {user.skills.length ? (
-              user.skills.map((k) => (
-                <Badge key={k} tone="primary">
-                  {k}
-                </Badge>
-              ))
+              user.skills.map((k) => {
+                const level = progressOf(s, user.id).skillLevels?.[k];
+                const word = level === "comfortable" ? (lang === "my" ? "ရင်းနှီးသည်" : "Comfortable") : lang === "my" ? "အနည်းငယ်" : "A little";
+                return (
+                  <Badge key={k} tone="primary">
+                    {level ? `${k} · ${word}` : k}
+                  </Badge>
+                );
+              })
             ) : (
               <p className="text-muted">No skills listed yet.</p>
             )}
@@ -117,16 +109,18 @@ export default function Profile() {
           {!certs.length && <p className="text-muted">No certificates yet.</p>}
           <ul className="flex flex-col gap-2">
             {certs.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-3">
-                <span className="inline-flex items-center gap-2">
-                  <span className="text-burgundy">
-                    <FieldIcon kind="certificate" />
+              <li key={c.id}>
+                <Link href={`/certificates/${c.id}`} className={`${cardLinkClass} flex items-center justify-between gap-3 rounded-xl border border-line px-3 py-2`}>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="text-burgundy">
+                      <FieldIcon kind="certificate" />
+                    </span>
+                    {courseTitle(courses.find((x) => x.id === c.courseId), lang)}
                   </span>
-                  {courseTitle(courses.find((x) => x.id === c.courseId), lang)}
-                </span>
-                <span className="text-body-sm text-muted">
-                  {c.score}% · {c.issuedAt}
-                </span>
+                  <span className="text-body-sm text-muted">
+                    {c.score}% · {c.issuedAt}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>

@@ -1,0 +1,75 @@
+-- One skill name for courses, the roadmap, and the profile.
+CREATE TABLE skills (
+  id text PRIMARY KEY,
+  label_en text NOT NULL,
+  label_my text NOT NULL
+);
+
+CREATE TABLE goal_skills (
+  goal_id text NOT NULL,
+  skill_id text NOT NULL REFERENCES skills (id),
+  position integer NOT NULL,
+  PRIMARY KEY (goal_id, skill_id)
+);
+
+INSERT INTO skills (id, label_en, label_my) VALUES
+  ('html', 'HTML', 'HTML'),
+  ('css', 'CSS', 'CSS'),
+  ('javascript', 'JavaScript', 'JavaScript'),
+  ('git', 'Git', 'Git'),
+  ('responsive', 'Responsive design', 'ဖုန်းနဲ့ ကိုက်ညီသော ဒီဇိုင်း'),
+  ('react', 'React', 'React'),
+  ('python', 'Python', 'Python'),
+  ('javascript-node', 'JavaScript (Node)', 'JavaScript (Node)'),
+  ('sql', 'SQL', 'SQL'),
+  ('apis', 'APIs', 'API'),
+  ('linux', 'Linux basics', 'Linux အခြေခံ'),
+  ('figma', 'Figma', 'Figma'),
+  ('wireframing', 'Wireframing', 'ဝါယာဖရိမ်'),
+  ('user-research', 'User research', 'အသုံးပြုသူ သုတေသန'),
+  ('color-type', 'Color and typography', 'အရောင်နှင့် စာလုံး'),
+  ('prototyping', 'Prototyping', 'ပရိုတိုတိုက်'),
+  ('charts', 'Charts and dashboards', 'ဇယားနှင့် ဒက်ရှ်ဘုတ်'),
+  ('statistics', 'Statistics basics', 'စာရင်းအင်း အခြေခံ'),
+  ('computer', 'Computer basics', 'ကွန်ပျူတာ အခြေခံ'),
+  ('english-reading', 'English (reading)', 'အင်္ဂလိပ်စာ (ဖတ်ခြင်း)'),
+  ('english-speaking', 'English (speaking)', 'အင်္ဂလိပ်စာ (ပြောခြင်း)'),
+  ('excel', 'Excel or Google Sheets', 'Excel သို့မဟုတ် Google Sheets');
+
+INSERT INTO goal_skills (goal_id, skill_id, position) VALUES
+  ('frontend', 'html', 1),
+  ('frontend', 'css', 2),
+  ('frontend', 'javascript', 3),
+  ('frontend', 'git', 4),
+  ('frontend', 'responsive', 5),
+  ('frontend', 'react', 6),
+  ('backend', 'python', 1),
+  ('backend', 'javascript-node', 2),
+  ('backend', 'sql', 3),
+  ('backend', 'apis', 4),
+  ('backend', 'git', 5),
+  ('backend', 'linux', 6),
+  ('fullstack', 'html', 1),
+  ('fullstack', 'css', 2),
+  ('fullstack', 'javascript', 3),
+  ('fullstack', 'react', 4),
+  ('fullstack', 'responsive', 5),
+  ('fullstack', 'python', 6),
+  ('fullstack', 'javascript-node', 7),
+  ('fullstack', 'sql', 8),
+  ('fullstack', 'apis', 9),
+  ('fullstack', 'git', 10),
+  ('fullstack', 'linux', 11),
+  ('uiux', 'figma', 1),
+  ('uiux', 'wireframing', 2),
+  ('uiux', 'user-research', 3),
+  ('uiux', 'color-type', 4),
+  ('uiux', 'prototyping', 5),
+  ('data', 'sql', 1),
+  ('data', 'python', 2),
+  ('data', 'charts', 3),
+  ('data', 'statistics', 4),
+  ('all', 'computer', 1),
+  ('all', 'english-reading', 2),
+  ('all', 'english-speaking', 3),
+  ('all', 'excel', 4);

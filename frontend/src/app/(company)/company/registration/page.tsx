@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { YouTubeFrame } from "@/components/YouTubeFrame";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Card";
 import { Input, Textarea } from "@/components/ui/Field";
@@ -26,6 +27,9 @@ export default function Registration() {
 
   return (
     <>
+      {(company!.status !== "draft" || company!.reviewNote) && (
+        <Breadcrumb items={[{ label: "Registration status", href: "/company/registration/status" }, { label: "Edit registration" }]} />
+      )}
       <PageHeader title="Register your company" intro="Our team checks every company before it can post challenges or internships. This keeps learners safe." pose="wave" />
       {form.reviewNote && (
         <Card role="status" tone="highlight" className="mb-6">

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { AiPanel } from "@/components/ui/AiPanel";
-import { Button, LinkArrow, LinkButton } from "@/components/ui/Button";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Button, LinkButton } from "@/components/ui/Button";
 import { Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Input, Textarea } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
@@ -27,18 +28,31 @@ export default function ChallengeDetail() {
   const [error, setError] = useState("");
 
   const company = s.companies.find((c) => c.id === challenge?.companyId);
-  if (!challenge || company?.status !== "verified") return <Empty>Challenge not found.</Empty>;
+  const crumbs = [
+    { label: "Challenges", href: "/challenges" },
+    { label: challenge?.title ?? "Challenge" },
+  ];
+  if (!challenge || company?.status !== "verified")
+    return (
+      <>
+        <Breadcrumb items={crumbs} />
+        <Empty>Challenge not found.</Empty>
+      </>
+    );
   const companyUser = s.users.find((u) => u.companyId === company.id);
   const course = courses.find((c) => c.id === challenge.courseId);
   if (!challengeUnlocked(s.certificates, me.id, challenge.courseId))
     return (
-      <Empty>
-        This challenge unlocks after you get certified in{" "}
-        <Link href={`/courses/${challenge.courseId}`} className="font-medium text-burgundy">
-          {courseTitle(course, lang)}
-        </Link>
-        .
-      </Empty>
+      <>
+        <Breadcrumb items={crumbs} />
+        <Empty>
+          This challenge unlocks after you get certified in{" "}
+          <Link href={`/courses/${challenge.courseId}`} className="font-medium text-burgundy">
+            {courseTitle(course, lang)}
+          </Link>
+          .
+        </Empty>
+      </>
     );
 
   const editable = !sub || sub.status === "needs-work";
@@ -67,6 +81,7 @@ export default function ChallengeDetail() {
 
   return (
     <>
+      <Breadcrumb items={crumbs} />
       <PageHeader title={challenge.title}>
         <div className="flex items-center gap-2 text-muted">
           {companyUser ? (
@@ -171,9 +186,8 @@ export default function ChallengeDetail() {
                 <summary className="cursor-pointer font-medium">Your answer</summary>
                 <p className="mt-2 whitespace-pre-wrap">{sub.answer}</p>
                 {sub.link && (
-                  <a href={sub.link} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-burgundy underline">
+                  <a href={sub.link} target="_blank" rel="noreferrer" className="mt-2 text-burgundy underline">
                     {sub.link}
-                    <LinkArrow className="size-3" />
                   </a>
                 )}
               </details>

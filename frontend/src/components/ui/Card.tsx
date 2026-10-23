@@ -9,6 +9,11 @@ const cardTones = {
   dashed: "border-dashed border-line bg-white",
 };
 
+export const cardLinkClass =
+  "group relative cursor-pointer transition duration-200 hover:-translate-y-0.5 hover:shadow-md focus-within:ring-2 focus-within:ring-burgundy focus-within:ring-offset-2";
+
+export const cardLinkStretch = "after:absolute after:inset-0 after:rounded-2xl focus:outline-none";
+
 export function Card({ tone = "default", className = "", ...props }: ComponentProps<"section"> & { tone?: keyof typeof cardTones }) {
   return <section className={`rounded-2xl border p-5 sm:p-6 ${cardTones[tone]} ${className}`} {...props} />;
 }

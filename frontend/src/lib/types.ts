@@ -129,6 +129,9 @@ export type Progress = {
   goal: string;
   currentSkills: string;
   hoursPerWeek: number;
+  knownSkills?: { id: string; level: "little" | "comfortable" }[];
+  otherSkill?: string;
+  skillLevels?: Record<string, "little" | "comfortable">;
   roadmap: string[];
   roadmapNote: string;
   doneLessons: string[];

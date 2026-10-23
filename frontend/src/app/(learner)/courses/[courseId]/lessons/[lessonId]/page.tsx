@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Quiz } from "@/components/Quiz";
 import { YouTubeFrame } from "@/components/YouTubeFrame";
 import { AiPanel } from "@/components/ui/AiPanel";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Card, Empty } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Field";
@@ -67,14 +67,17 @@ export default function LessonPage() {
   const certified = s.certificates.some((c) => c.learnerId === me.id && c.courseId === course.id);
   const next = course.lessons[index + 1];
   const nextOpen = !!next && lessonIncluded(course, index + 1, p.paidCourseIds, certified);
+  const crumbs = [
+    { label: "Courses", href: "/courses" },
+    { label: courseTitle(course, lang), href: `/courses/${course.id}` },
+    { label: lesson.title },
+  ];
   if (!lessonIncluded(course, index, p.paidCourseIds, certified))
     return (
-      <Empty>
-        This lesson is on the paid track.{" "}
-        <Link href={`/courses/${course.id}`} className="font-medium text-burgundy">
-          Back to the course
-        </Link>
-      </Empty>
+      <>
+        <Breadcrumb items={crumbs} />
+        <Empty>This lesson is on the paid track.</Empty>
+      </>
     );
   const done = p.doneLessons.includes(lesson.id);
   const complete = done || passedId === lesson.id;
@@ -83,12 +86,7 @@ export default function LessonPage() {
 
   return (
     <>
-      <nav aria-label="Breadcrumb" className="mb-4 text-body-sm text-muted">
-        <Link href={`/courses/${course.id}`} className="hover:text-burgundy">
-          {courseTitle(course, lang)}
-        </Link>{" "}
-        / Lesson {index + 1}
-      </nav>
+      <Breadcrumb items={crumbs} />
       <h1 className="mb-8 text-h2 sm:text-h1">{lesson.title}</h1>
       <LessonVideo videoId={lesson.videoId} title={lesson.title} />
       <div className="grid items-stretch gap-6 lg:grid-cols-[3fr_2fr]">
@@ -101,34 +99,40 @@ export default function LessonPage() {
             </div>
           </Card>
           <Card className="flex flex-1 flex-col">
-            <h2 className="mb-1 text-h3">Practice quiz</h2>
-            <p className="mb-5 text-muted">{done ? "✓ You passed this quiz." : "Get every answer right to complete the lesson."}</p>
-            <Quiz
-              key={lesson.id}
-              questions={lesson.quiz}
-              submitLabel="Check answers"
-              retry={passedId !== lesson.id}
-              onChecked={(correct) => {
-                const perfect = correct === lesson.quiz.length;
-                setPassedId(perfect ? lesson.id : null);
-                if (perfect && !done) updateProgress(me.id, (pr) => ({ ...pr, doneLessons: [...pr.doneLessons, lesson.id] }));
-              }}
-            >
-              {complete && nextOpen && next && (
-                <LinkButton href={`/courses/${course.id}/lessons/${next.id}`} variant="tertiary">
-                  Next lesson
-                </LinkButton>
-              )}
-              {complete && lastLesson && (
-                <LinkButton href={`/courses/${course.id}/test`}>
-                  Finish course
-                </LinkButton>
-              )}
-            </Quiz>
+            {complete && lastLesson ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 py-8 text-center">
+                <Mascot pose="cheer" size={120} />
+                <h2 className="text-h3">You passed the final quiz</h2>
+                <p className="max-w-md text-muted">Every answer was right. Take the final test to finish this course.</p>
+                <LinkButton href={`/courses/${course.id}/test`}>Final test</LinkButton>
+              </div>
+            ) : (
+              <>
+                <h2 className="mb-1 text-h3">Practice quiz</h2>
+                <p className="mb-5 text-muted">{done ? "✓ You passed this quiz." : "Get every answer right to complete the lesson."}</p>
+                <Quiz
+                  key={lesson.id}
+                  questions={lesson.quiz}
+                  submitLabel="Check answers"
+                  retry={passedId !== lesson.id}
+                  onChecked={(correct) => {
+                    const perfect = correct === lesson.quiz.length;
+                    setPassedId(perfect ? lesson.id : null);
+                    if (perfect && !done) updateProgress(me.id, (pr) => ({ ...pr, doneLessons: [...pr.doneLessons, lesson.id] }));
+                  }}
+                >
+                  {complete && nextOpen && next && (
+                    <LinkButton href={`/courses/${course.id}/lessons/${next.id}`} variant="tertiary">
+                      Next lesson
+                    </LinkButton>
+                  )}
+                </Quiz>
+              </>
+            )}
           </Card>
         </div>
         <div className="flex h-full flex-col gap-6">
-          <AiPanel title="Lesson summary" loading={loading}>
+          <AiPanel title="Lesson summary" loading={loading} tone="secondary">
             {summary ? (
               <>
                 <p className="mb-3">{summary.summary}</p>

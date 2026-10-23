@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
 import { Empty } from "@/components/ui/Card";
 import { Mascot } from "@/components/ui/Mascot";
@@ -18,6 +19,14 @@ export default function CertificatePage() {
 
   return (
     <div className="mx-auto max-w-3xl">
+      <Breadcrumb
+        className="print:hidden"
+        items={[
+          { label: "Courses", href: "/courses" },
+          { label: courseTitle(course, lang), href: `/courses/${course.id}` },
+          { label: "Certificate" },
+        ]}
+      />
       <article className="rounded-3xl border-2 border-burgundy bg-white p-10 text-center sm:p-14">
         <Image src="/logo/the-citadel-logo-primary.png" alt="The Citadel" width={112} height={112} className="mx-auto -mt-4 mb-2 size-28" />
         <Mascot pose="teach" size={128} className="mx-auto" />

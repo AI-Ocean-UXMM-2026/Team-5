@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, PageHeader } from "@/components/ui/Card";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { courseTitle } from "@/lib/i18n";
 import { courses } from "@/lib/seed";
@@ -29,9 +29,9 @@ export default function Candidates() {
       {!certified.length && <Empty>No certified learners match.</Empty>}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {certified.map(({ user, certs }) => (
-          <Card key={user.id} className="flex flex-col gap-2">
+          <Card key={user.id} className={`${cardLinkClass} flex flex-col gap-2`}>
             <h2 className="text-h4">
-              <Link href={`/profile/${user.id}`} className="hover:text-burgundy">
+              <Link href={`/profile/${user.id}`} className={`${cardLinkStretch} group-hover:text-burgundy`}>
                 {user.name}
               </Link>
             </h2>
@@ -47,9 +47,7 @@ export default function Candidates() {
                       ✓ {courseTitle(course, lang)} · {c.score}%
                     </Badge>
                     <span className="text-body-sm text-muted">{challenge ? `${challenge.title} · ${sub ? challengeStatus[sub.status] : "Not submitted"}` : "No challenge yet"}</span>
-                    <Link href={`/profile/${user.id}`} className="text-body-sm font-medium text-burgundy">
-                      View profile
-                    </Link>
+                    <span className="text-body-sm font-medium text-burgundy">View profile</span>
                   </div>
                 );
               })}

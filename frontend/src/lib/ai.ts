@@ -20,6 +20,15 @@ async function ask(path: string, body: unknown) {
   return data;
 }
 
+export type SkillChip = { id: string; en: string; my: string; goalId: string };
+
+export async function loadSkills(): Promise<SkillChip[]> {
+  const res = await fetch(`${API}/skills`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !Array.isArray(data.skills)) throw new Error("Skills could not be loaded.");
+  return data.skills;
+}
+
 export const goals = [
   { id: "frontend", label: "Frontend Developer" },
   { id: "backend", label: "Backend Developer" },

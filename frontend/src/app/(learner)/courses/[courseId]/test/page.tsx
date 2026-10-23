@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Quiz } from "@/components/Quiz";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Mascot } from "@/components/ui/Mascot";
@@ -18,10 +19,28 @@ export default function TestPage() {
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
   const course = courses.find((c) => c.id === courseId);
   if (!course) return <Empty>Course not found.</Empty>;
+  const title = courseTitle(course, lang);
+  const crumbs = [
+    { label: "Courses", href: "/courses" },
+    { label: title, href: `/courses/${course.id}` },
+    { label: "Final test" },
+  ];
   const progress = progressOf(s, me.id);
   const cert = s.certificates.find((c) => c.learnerId === me.id && c.courseId === course.id);
-  if (!paidTrackOpen(course, progress.paidCourseIds, !!cert)) return <Empty>The final test is included with the paid track.</Empty>;
-  if (!allLessonsDone(progress.doneLessons, course)) return <Empty>Finish every lesson quiz before you take the test.</Empty>;
+  if (!paidTrackOpen(course, progress.paidCourseIds, !!cert))
+    return (
+      <>
+        <Breadcrumb items={crumbs} />
+        <Empty>The final test is included with the paid track.</Empty>
+      </>
+    );
+  if (!allLessonsDone(progress.doneLessons, course))
+    return (
+      <>
+        <Breadcrumb items={crumbs} />
+        <Empty>Finish every lesson quiz before you take the test.</Empty>
+      </>
+    );
 
   const certId = `cert-${me.id}-${course.id}`;
   const issueCertificate = (score: number) => {
@@ -35,7 +54,8 @@ export default function TestPage() {
 
   return (
     <>
-      <PageHeader title={`Final test: ${courseTitle(course, lang)}`} intro={`${course.test.length} questions. You need ${PASS_MARK * 100}% to pass and get certified.`} pose="focus" />
+      <Breadcrumb items={crumbs} />
+      <PageHeader title={`Final test: ${title}`} intro={`${course.test.length} questions. You need ${PASS_MARK * 100}% to pass and get certified.`} pose="focus" />
       {result ? (
         <Card role="status" tone={result.passed ? "success" : "danger"} className="mx-auto flex max-w-2xl flex-col items-center gap-4 p-8 text-center sm:p-10">
           <Mascot pose={result.passed ? "cheer" : "think"} size={140} />
@@ -58,9 +78,6 @@ export default function TestPage() {
                 Try again
               </Button>
             )}
-            <LinkButton href={`/courses/${course.id}`} variant="secondary">
-              Back to course
-            </LinkButton>
           </div>
         </Card>
       ) : (

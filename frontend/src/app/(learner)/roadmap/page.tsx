@@ -79,7 +79,7 @@ export default function Roadmap() {
                 type="button"
                 aria-pressed={selected === i}
                 onClick={() => setPicked(i)}
-                className={`flex h-full w-full flex-col items-center gap-2 rounded-2xl border bg-white p-4 text-center shadow-sm transition-colors ${selected === i ? "border-burgundy ring-2 ring-burgundy/20" : "border-line hover:border-subtle"} ${open ? "" : "bg-disabled text-muted"}`}
+                className={`flex h-full w-full cursor-pointer flex-col items-center gap-2 rounded-2xl border bg-white p-4 text-center shadow-sm transition duration-200 focus-visible:ring-2 focus-visible:ring-burgundy focus-visible:ring-offset-2 ${open ? "hover:-translate-y-0.5 hover:shadow-md" : "bg-disabled text-muted"} ${selected === i ? "border-burgundy ring-2 ring-burgundy/20" : "border-line hover:border-subtle"}`}
               >
                 <span
                   aria-label={open ? undefined : "Locked"}
@@ -112,7 +112,7 @@ export default function Roadmap() {
               <p className="mt-2 text-body-sm text-muted">
                 {current.c.hours} hours · {current.done} of {current.c.lessons.length} lessons done
               </p>
-              <LinkButton href={`/courses/${current.c.id}`} variant="secondary" className="mt-4">
+              <LinkButton href={`/courses/${current.c.id}`} className="mt-4">
                 Open course
               </LinkButton>
             </>

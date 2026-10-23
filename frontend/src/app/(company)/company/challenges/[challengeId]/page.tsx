@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { Button, LinkArrow } from "@/components/ui/Button";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Dialog } from "@/components/ui/Dialog";
 import { Input, Textarea } from "@/components/ui/Field";
@@ -72,9 +73,8 @@ function Review({ sub }: { sub: Submission }) {
         <summary className="cursor-pointer font-medium">Full answer</summary>
         <p className="mt-2 whitespace-pre-wrap">{sub.answer}</p>
         {sub.link && (
-          <a href={sub.link} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-burgundy underline">
+          <a href={sub.link} target="_blank" rel="noreferrer" className="mt-2 text-burgundy underline">
             {sub.link}
-            <LinkArrow className="size-3" />
           </a>
         )}
       </details>
@@ -163,12 +163,23 @@ export default function ReviewChallenge() {
   const { challengeId } = useParams<{ challengeId: string }>();
   const { s, company, lang } = useData();
   const challenge = s.challenges.find((c) => c.id === challengeId && c.companyId === company?.id);
-  if (!challenge) return <Empty>Challenge not found.</Empty>;
+  const crumbs = [
+    { label: "Challenges", href: "/company/challenges" },
+    { label: challenge?.title ?? "Challenge" },
+  ];
+  if (!challenge)
+    return (
+      <>
+        <Breadcrumb items={crumbs} />
+        <Empty>Challenge not found.</Empty>
+      </>
+    );
   const subs = s.submissions.filter((x) => x.challengeId === challenge.id).sort((a, b) => b.aiScore - a.aiScore);
   const offers = s.interviews.filter((i) => i.challengeId === challenge.id && offerLabel[i.status]);
 
   return (
     <>
+      <Breadcrumb items={crumbs} />
       <PageHeader title={challenge.title} intro={courseTitle(courses.find((c) => c.id === challenge.courseId), lang)} />
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-4">

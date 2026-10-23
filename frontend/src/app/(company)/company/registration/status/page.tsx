@@ -1,6 +1,7 @@
 "use client";
 
 import { YouTubeFrame } from "@/components/YouTubeFrame";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Badge, Card, PageHeader } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Field";
@@ -44,6 +45,7 @@ export default function RegistrationStatus() {
 
   return (
     <>
+      <Breadcrumb items={[{ label: "Registration", href: "/company/registration" }, { label: "Status" }]} />
       <PageHeader title={copy.title} intro={copy.intro} pose={view === "live" ? "excited" : "search"}>
         <Badge tone={copy.tone}>{copy.badge}</Badge>
       </PageHeader>

@@ -1,87 +1,298 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BackLink } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
-import { Card, PageHeader } from "@/components/ui/Card";
-import { Input, Select, Textarea } from "@/components/ui/Field";
-import { goals, makeRoadmap } from "@/lib/ai";
-import { progressOf, updateProgress, useData } from "@/lib/store";
+import { Card } from "@/components/ui/Card";
+import { Select } from "@/components/ui/Field";
+import { Mascot } from "@/components/ui/Mascot";
+import { goals, loadSkills, makeRoadmap, type SkillChip } from "@/lib/ai";
+import { emptyProgress } from "@/lib/seed";
+import {
+  coachStep,
+  keepApplicable,
+  NOTHING,
+  OTHER,
+  profileSkillNames,
+  setChipLevel,
+  skillsForRoadmap,
+  studyHours,
+  toggleChip,
+  type PickedSkill,
+  type SkillLevel,
+} from "@/lib/skills";
+import { progressOf, setState, useData } from "@/lib/store";
+
+const copy = {
+  en: {
+    title: "Set your career goal",
+    reset: "Reset your career goal",
+    intro: "Tell us where you want to go. AI turns it into an ordered roadmap of courses.",
+    goal: "Career goal",
+    choose: "Choose a career goal",
+    skills: "What can you do already?",
+    skillsHint: "Tap everything you already know. No problem if you know nothing yet.",
+    forGoal: "For this goal",
+    anywhere: "Useful anywhere",
+    nothing: "Nothing yet, I am starting fresh",
+    other: "Something else?",
+    little: "A little",
+    comfortable: "Comfortable",
+    hours: "Hours you can study each week",
+    make: "Make my roadmap",
+    remake: "Remake my roadmap",
+    busy: "AI is making your roadmap…",
+    begin: "Let's Begin",
+    bubbleGoal: "Pick a goal to start.",
+    bubbleChosen: "Nice choice. What do you know already?",
+    bubbleSkills: "Good start. Now pick your study hours.",
+    bubbleReady: "Let's build your roadmap.",
+    loadError: "Skills could not be loaded.",
+    mascot: "The Citadel mascot",
+  },
+  my: {
+    title: "အသက်မွေးမှု ပန်းတိုင် သတ်မှတ်ပါ",
+    reset: "အသက်မွေးမှု ပန်းတိုင် ပြန်သတ်မှတ်ပါ",
+    intro: "ဘယ်ကို ရောက်ချင်လဲ ပြောပါ။ AI က သင်တန်းအစီအစဉ် လမ်းပြမြေပုံ ဆွဲပေးပါမယ်။",
+    goal: "အသက်မွေးမှု ပန်းတိုင်",
+    choose: "ပန်းတိုင် ရွေးပါ",
+    skills: "ဘာတွေ တတ်ပြီးပြီလဲ။",
+    skillsHint: "သိပြီးသား အတတ်တွေကို နှိပ်ပါ။ ဘာမှ မသိသေးရင်လည်း ကိစ္စမရှိပါ။",
+    forGoal: "ဒီပန်းတိုင်အတွက်",
+    anywhere: "ဘယ်လမ်းမှာမဆို",
+    nothing: "မသိသေးပါ၊ အစကနေ စပါမယ်",
+    other: "တခြားတစ်ခုခုလား။",
+    little: "အနည်းငယ်",
+    comfortable: "ရင်းနှီးသည်",
+    hours: "တစ်ပတ်လျှင် လေ့လာနိုင်သည့် နာရီ",
+    make: "လမ်းပြမြေပုံ ဆွဲမည်",
+    remake: "လမ်းပြမြေပုံ ပြန်ဆွဲမည်",
+    busy: "AI က လမ်းပြမြေပုံ ဆွဲနေသည်…",
+    begin: "စတင်ကြစို",
+    bubbleGoal: "ပန်းတိုင်တစ်ခု ရွေးပြီး စပါ။",
+    bubbleChosen: "ရွေးချယ်မှု ကောင်းပါတယ်။ ဘာတွေ တတ်ပြီးပြီလဲ။",
+    bubbleSkills: "အစကောင်းပါတယ်။ အခု လေ့လာမည့် အချိန်ကို ရွေးပါ။",
+    bubbleReady: "လမ်းပြမြေပုံကို ဆွဲကြပါစို့။",
+    loadError: "အတတ်စာရင်းကို မဖွင့်နိုင်ပါ။",
+    mascot: "The Citadel mascot",
+  },
+};
+
+const goalMy: Record<string, string> = {
+  frontend: "Frontend ဖန်တီးသူ",
+  backend: "Backend ဖန်တီးသူ",
+  fullstack: "Full-Stack ဖန်တီးသူ",
+  uiux: "UI/UX ဒီဇိုင်နာ",
+  data: "ဒေတာ လေ့လာသူ",
+  unsure: "မသေချာသေးပါ",
+};
+
+const chipClass = (on: boolean) =>
+  `rounded-full border px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burgundy ${on ? "border-burgundy bg-burgundy text-white" : "border-line bg-white text-ink hover:border-subtle"}`;
 
 export default function Onboarding() {
-  const { s, me } = useData();
+  const { s, me, lang } = useData();
   const router = useRouter();
   const current = progressOf(s, me.id);
-  const [goal, setGoal] = useState(goals.some((g) => g.id === current.goal) ? current.goal : "frontend");
-  const [currentSkills, setCurrentSkills] = useState(current.currentSkills);
-  const [hours, setHours] = useState(current.hoursPerWeek);
+  const t = copy[lang];
+  const remake = current.roadmap.length > 0;
+  const [goal, setGoal] = useState(goals.some((item) => item.id === current.goal) ? current.goal : "");
+  const [picked, setPicked] = useState<PickedSkill[]>(current.knownSkills ?? []);
+  const [other, setOther] = useState(current.otherSkill ?? "");
+  const [hours, setHours] = useState<number | null>(remake && [2, 5, 10, 15].includes(current.hoursPerWeek) ? current.hoursPerWeek : null);
+  const [catalogue, setCatalogue] = useState<SkillChip[]>([]);
+  const [loadError, setLoadError] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const remake = current.roadmap.length > 0;
+
+  useEffect(() => {
+    let gone = false;
+    loadSkills()
+      .then((skills) => {
+        if (!gone) setCatalogue(skills);
+      })
+      .catch(() => {
+        if (!gone) setLoadError(copy[lang].loadError);
+      });
+    return () => {
+      gone = true;
+    };
+  }, [lang]);
+
+  useEffect(() => {
+    if (!catalogue.length) return;
+    const allowed = new Set(catalogue.filter((row) => row.goalId === goal || row.goalId === "all").map((row) => row.id));
+    setPicked((prev) => keepApplicable(prev, allowed));
+  }, [catalogue, goal]);
+
+  const step = coachStep(goal, picked.length, hours);
+  const bubble = { goal: t.bubbleGoal, chosen: t.bubbleChosen, skills: t.bubbleSkills, ready: t.bubbleReady }[step];
+  const label = (row: SkillChip) => (lang === "my" ? row.my : row.en);
+  const english = (id: string) => catalogue.find((row) => row.id === id)?.en ?? id;
+
+  function chips(rows: SkillChip[]) {
+    return (
+      <div className="flex flex-wrap items-start gap-3">
+        {rows.map((row) => {
+          const on = picked.find((item) => item.id === row.id);
+          return (
+            <div key={`${row.goalId}-${row.id}`} className="flex max-w-full flex-col items-start gap-1">
+              <button type="button" aria-pressed={!!on} className={chipClass(!!on)} onClick={() => setPicked((prev) => toggleChip(prev, row.id))}>
+                {label(row)}
+              </button>
+              {on ? <LevelToggle level={on.level} little={t.little} comfortable={t.comfortable} onPick={(level) => setPicked((prev) => setChipLevel(prev, row.id, level))} /> : null}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  const forGoal = catalogue.filter((row) => row.goalId === goal);
+  const anywhere = catalogue.filter((row) => row.goalId === "all");
+  const otherOn = picked.find((item) => item.id === OTHER);
 
   return (
     <>
-      <PageHeader
-        title={remake ? "Reset your career goal" : "Set your career goal"}
-        intro="Tell us where you want to go. AI turns it into an ordered roadmap of courses."
-        pose="ready"
-      />
-      <div className={remake ? "grid items-start gap-6 lg:grid-cols-2" : undefined}>
-        <Card className={remake ? undefined : "max-w-xl"}>
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setBusy(true);
-              setError("");
-              try {
-                const result = await makeRoadmap(goal, currentSkills, hours);
-                updateProgress(me.id, (p) => ({ ...p, goal, currentSkills, hoursPerWeek: hours, ...result }));
-                router.push("/roadmap");
-              } catch (err) {
-                setError(err instanceof Error ? err.message : "AI did not answer.");
-                setBusy(false);
-              }
-            }}
-          >
-            <Select label="Career goal" value={goal} onChange={(e) => setGoal(e.target.value)}>
-              {goals.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.label}
-                </option>
-              ))}
-            </Select>
-            <Textarea label="What can you do already?" hint="For example: a little HTML, Excel, English" value={currentSkills} onChange={(e) => setCurrentSkills(e.target.value)} />
-            <Input label="Hours you can study each week" type="number" min={1} max={60} required value={hours} onChange={(e) => setHours(Number(e.target.value))} />
-            <Button type="submit" disabled={busy}>
-              {busy ? "AI is making your roadmap…" : remake ? "Remake my roadmap" : "Make my roadmap"}
-            </Button>
-            {error ? <p className="text-body-sm text-danger">{error}</p> : null}
-          </form>
-        </Card>
-        {remake && (
+      {remake && <BackLink href="/roadmap">Roadmap</BackLink>}
+      <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[3fr_2fr]">
+        <div className="order-2 min-w-0 lg:order-1">
+          <h1 className="text-h2">{remake ? t.reset : t.title}</h1>
+          <p className="mt-2 mb-6 text-body-lg text-muted">{t.intro}</p>
           <Card>
-            <h2 className="text-h4">How to set a career goal</h2>
-            <p className="mt-2 text-muted">A demo. These answers build an ordered list of courses.</p>
-            <dl className="mt-4 flex flex-col gap-3">
-              {[
-                ["Career goal", "Frontend Developer"],
-                ["What you can do already", "A little HTML"],
-                ["Hours each week", "5"],
-              ].map(([k, v]) => (
-                <div key={k}>
-                  <dt className="text-body-sm text-muted">{k}</dt>
-                  <dd>{v}</dd>
+            <form
+              className="flex min-w-0 flex-col gap-5"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!goal) return;
+                setBusy(true);
+                setError("");
+                const hoursPerWeek = studyHours(hours ?? 5);
+                const extra = other.trim().slice(0, 40);
+                const names = profileSkillNames(picked, english, extra);
+                const skillLevels: Record<string, SkillLevel> = {};
+                for (const item of picked) {
+                  if (item.id === NOTHING || item.id === OTHER) continue;
+                  skillLevels[english(item.id)] = item.level;
+                }
+                if (otherOn && extra) skillLevels[extra] = otherOn.level;
+                try {
+                  const result = await makeRoadmap(goal, skillsForRoadmap(picked, english, extra), hoursPerWeek);
+                  setState((st) => ({
+                    ...st,
+                    users: st.users.map((user) => (user.id === me.id ? { ...user, skills: names } : user)),
+                    progress: {
+                      ...st.progress,
+                      [me.id]: {
+                        ...(st.progress[me.id] ?? emptyProgress),
+                        goal,
+                        currentSkills: skillsForRoadmap(picked, english, extra),
+                        hoursPerWeek,
+                        knownSkills: picked,
+                        otherSkill: extra,
+                        skillLevels,
+                        ...result,
+                      },
+                    },
+                  }));
+                  router.push("/roadmap");
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "AI did not answer.");
+                  setBusy(false);
+                }
+              }}
+            >
+              <Select label={t.goal} value={goal} onChange={(e) => setGoal(e.target.value)}>
+                <option value="">{t.choose}</option>
+                {goals.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {lang === "my" ? goalMy[item.id] : item.label}
+                  </option>
+                ))}
+              </Select>
+              <fieldset className="min-w-0">
+                <legend className="text-sm font-medium">{t.skills}</legend>
+                <p className="mt-1 text-body-sm text-muted">{t.skillsHint}</p>
+                {loadError ? <p className="mt-2 text-body-sm text-danger">{loadError}</p> : null}
+                {forGoal.length ? (
+                  <div className="mt-4">
+                    <p className="mb-2 text-body-sm font-semibold text-muted">{t.forGoal}</p>
+                    {chips(forGoal)}
+                  </div>
+                ) : null}
+                {anywhere.length ? (
+                  <div className="mt-4">
+                    <p className="mb-2 text-body-sm font-semibold text-muted">{t.anywhere}</p>
+                    {chips(anywhere)}
+                  </div>
+                ) : null}
+                <div className="mt-4 flex flex-wrap items-start gap-3">
+                  <div className="flex max-w-full flex-col items-start gap-1">
+                    <button type="button" aria-pressed={!!otherOn} className={chipClass(!!otherOn)} onClick={() => setPicked((prev) => toggleChip(prev, OTHER))}>
+                      {t.other}
+                    </button>
+                    {otherOn ? (
+                      <>
+                        <input
+                          maxLength={40}
+                          value={other}
+                          aria-label={t.other}
+                          onChange={(e) => setOther(e.target.value.slice(0, 40))}
+                          className="mt-1 h-10 w-full max-w-xs rounded-xl border border-line bg-white px-3 text-sm text-ink focus-visible:border-burgundy focus-visible:outline-none"
+                        />
+                        <LevelToggle level={otherOn.level} little={t.little} comfortable={t.comfortable} onPick={(level) => setPicked((prev) => setChipLevel(prev, OTHER, level))} />
+                      </>
+                    ) : null}
+                  </div>
+                  <button type="button" aria-pressed={picked.some((item) => item.id === NOTHING)} className={chipClass(picked.some((item) => item.id === NOTHING))} onClick={() => setPicked((prev) => toggleChip(prev, NOTHING))}>
+                    {t.nothing}
+                  </button>
                 </div>
-              ))}
-            </dl>
-            <ol className="mt-4 flex flex-col gap-2 text-muted">
-              <li>1. Career starter: working in IT</li>
-              <li>2. Frontend basics: HTML, CSS and JavaScript</li>
-            </ol>
+              </fieldset>
+              <div>
+                <p className="text-sm font-medium">{t.hours}</p>
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {[2, 5, 10, 15].map((n) => (
+                    <button key={n} type="button" aria-pressed={hours === n} className={chipClass(hours === n)} onClick={() => setHours(n)}>
+                      {n === 15 ? "15+" : n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <Button type="submit" disabled={busy || !goal}>
+                {busy ? t.busy : remake ? t.remake : t.make}
+              </Button>
+              {error ? <p className="text-body-sm text-danger">{error}</p> : null}
+            </form>
           </Card>
-        )}
+        </div>
+        <aside className="order-1 min-w-0 lg:order-2">
+          <div className="flex flex-col items-center rounded-3xl bg-burgundy-tint px-6 py-8 text-center">
+            <p className="font-heading text-h1 font-semibold">{t.begin}</p>
+            <Mascot pose="ready" size={260} alt={t.mascot} priority className="mt-4 h-40 w-40 lg:h-[260px] lg:w-[260px]" />
+            <p className="mt-4 max-w-xs rounded-2xl bg-white px-4 py-3 text-body shadow-sm">{bubble}</p>
+          </div>
+        </aside>
       </div>
     </>
+  );
+}
+
+function LevelToggle({ level, little, comfortable, onPick }: { level: SkillLevel; little: string; comfortable: string; onPick: (level: SkillLevel) => void }) {
+  return (
+    <span className="inline-flex rounded-full border border-line bg-white p-0.5 text-xs">
+      {(["little", "comfortable"] as const).map((value) => (
+        <button
+          key={value}
+          type="button"
+          aria-pressed={level === value}
+          className={`rounded-full px-2 py-0.5 ${level === value ? "bg-burgundy text-white" : "text-muted"}`}
+          onClick={() => onPick(value)}
+        >
+          {value === "little" ? little : comfortable}
+        </button>
+      ))}
+    </span>
   );
 }

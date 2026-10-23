@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button, LinkButton } from "@/components/ui/Button";
-import { Badge, Card, Empty, LockIcon, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, LockIcon, PageHeader } from "@/components/ui/Card";
 import { courseTitle } from "@/lib/i18n";
 import { allLessonsDone, challengeUnlocked, lessonIncluded, paidTrackOpen, previewLessonCount } from "@/lib/rules";
 import { courses } from "@/lib/seed";
@@ -27,21 +28,7 @@ export default function CourseDetail() {
 
   return (
     <>
-      <nav aria-label="Breadcrumb" className="mb-4">
-        <ol className="flex flex-wrap items-center gap-2 text-body-sm">
-          <li>
-            <Link href="/courses" className="text-muted hover:text-burgundy">
-              Courses
-            </Link>
-          </li>
-          <li aria-hidden className="text-subtle">
-            /
-          </li>
-          <li aria-current="page" className="font-medium">
-            {title}
-          </li>
-        </ol>
-      </nav>
+      <Breadcrumb items={[{ label: "Courses", href: "/courses" }, { label: title }]} />
       <PageHeader title={title} intro={course.description} />
       <div className="grid items-stretch gap-6 lg:grid-cols-[2fr_1fr]">
         <Card className="h-full">
@@ -86,12 +73,12 @@ export default function CourseDetail() {
           )}
         </Card>
         <div className="flex h-full flex-col gap-4">
-          <Card className="flex flex-1 flex-col">
+          <Card className={`${cert || (trackOpen && lessonsDone) ? cardLinkClass : ""} flex flex-1 flex-col`}>
             <h2 className="mb-2 text-h4">Final test</h2>
             {cert ? (
               <>
                 <p className="mb-4 text-muted">You passed with {cert.score}%.</p>
-                <LinkButton href={`/certificates/${cert.id}`} variant="secondary">
+                <LinkButton href={`/certificates/${cert.id}`} variant="secondary" className={cardLinkStretch}>
                   View certificate
                 </LinkButton>
               </>
@@ -100,7 +87,9 @@ export default function CourseDetail() {
             ) : lessonsDone ? (
               <>
                 <p className="mb-4 text-muted">All lessons done. Pass with 70% or more to get certified.</p>
-                <LinkButton href={`/courses/${course.id}/test`}>Take the test</LinkButton>
+                <LinkButton href={`/courses/${course.id}/test`} className={cardLinkStretch}>
+                  Take the test
+                </LinkButton>
               </>
             ) : (
               <p className="text-muted">Finish every lesson quiz to unlock the test.</p>
@@ -113,7 +102,7 @@ export default function CourseDetail() {
               {challenges.map((c) => (
                 <li key={c.id}>
                   {unlocked ? (
-                    <Link href={`/challenges/${c.id}`} className="font-medium text-burgundy hover:underline">
+                    <Link href={`/challenges/${c.id}`} className={`${cardLinkClass} block rounded-xl border border-line px-3 py-2 font-medium`}>
                       {c.title}
                     </Link>
                   ) : (

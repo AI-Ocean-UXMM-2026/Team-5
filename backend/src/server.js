@@ -6,6 +6,7 @@ import { fail, matchPath, readJson, send } from "./http.js";
 import { hashPassword, verifyPassword } from "./password.js";
 import { openSession, readSessionId, setSessionCookie, userFromRequest } from "./session.js";
 import { signInWithGoogle } from "./google.js";
+import { listSkills } from "./skills.js";
 import {
   addLesson,
   addQuizQuestion,
@@ -100,6 +101,7 @@ const routes = [
   { method: "POST", path: "/ai/lesson-summary", auth: "none", handle: lessonSummary },
   { method: "POST", path: "/ai/challenge-review", auth: "none", handle: challengeReview },
   { method: "POST", path: "/ai/challenge-draft", auth: "none", handle: challengeDraft },
+  { method: "GET", path: "/skills", auth: "none", handle: listSkills },
   { method: "GET", path: "/courses", auth: "optional", handle: listCourses },
   { method: "POST", path: "/courses", auth: "required", handle: createCourse },
   { method: "GET", path: "/courses/:id", auth: "optional", handle: getCourse },

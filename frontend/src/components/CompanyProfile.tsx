@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import { RatingsList } from "@/components/RatingForm";
-import { Button, LinkArrow } from "@/components/ui/Button";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Button } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Card";
 import { Detail } from "@/components/ui/Detail";
 import { Input, Textarea } from "@/components/ui/Field";
@@ -51,9 +52,8 @@ function CompanyLogo({ company, own }: { company: Company; own: boolean }) {
 
 function linkOrText(value: string) {
   return /^https?:\/\//.test(value) ? (
-    <a href={value} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-burgundy underline-offset-2 hover:underline">
+    <a href={value} target="_blank" rel="noreferrer" className="text-burgundy underline-offset-2 hover:underline">
       {value}
-      <LinkArrow className="size-3" />
     </a>
   ) : (
     value || "—"
@@ -80,21 +80,7 @@ export function CompanyProfile({ company, own }: { company: Company; own: boolea
     <>
       {editing ? (
         <div className="mb-8">
-          <nav aria-label="Breadcrumb" className="mb-4">
-            <ol className="flex items-center gap-2 text-body-sm">
-              <li>
-                <button type="button" onClick={close} className="text-muted hover:text-burgundy">
-                  Profile
-                </button>
-              </li>
-              <li aria-hidden className="text-subtle">
-                /
-              </li>
-              <li aria-current="page" className="font-medium">
-                Edit profile
-              </li>
-            </ol>
-          </nav>
+          <Breadcrumb items={[{ label: "Profile", onClick: close }, { label: "Edit profile" }]} />
           <h1 className="text-h2">Edit profile</h1>
           <p className="mt-2 font-heading text-h4 font-medium text-muted">{company.name}</p>
         </div>

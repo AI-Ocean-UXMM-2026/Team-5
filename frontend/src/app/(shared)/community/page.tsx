@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button, LinkButton } from "@/components/ui/Button";
-import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, PageHeader } from "@/components/ui/Card";
 import { Input, Select, Textarea } from "@/components/ui/Field";
 import { ReportButton } from "@/components/ui/ReportButton";
 import { SearchBar } from "@/components/ui/SearchBar";
@@ -71,18 +71,20 @@ export default function Community() {
         <div className="flex flex-col gap-4 lg:col-start-1 lg:row-start-2">
           {!posts.length && <Empty>No posts here yet.</Empty>}
           {posts.map((p) => (
-            <Card key={p.id} className="flex flex-col gap-2">
+            <Card key={p.id} className={`${cardLinkClass} flex flex-col gap-2`}>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <Author userId={p.authorId} at={p.at} />
+                <span className="relative z-10">
+                  <Author userId={p.authorId} at={p.at} />
+                </span>
                 <Badge tone={p.kind === "challenge" ? "highlight" : "neutral"}>{topicName(s, p, lang)}</Badge>
               </div>
               <h2 className="text-h4">
-                <Link href={`/community/${p.id}`} className="hover:text-burgundy">
+                <Link href={`/community/${p.id}`} className={`${cardLinkStretch} group-hover:text-burgundy`}>
                   {p.title}
                 </Link>
               </h2>
               <p className="line-clamp-2 text-muted">{p.body}</p>
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 pt-1">
                 <div className="flex flex-wrap gap-1">
                   <LinkButton href={`/community/${p.id}#reply`} variant="tertiary">
                     Add comment

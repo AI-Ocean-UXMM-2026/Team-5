@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Field";
@@ -22,16 +22,23 @@ export default function PostPage() {
     if (window.location.hash === "#reply") document.querySelector<HTMLTextAreaElement>("#reply textarea")?.focus();
   }, [postId]);
 
-  if (!post) return <Empty>Post not found.</Empty>;
+  const crumbs = [
+    { label: "Community", href: "/community" },
+    { label: post?.title ?? "Post" },
+  ];
+  if (!post) return (
+    <>
+      <Breadcrumb items={crumbs} />
+      <Empty>Post not found.</Empty>
+    </>
+  );
 
   const contactError = tried && hasContactDetails(reply) ? "Remove phone numbers and email addresses. Keep contact on the platform." : undefined;
   const ownsChallenge = post.kind === "challenge" && company?.status === "verified" && s.challenges.some((c) => c.id === post.topicId && c.companyId === company.id);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
-      <Link href="/community" className="text-body-sm text-muted hover:text-burgundy">
-        ← Community
-      </Link>
+      <Breadcrumb items={crumbs} />
       <Card className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Author userId={post.authorId} at={post.at} />

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Badge, Card, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, cardLinkClass, cardLinkStretch, PageHeader } from "@/components/ui/Card";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { copy, courseTitle, formatMmk } from "@/lib/i18n";
 import { counted } from "@/lib/rules";
@@ -25,14 +25,14 @@ export default function Courses() {
         {shown.map((c) => {
           const unlocks = s.challenges.filter((ch) => ch.courseId === c.id);
           return (
-            <Card key={c.id} className="flex flex-col gap-2">
+            <Card key={c.id} className={`${cardLinkClass} flex flex-col gap-2`}>
               <div className="flex flex-wrap gap-2">
                 <Badge tone={c.priceMmk === 0 ? "success" : "highlight"}>{c.priceMmk === 0 ? t.free : t.paid}</Badge>
                 <Badge>{c.level}</Badge>
                 {roadmap.includes(c.id) && <Badge tone="brand">On your roadmap</Badge>}
               </div>
               <h2 className="text-h4">
-                <Link href={`/courses/${c.id}`} className="hover:text-burgundy">
+                <Link href={`/courses/${c.id}`} className={`${cardLinkStretch} group-hover:text-burgundy`}>
                   {courseTitle(c, lang)}
                 </Link>
               </h2>

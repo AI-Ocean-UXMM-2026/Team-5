@@ -26,6 +26,6 @@ const poses = { wave, teach, search, laptop, wink, cheer, read, love, think, exc
 export type Pose = keyof typeof poses;
 
 // The mascot PNGs have an opaque white background; multiply blends it into the light surfaces.
-export function Mascot({ pose, size = 120, className = "", priority }: { pose: Pose; size?: number; className?: string; priority?: boolean }) {
-  return <Image src={poses[pose]} alt="" width={size} height={size} priority={priority} className={`shrink-0 select-none mix-blend-multiply ${className}`} />;
+export function Mascot({ pose, size = 120, className = "", priority, alt = "" }: { pose: Pose; size?: number; className?: string; priority?: boolean; alt?: string }) {
+  return <Image src={poses[pose]} alt={alt} width={size} height={size} priority={priority} className={`shrink-0 select-none mix-blend-multiply ${className}`} />;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { LinkButton } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
+import { Card, cardLinkClass, cardLinkStretch } from "@/components/ui/Card";
 import { Mascot } from "@/components/ui/Mascot";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { copy, courseTitle } from "@/lib/i18n";
@@ -74,19 +74,19 @@ export default function Landing() {
       </section>
 
       <section className="grid gap-6 md:grid-cols-2">
-        <Card className="flex h-full flex-col gap-4 !p-8 sm:!p-10">
+        <Card className={`${cardLinkClass} flex h-full flex-col gap-4 !p-8 sm:!p-10`}>
           <Mascot pose="teach" size={96} />
           <h2 className="text-h3">{t.forLearners}</h2>
           <p className="text-body-lg text-muted">{t.forLearnersBody}</p>
-          <LinkButton href="/signup" className="mt-auto self-start">
+          <LinkButton href="/signup" className={`mt-auto self-start ${cardLinkStretch}`}>
             {t.startLearning}
           </LinkButton>
         </Card>
-        <Card className="flex h-full flex-col gap-4 !p-8 sm:!p-10">
+        <Card className={`${cardLinkClass} flex h-full flex-col gap-4 !p-8 sm:!p-10`}>
           <Mascot pose="search" size={96} />
           <h2 className="text-h3">{t.forCompanies}</h2>
           <p className="text-body-lg text-muted">{t.forCompaniesBody}</p>
-          <LinkButton href="/signup?role=company" className="mt-auto self-start">
+          <LinkButton href="/signup?role=company" className={`mt-auto self-start ${cardLinkStretch}`}>
             {t.registerCompany}
           </LinkButton>
         </Card>
