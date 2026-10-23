@@ -1,3 +1,4 @@
+import { emptyProgress } from "./seed.ts";
 import type { CoursePayment, State } from "./types";
 
 // shortcut: placeholder accounts for the demo; replace with The Citadel's real wallet numbers before taking real money.
@@ -22,9 +23,10 @@ export function reviewPayment(s: State, paymentId: string, approve: boolean, not
     p.id === paymentId ? { ...p, status: approve ? ("approved" as const) : ("rejected" as const), staffNote: approve ? undefined : note, reviewedAt: day } : p,
   );
   if (!approve) return { ...s, payments };
-  const progress = s.progress[payment.learnerId];
-  const paidCourseIds = [...new Set([...(progress?.paidCourseIds ?? []), payment.courseId])];
-  return { ...s, payments, progress: progress ? { ...s.progress, [payment.learnerId]: { ...progress, paidCourseIds } } : s.progress };
+  // A learner who paid before setting a goal has no progress yet; start one so the course still opens.
+  const progress = s.progress[payment.learnerId] ?? emptyProgress;
+  const paidCourseIds = [...new Set([...(progress.paidCourseIds ?? []), payment.courseId])];
+  return { ...s, payments, progress: { ...s.progress, [payment.learnerId]: { ...progress, paidCourseIds } } };
 }
 
 /** Shrinks a receipt photo so it fits in browser storage (about 100–300 KB). */

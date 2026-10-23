@@ -1,8 +1,13 @@
-import { PASS_MARK } from "./rules";
+import { approveCompany, PASS_MARK } from "./rules";
 import { getCourses } from "./catalogue";
+import { reviewPayment } from "./payments";
 import type { State } from "./types";
 
-export type Notification = { id: string; title: string; body: string; href: string; at: string };
+/**
+ * `approve` stands in for our staff until they have their own screen: opening the notification
+ * applies the decision, then the link shows the page after approval.
+ */
+export type Notification = { id: string; title: string; body: string; href: string; at: string; approve?: (s: State, day: string) => State };
 
 /** Built from the demo data, so a notification appears as soon as its event happens. */
 export function notificationsFor(s: State, userId: string): Notification[] {
@@ -30,10 +35,20 @@ export function notificationsFor(s: State, userId: string): Notification[] {
       });
   }
   for (const pay of s.payments ?? []) {
-    if (pay.learnerId !== userId || pay.status === "pending") continue;
+    if (pay.learnerId !== userId) continue;
     const course = courses.find((c) => c.id === pay.courseId);
     list.push(
-      pay.status === "approved"
+      // Same id before and after approval, so opening it doesn't leave a second unread one behind.
+      pay.status === "pending"
+        ? {
+            id: `payment-${pay.id}`,
+            title: "Payment approved",
+            body: `The full ${course?.title ?? "course"} course is open for you now.`,
+            href: `/courses/${pay.courseId}`,
+            at: pay.submittedAt,
+            approve: (st, day) => reviewPayment(st, pay.id, true, "", day),
+          }
+        : pay.status === "approved"
         ? { id: `payment-${pay.id}`, title: "Payment approved", body: `The full ${course?.title ?? "course"} course is open for you now.`, href: `/courses/${pay.courseId}`, at: pay.reviewedAt ?? pay.submittedAt }
         : { id: `payment-${pay.id}`, title: "We couldn't confirm your payment", body: pay.staffNote ?? "Send your receipt again.", href: `/courses/${pay.courseId}/pay`, at: pay.reviewedAt ?? pay.submittedAt },
     );
@@ -43,6 +58,18 @@ export function notificationsFor(s: State, userId: string): Notification[] {
     const course = courses.find((c) => c.id === cert.courseId);
     list.push({ id: `cert-${cert.id}`, title: `You're certified in ${course?.title ?? "a course"}`, body: `You passed the final test with ${cert.score}%. Its company challenges are open now.`, href: `/certificates/${cert.id}`, at: cert.issuedAt });
   }
+  const company = s.companies.find((c) => c.id === s.users.find((u) => u.id === userId)?.companyId);
+  const approvedId = `company-approved-${company?.id}`;
+  // After approval it stays in the list only for whoever opened it, so companies verified before this never get it.
+  if (company && (company.status === "pending" || (company.status === "verified" && s.seenNotifications?.[userId]?.includes(approvedId))))
+    list.push({
+      id: approvedId,
+      title: "Your company is approved",
+      body: "You're verified. Check your company page, then post your first challenge.",
+      href: "/company/registration/status",
+      at: company.verifiedAt ?? "",
+      approve: company.status === "pending" ? (st, day) => approveCompany(st, company.id, day) : undefined,
+    });
   const progress = s.progress[userId];
   for (const [courseId, score] of Object.entries(progress?.testScores ?? {})) {
     if (score >= PASS_MARK * 100 || s.certificates.some((c) => c.learnerId === userId && c.courseId === courseId)) continue;

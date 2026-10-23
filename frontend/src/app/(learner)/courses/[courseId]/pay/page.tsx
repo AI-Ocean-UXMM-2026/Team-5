@@ -5,9 +5,9 @@ import { useState } from "react";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
-import { Input, Textarea } from "@/components/ui/Field";
+import { Input } from "@/components/ui/Field";
 import { courseTitle, formatMmk } from "@/lib/i18n";
-import { compressImage, latestPayment, methodName, paymentAccounts, reviewPayment } from "@/lib/payments";
+import { compressImage, latestPayment, methodName, paymentAccounts } from "@/lib/payments";
 import { paidTrackOpen } from "@/lib/rules";
 import { useCourses } from "@/lib/catalogue";
 import { newId, progressOf, setState, today, useData } from "@/lib/store";
@@ -23,7 +23,6 @@ export default function PayForCourse() {
   const [fileError, setFileError] = useState("");
   const [tried, setTried] = useState(false);
   const [copied, setCopied] = useState("");
-  const [staffNote, setStaffNote] = useState("We could not find this transfer. Please check the amount and upload a clearer screenshot.");
   if (!course) return <Empty action={<LinkButton href="/courses">See all courses</LinkButton>}>Course not found.</Empty>;
 
   const title = courseTitle(course, lang);
@@ -78,18 +77,6 @@ export default function PayForCourse() {
               </div>
               <p className="text-muted">Our team checks every receipt, usually within 1 working day. We&apos;ll send you a notification when the full course is open.</p>
               <Receipt payment={payment} />
-              {/* Demo only: in the real product our staff do this from their own screen. */}
-              <div className="flex flex-col gap-3 rounded-xl border border-dashed border-line p-4">
-                <p className="text-body-sm font-semibold">Demo controls</p>
-                <p className="text-body-sm text-muted">In the real product our staff check the receipt. Use these to continue the demo.</p>
-                <Button className="self-start" onClick={() => setState((st) => reviewPayment(st, payment.id, true, "", today()))}>
-                  Simulate staff approval
-                </Button>
-                <Textarea label="Message to the learner" value={staffNote} onChange={(e) => setStaffNote(e.target.value)} />
-                <Button variant="secondary" className="self-start" onClick={() => setState((st) => reviewPayment(st, payment.id, false, staffNote.trim() || "We could not confirm this payment.", today()))}>
-                  Reject payment
-                </Button>
-              </div>
             </Card>
           )}
 

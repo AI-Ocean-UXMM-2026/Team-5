@@ -59,6 +59,12 @@ export function registrationView(company: Company | undefined): RegistrationView
   return "none";
 }
 
+/** Our team's decision on a company waiting for review. Only a pending company can be verified. */
+export function approveCompany(s: State, companyId: string, day: string): State {
+  if (s.companies.find((c) => c.id === companyId)?.status !== "pending") return s;
+  return { ...s, companies: s.companies.map((c) => (c.id === companyId ? { ...c, status: "verified", verifiedAt: day, reviewNote: undefined } : c)) };
+}
+
 export function counted(n: number, singular: string, plural = `${singular}s`) {
   return `${n} ${n === 1 ? singular : plural}`;
 }

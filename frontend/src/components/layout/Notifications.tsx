@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { notificationsFor } from "@/lib/notifications";
-import { setState } from "@/lib/store";
+import { setState, today } from "@/lib/store";
 import type { State } from "@/lib/types";
 
 export function Notifications({ s, userId }: { s: State; userId: string }) {
@@ -77,6 +77,7 @@ export function Notifications({ s, userId }: { s: State; userId: string }) {
                     <Link
                       href={n.href}
                       onClick={() => {
+                        if (n.approve) setState((st) => n.approve!(st, today()));
                         markSeen([n.id]);
                         setOpenOn(null);
                       }}

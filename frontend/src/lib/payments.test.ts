@@ -41,3 +41,9 @@ test("latest payment is the newest one for that learner and course", () => {
   assert.equal(latestPayment(s, "u-aye", "qa")?.id, "pay-2");
   assert.equal(latestPayment(s, "u-min", "qa"), undefined);
 });
+
+test("approving a payment opens the course even before the learner has any progress", () => {
+  const noProgress: State = { ...seed, payments: [pending], progress: {} };
+  const next = reviewPayment(noProgress, "pay-1", true, "", "2026-10-24");
+  assert.deepEqual(next.progress["u-aye"].paidCourseIds, ["qa"]);
+});

@@ -2,14 +2,12 @@
 
 import { YouTubeFrame } from "@/components/YouTubeFrame";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Button, LinkButton } from "@/components/ui/Button";
+import { LinkButton } from "@/components/ui/Button";
 import { Badge, Card, PageHeader } from "@/components/ui/Card";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { Textarea } from "@/components/ui/Field";
 import { registrationView } from "@/lib/rules";
-import { setState, today, useData } from "@/lib/store";
+import { setState, useData } from "@/lib/store";
 import type { Company } from "@/lib/types";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const steps = ["Business registration documents", "Office address, phone and domain email", "Website and LinkedIn or Facebook history", "Short call with a company representative", "Internship terms"];
 
@@ -22,8 +20,6 @@ const viewCopy = {
 
 export default function RegistrationStatus() {
   const { company } = useData();
-  const [note, setNote] = useState("Please upload a clearer copy of your registration document.");
-  const [confirmReject, setConfirmReject] = useState(false);
   const view = registrationView(company);
   const update = (patch: Partial<Company>) => setState((st) => ({ ...st, companies: st.companies.map((c) => (c.id === company!.id ? { ...c, ...patch } : c)) }));
   const unseenApproval = view === "live" && !company?.approvalSeen;
@@ -74,7 +70,7 @@ export default function RegistrationStatus() {
                 ))}
               </ol>
               <p className="mt-4 text-muted">
-                We&apos;ll email <span className="font-medium text-ink">{company.email}</span> when the review is done. You can also check this page any time.
+                We&apos;ll email <span className="font-medium text-ink">{company.email}</span> and send you a notification when the review is done. You can also check this page any time.
               </p>
             </>
           )}
@@ -107,34 +103,6 @@ export default function RegistrationStatus() {
             </>
           )}
         </Card>
-        {view !== "live" && (
-          <Card tone="dashed">
-            <h2 className="mb-1 text-h4">Demo controls</h2>
-            <p className="mb-4 text-muted">In the real product our team does this. Use these to continue the demo.</p>
-            <Button onClick={() => update({ status: "verified", verifiedAt: today(), reviewNote: undefined })}>Simulate team approval</Button>
-            <div className="mt-6 flex flex-col gap-3">
-              <Textarea label="Message to the company" value={note} onChange={(e) => setNote(e.target.value)} className="min-h-20" />
-              <div className="flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={() => update({ status: "draft", reviewNote: note })}>
-                  Ask for more information
-                </Button>
-                <Button variant="secondary" onClick={() => setConfirmReject(true)}>
-                  Reject
-                </Button>
-                <ConfirmDialog
-                  open={confirmReject}
-                  onClose={() => setConfirmReject(false)}
-                  onConfirm={() => update({ status: "rejected", reviewNote: note || "We could not confirm this company." })}
-                  title={`Reject ${company.name}?`}
-                  confirmLabel="Reject company"
-                  danger
-                >
-                  <p>The company can&apos;t post challenges or internships, and sees your message as the reason. In this demo it can&apos;t resubmit after a rejection.</p>
-                </ConfirmDialog>
-              </div>
-            </div>
-          </Card>
-        )}
       </div>
     </>
   );
