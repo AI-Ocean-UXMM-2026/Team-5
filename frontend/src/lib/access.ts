@@ -8,6 +8,7 @@ export function homePath(s: State): string {
   if (me.role === "learner") return s.progress[me.id]?.roadmap.length ? "/roadmap" : "/onboarding";
   const company = s.companies.find((c) => c.id === me.companyId);
   if (company?.status === "verified") return company.approvalSeen ? "/company/challenges" : "/company/registration/status";
+  if (company?.status === "approved") return "/company/registration/pay";
   if (company?.status === "pending" || company?.status === "rejected" || company?.reviewNote) return "/company/registration/status";
   return "/company/registration";
 }

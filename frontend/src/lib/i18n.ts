@@ -300,6 +300,22 @@ export function courseTitle(course: { id: string; title: string } | undefined, l
 
 export const formatMmk = (n: number) => `${n.toLocaleString("en-US")} MMK`;
 
+/** "Thu 5 Nov 2026, 10:00" for an interview time saved as "2026-11-05T10:00". */
+export function formatWhen(iso: string) {
+  if (!iso) return "";
+  const [d, t] = iso.split("T");
+  const date = new Date(`${d}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return iso.replace("T", " at ");
+  const day = date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }).replace(",", "");
+  return t ? `${day}, ${t.slice(0, 5)}` : day;
+}
+
+/** How and where an interview happens, e.g. "Video call" or "At the office · No. 1, Pyay Road". */
+export function formatPlace(i: { format?: "video" | "office"; place?: string }) {
+  if (!i.format) return "";
+  return i.format === "video" ? "Video call" : `At the office${i.place ? ` · ${i.place}` : ""}`;
+}
+
 /** Burmese for Myanmar locales, and for visitors whose clock is set to Myanmar. */
 export function defaultLang(languages: readonly string[], timeZone = ""): Lang {
   if (languages.some((l) => l.toLowerCase().startsWith("my"))) return "my";

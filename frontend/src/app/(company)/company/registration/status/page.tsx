@@ -4,6 +4,7 @@ import { YouTubeFrame } from "@/components/YouTubeFrame";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { LinkButton } from "@/components/ui/Button";
 import { Badge, Card, PageHeader } from "@/components/ui/Card";
+import { latestCompanyPayment } from "@/lib/payments";
 import { registrationView } from "@/lib/rules";
 import { setState, useData } from "@/lib/store";
 import type { Company } from "@/lib/types";
@@ -14,13 +15,15 @@ const steps = ["Business registration documents", "Office address, phone and dom
 const viewCopy = {
   waiting: { title: "We're checking your company", badge: "Waiting", tone: "highlight" as const, intro: "This usually takes 2–3 working days. You can't post challenges until you're verified." },
   "needs-info": { title: "We need a bit more information", badge: "More info needed", tone: "highlight" as const, intro: "Update your registration and send it again. You can't post challenges until you're verified." },
+  pay: { title: "Your company is approved", badge: "Payment due", tone: "highlight" as const, intro: "Our team checked your company. Choose a partner plan and pay the fee to go live. Learners can't see your challenges until then." },
   rejected: { title: "This company was not verified", badge: "Rejected", tone: "danger" as const, intro: "You can't post challenges or internships. If this is a mistake, reply to the note from our team." },
   live: { title: "Your company is live", badge: "Live", tone: "success" as const, intro: "You're verified. Check your company page, then post your first challenge." },
 };
 
 export default function RegistrationStatus() {
-  const { company } = useData();
+  const { s, company } = useData();
   const view = registrationView(company);
+  const payment = company ? latestCompanyPayment(s, company.id) : undefined;
   const update = (patch: Partial<Company>) => setState((st) => ({ ...st, companies: st.companies.map((c) => (c.id === company!.id ? { ...c, ...patch } : c)) }));
   const unseenApproval = view === "live" && !company?.approvalSeen;
 
@@ -73,6 +76,17 @@ export default function RegistrationStatus() {
                 We&apos;ll email <span className="font-medium text-ink">{company.email}</span> and send you a notification when the review is done. You can also check this page any time.
               </p>
             </>
+          )}
+          {view === "pay" && (
+            <div className="flex flex-col items-start gap-3">
+              <h2 className="text-h4">{payment?.status === "pending" ? "We're checking your payment" : "Last step: the partner fee"}</h2>
+              <p className="text-muted">
+                {payment?.status === "pending"
+                  ? "We'll send you a notification as soon as your payment is confirmed and your company is live."
+                  : "Pay monthly or yearly by mobile wallet and send us the receipt. Your Verified badge turns on when we confirm it."}
+              </p>
+              <LinkButton href="/company/registration/pay">{payment?.status === "pending" ? "See your payment" : "Choose a plan and pay"}</LinkButton>
+            </div>
           )}
           {view === "needs-info" && (
             <LinkButton href="/company/registration" variant="secondary">

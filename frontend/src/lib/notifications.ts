@@ -1,6 +1,7 @@
 import { approveCompany, PASS_MARK } from "./rules";
 import { getCourses } from "./catalogue";
-import { reviewPayment } from "./payments";
+import { formatPlace, formatWhen } from "./i18n";
+import { latestCompanyPayment, reviewCompanyPayment, reviewPayment } from "./payments";
 import type { State } from "./types";
 
 /**
@@ -29,7 +30,7 @@ export function notificationsFor(s: State, userId: string): Notification[] {
       list.push({
         id: `interview-${i.id}`,
         title: `Interview with ${company?.name}`,
-        body: `${role} interview on ${i.when.replace("T", " at ")}.`,
+        body: `${role} interview on ${formatWhen(i.when)}${i.format ? `, ${formatPlace({ format: i.format })}` : ""}.`,
         href: "/internships",
         at: i.when.slice(0, 10),
       });
@@ -60,16 +61,31 @@ export function notificationsFor(s: State, userId: string): Notification[] {
   }
   const company = s.companies.find((c) => c.id === s.users.find((u) => u.id === userId)?.companyId);
   const approvedId = `company-approved-${company?.id}`;
-  // After approval it stays in the list only for whoever opened it, so companies verified before this never get it.
-  if (company && (company.status === "pending" || (company.status === "verified" && s.seenNotifications?.[userId]?.includes(approvedId))))
+  // After the company is live it stays in the list only for whoever opened it, so companies verified before this never get it.
+  if (company && (company.status === "pending" || company.status === "approved" || (company.status === "verified" && s.seenNotifications?.[userId]?.includes(approvedId))))
     list.push({
       id: approvedId,
-      title: "Your company is approved",
-      body: "You're verified. Check your company page, then post your first challenge.",
-      href: "/company/registration/status",
-      at: company.verifiedAt ?? "",
+      title: "Your company is approved & ready to pay",
+      body: "Our team checked your company. Choose a partner plan and pay the fee to go live.",
+      href: "/company/registration/pay",
+      at: company.approvedAt ?? "",
       approve: company.status === "pending" ? (st, day) => approveCompany(st, company.id, day) : undefined,
     });
+  const fee = company && latestCompanyPayment(s, company.id);
+  if (fee)
+    list.push(
+      // Same id before and after approval, so opening it doesn't leave a second unread one behind.
+      fee.status === "rejected"
+        ? { id: `company-pay-${fee.id}`, title: "We couldn't confirm your payment", body: fee.staffNote ?? "Send your receipt again.", href: "/company/registration/pay", at: fee.reviewedAt ?? fee.submittedAt }
+        : {
+            id: `company-pay-${fee.id}`,
+            title: "Payment confirmed. Your company is live",
+            body: "Your Verified badge is on. Check your company page, then post your first challenge.",
+            href: "/company/registration/status",
+            at: fee.reviewedAt ?? fee.submittedAt,
+            approve: fee.status === "pending" ? (st, day) => reviewCompanyPayment(st, fee.id, true, "", day) : undefined,
+          },
+    );
   const progress = s.progress[userId];
   for (const [courseId, score] of Object.entries(progress?.testScores ?? {})) {
     if (score >= PASS_MARK * 100 || s.certificates.some((c) => c.learnerId === userId && c.courseId === courseId)) continue;

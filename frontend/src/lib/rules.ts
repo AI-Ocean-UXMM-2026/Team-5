@@ -49,20 +49,21 @@ export function companyChallengeIds(company: Company | undefined, challenges: { 
   return challenges.filter((c) => c.companyId === company.id).map((c) => c.id);
 }
 
-export type RegistrationView = "none" | "waiting" | "needs-info" | "rejected" | "live";
+export type RegistrationView = "none" | "waiting" | "needs-info" | "rejected" | "pay" | "live";
 
 export function registrationView(company: Company | undefined): RegistrationView {
   if (company?.status === "verified") return "live";
+  if (company?.status === "approved") return "pay";
   if (company?.status === "rejected") return "rejected";
   if (company?.status === "pending") return "waiting";
   if (company?.reviewNote) return "needs-info";
   return "none";
 }
 
-/** Our team's decision on a company waiting for review. Only a pending company can be verified. */
+/** Our team's decision on a company waiting for review. Approval asks for the partner fee; the company goes live once it's paid. */
 export function approveCompany(s: State, companyId: string, day: string): State {
   if (s.companies.find((c) => c.id === companyId)?.status !== "pending") return s;
-  return { ...s, companies: s.companies.map((c) => (c.id === companyId ? { ...c, status: "verified", verifiedAt: day, reviewNote: undefined } : c)) };
+  return { ...s, companies: s.companies.map((c) => (c.id === companyId ? { ...c, status: "approved", approvedAt: day, reviewNote: undefined } : c)) };
 }
 
 export function counted(n: number, singular: string, plural = `${singular}s`) {

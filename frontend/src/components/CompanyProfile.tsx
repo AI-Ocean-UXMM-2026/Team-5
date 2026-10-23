@@ -4,11 +4,16 @@ import Image from "next/image";
 import { useState } from "react";
 import { RatingsList } from "@/components/RatingForm";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Button } from "@/components/ui/Button";
+import Link from "next/link";
+import { YouTubeFrame } from "@/components/YouTubeFrame";
+import { Button, LinkButton } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Card";
-import { Detail } from "@/components/ui/Detail";
+import { Detail, FieldIcon } from "@/components/ui/Detail";
+import { ProfileHero, StarsFact } from "@/components/ui/ProfileHero";
 import { Input, Textarea } from "@/components/ui/Field";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { useCourses } from "@/lib/catalogue";
+import { courseTitle } from "@/lib/i18n";
 import { emailMatchesWebsite } from "@/lib/rules";
 import { setState, useData } from "@/lib/store";
 import type { Company } from "@/lib/types";
@@ -61,8 +66,10 @@ function linkOrText(value: string) {
 }
 
 export function CompanyProfile({ company, own }: { company: Company; own: boolean }) {
-  const { s } = useData();
+  const { s, me, lang } = useData();
+  const courses = useCourses();
   const ratings = s.ratings.filter((r) => r.toId === company.id);
+  const challenges = s.challenges.filter((c) => c.companyId === company.id);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(company);
   const [tried, setTried] = useState(false);
@@ -78,26 +85,59 @@ export function CompanyProfile({ company, own }: { company: Company; own: boolea
 
   return (
     <>
-      {!own && <Breadcrumb items={[{ label: company.name }]} />}
+      {/* Learners usually arrive from an internship or a challenge. */}
+      {!own && <Breadcrumb items={me.role === "learner" ? [{ label: "Internships", href: "/internships" }, { label: company.name }] : [{ label: company.name }]} />}
       {editing ? (
         <>
           <Breadcrumb items={[{ label: "Company page", onClick: close }, { label: "Edit profile" }]} />
           <PageHeader title="Edit profile" intro={company.name} />
         </>
       ) : (
-        <PageHeader title={company.name} intro={company.about} media={<CompanyLogo company={company} own={own} />} badge={<VerifiedBadge company={company} />}>
-          {own && (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setForm(company);
-                setEditing(true);
-              }}
-            >
-              Edit profile
-            </Button>
-          )}
-        </PageHeader>
+        <ProfileHero
+          avatar={<CompanyLogo company={company} own={own} />}
+          name={company.name}
+          badge={<VerifiedBadge company={company} />}
+          subtitle={company.terms.role ? `Hiring a ${company.terms.role.toLowerCase()}` : undefined}
+          facts={[
+            company.terms.location || company.address ? (
+              <>
+                <span className="text-burgundy">
+                  <FieldIcon kind="location" className="size-3.5" />
+                </span>
+                {company.terms.location || company.address}
+              </>
+            ) : null,
+            company.website ? (
+              <>
+                <span className="text-burgundy">
+                  <FieldIcon kind="website" className="size-3.5" />
+                </span>
+                <a href={company.website} target="_blank" rel="noreferrer" className="hover:text-burgundy hover:underline">
+                  {company.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
+                </a>
+              </>
+            ) : null,
+            ratings.length ? <StarsFact ratings={ratings} /> : null,
+            company.verifiedAt ? <span className="text-muted">Partner since {company.verifiedAt}</span> : null,
+          ]}
+          actions={
+            own ? (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setForm(company);
+                  setEditing(true);
+                }}
+              >
+                Edit profile
+              </Button>
+            ) : challenges.length ? (
+              <LinkButton href="#company-challenges" variant="secondary">
+                See their challenges
+              </LinkButton>
+            ) : undefined
+          }
+        />
       )}
       {editing ? (
         <form
@@ -139,31 +179,46 @@ export function CompanyProfile({ company, own }: { company: Company; own: boolea
           </div>
         </form>
       ) : (
-        <div className="grid items-stretch gap-6 lg:grid-cols-2">
-          <Card className="h-full">
-            <h2 className="mb-4 text-h4">Company page</h2>
-            <dl className="flex flex-col gap-4">
-              <Detail kind="website" label="Website">
-                {linkOrText(company.website)}
-              </Detail>
-              <Detail kind="social" label="LinkedIn or Facebook">
-                {linkOrText(company.social)}
-              </Detail>
-              <Detail kind="email" label="Email">
-                {company.email || "—"}
-              </Detail>
-              <Detail kind="phone" label="Phone">
-                {company.phone || "—"}
-              </Detail>
-              <Detail kind="address" label="Office">
-                {company.address || "—"}
-              </Detail>
-            </dl>
-          </Card>
-          <div className="flex h-full flex-col gap-6">
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div className="flex flex-col gap-6">
             <Card>
-              <h2 className="mb-4 text-h4">Approved internship terms</h2>
-              <dl className="grid grid-cols-2 gap-4">
+              <h2 className="mb-3 text-h4">About</h2>
+              <p className="whitespace-pre-line text-body-lg">{company.about || "No description yet."}</p>
+              {company.videoId && (
+                <div className="mt-4">
+                  <YouTubeFrame videoId={company.videoId} title={`${company.name} video`} />
+                </div>
+              )}
+            </Card>
+            <Card id="company-challenges" className="scroll-mt-24">
+              <h2 className="mb-4 text-h4">Challenges</h2>
+              {challenges.length ? (
+                <ul className="flex flex-col divide-y divide-line">
+                  {challenges.map((ch) => (
+                    <li key={ch.id}>
+                      <Link
+                        href={own ? `/company/challenges/${ch.id}` : `/challenges/${ch.id}`}
+                        className="-mx-2 flex items-center justify-between gap-3 rounded-xl px-2 py-3 hover:bg-surface"
+                      >
+                        <span className="min-w-0">
+                          <span className="block font-medium">{ch.title}</span>
+                          <span className="block text-body-sm text-muted">{courseTitle(courses.find((c) => c.id === ch.courseId), lang)}</span>
+                        </span>
+                        <span aria-hidden className="text-burgundy">
+                          →
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted">{own ? "Post a challenge and it shows here for learners." : "No challenges posted yet."}</p>
+              )}
+            </Card>
+            <Card>
+              <h2 className="mb-1 text-h4">Internship terms</h2>
+              <p className="mb-4 text-body-sm text-muted">Written up front and checked by our team, so you know exactly what you apply for.</p>
+              <dl className="grid gap-4 sm:grid-cols-2">
                 <Detail kind="role" label="Role">
                   {company.terms.role || "—"}
                 </Detail>
@@ -178,7 +233,29 @@ export function CompanyProfile({ company, own }: { company: Company; own: boolea
                 </Detail>
               </dl>
             </Card>
-            <Card className="flex-1">
+          </div>
+          <div className="flex flex-col gap-6">
+            <Card>
+              <h2 className="mb-4 text-h4">Contact</h2>
+              <dl className="flex flex-col gap-4">
+                <Detail kind="website" label="Website">
+                  {linkOrText(company.website)}
+                </Detail>
+                <Detail kind="social" label="LinkedIn or Facebook">
+                  {linkOrText(company.social)}
+                </Detail>
+                <Detail kind="email" label="Email">
+                  {company.email || "—"}
+                </Detail>
+                <Detail kind="phone" label="Phone">
+                  {company.phone || "—"}
+                </Detail>
+                <Detail kind="address" label="Office">
+                  {company.address || "—"}
+                </Detail>
+              </dl>
+            </Card>
+            <Card>
               <h2 className="mb-3 text-h4">Ratings from interns</h2>
               <RatingsList ratings={ratings} empty="No ratings yet." />
             </Card>

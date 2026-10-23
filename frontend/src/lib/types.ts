@@ -47,7 +47,10 @@ export type User = {
   acceptedTermsAt?: string;
 };
 
-export type CompanyStatus = "draft" | "pending" | "verified" | "rejected";
+/** "approved": our team checked the company and it now pays the partner fee; it goes live ("verified") once the fee is confirmed. */
+export type CompanyStatus = "draft" | "pending" | "approved" | "verified" | "rejected";
+
+export type PartnerPlan = "monthly" | "yearly";
 
 export type InternshipTerms = { role: string; duration: string; location: string; stipend: string };
 
@@ -66,8 +69,13 @@ export type Company = {
   terms: InternshipTerms;
   status: CompanyStatus;
   reviewNote?: string;
+  /** Day our team approved the registration. */
+  approvedAt?: string;
   verifiedAt?: string;
   approvalSeen?: boolean;
+  /** Partner plan paid for, and the last day it covers. */
+  plan?: PartnerPlan;
+  paidUntil?: string;
   /** Data URL of the company logo. */
   logo?: string;
 };
@@ -104,6 +112,9 @@ export type Interview = {
   learnerId: string;
   companyId: string;
   when: string;
+  /** How the interview happens, and the meeting link or office address. */
+  format?: "video" | "office";
+  place?: string;
   status: "scheduled" | "offered" | "accepted" | "declined" | "not-selected";
 };
 
@@ -170,6 +181,24 @@ export type State = {
   seenNotifications?: Record<string, string[]>;
   /** Course payments sent by bank transfer, checked by our staff. */
   payments?: CoursePayment[];
+  /** Partner fees companies pay after approval, checked by our staff. */
+  companyPayments?: CompanyPayment[];
+};
+
+export type CompanyPayment = {
+  id: string;
+  companyId: string;
+  plan: PartnerPlan;
+  amountMmk: number;
+  /** Id from paymentAccounts, e.g. "kpay". */
+  method: string;
+  reference: string;
+  /** Receipt screenshot as a compressed JPEG data URL. */
+  receipt: string;
+  status: "pending" | "approved" | "rejected";
+  staffNote?: string;
+  submittedAt: string;
+  reviewedAt?: string;
 };
 
 export type CoursePayment = {

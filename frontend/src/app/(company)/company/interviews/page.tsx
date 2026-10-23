@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { applyOffer } from "@/lib/rules";
+import { formatPlace, formatWhen } from "@/lib/i18n";
 import { nameOf, newId, setState, useData } from "@/lib/store";
 import type { Interview } from "@/lib/types";
 
@@ -47,7 +48,8 @@ export default function Interviews() {
                   </h2>
                   <p className="text-muted">
                     {challenge?.title}
-                    {i.when && ` · ${i.when.replace("T", " at ")}`}
+                    {i.when && ` · ${formatWhen(i.when)}`}
+                    {i.format && ` · ${formatPlace(i)}`}
                   </p>
                 </div>
                 <Badge tone={i.status === "accepted" ? "success" : i.status === "declined" || i.status === "not-selected" ? "neutral" : "highlight"}>{label[i.status]}</Badge>

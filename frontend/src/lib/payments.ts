@@ -1,5 +1,5 @@
 import { emptyProgress } from "./seed.ts";
-import type { CoursePayment, State } from "./types";
+import type { CompanyPayment, CoursePayment, PartnerPlan, State } from "./types";
 
 // shortcut: placeholder accounts for the demo; replace with The Citadel's real wallet numbers before taking real money.
 export const paymentAccounts = [
@@ -7,6 +7,14 @@ export const paymentAccounts = [
   { id: "wavepay", name: "WavePay", accountName: "The Citadel", number: "09 000 000 002", tone: "bg-[#ffd200] text-ink" },
   { id: "ayapay", name: "AYA Pay", accountName: "The Citadel", number: "09 000 000 003", tone: "bg-[#c8102e] text-white" },
 ] as const;
+
+// shortcut: placeholder partner fees for the demo (the business model names a monthly or yearly partner fee but no price yet); set real prices before launch.
+export const partnerPlans: { id: PartnerPlan; name: string; priceMmk: number; per: string; note: string }[] = [
+  { id: "monthly", name: "Monthly", priceMmk: 150000, per: "month", note: "Pay month by month" },
+  { id: "yearly", name: "Yearly", priceMmk: 1500000, per: "year", note: "Two months free" },
+];
+
+export const planOf = (id: PartnerPlan) => partnerPlans.find((p) => p.id === id)!;
 
 export const methodName = (id: string) => paymentAccounts.find((a) => a.id === id)?.name ?? id;
 
@@ -49,4 +57,30 @@ export function compressImage(file: File, maxSide = 1200): Promise<string> {
     };
     img.src = url;
   });
+}
+
+/** The company's latest partner-fee payment, if any. */
+export function latestCompanyPayment(s: State, companyId: string): CompanyPayment | undefined {
+  return (s.companyPayments ?? []).filter((p) => p.companyId === companyId).at(-1);
+}
+
+/** Staff decision on a partner fee. Approving puts an approved company live with its Verified badge. */
+export function reviewCompanyPayment(s: State, paymentId: string, approve: boolean, note: string, day: string): State {
+  const payment = s.companyPayments?.find((p) => p.id === paymentId);
+  if (!payment || payment.status !== "pending") return s;
+  const companyPayments = s.companyPayments!.map((p) =>
+    p.id === paymentId ? { ...p, status: approve ? ("approved" as const) : ("rejected" as const), staffNote: approve ? undefined : note, reviewedAt: day } : p,
+  );
+  if (!approve) return { ...s, companyPayments };
+  const until = new Date(`${day}T00:00:00`);
+  if (payment.plan === "yearly") until.setFullYear(until.getFullYear() + 1);
+  else until.setMonth(until.getMonth() + 1);
+  const paidUntil = `${until.getFullYear()}-${String(until.getMonth() + 1).padStart(2, "0")}-${String(until.getDate()).padStart(2, "0")}`;
+  return {
+    ...s,
+    companyPayments,
+    companies: s.companies.map((c) =>
+      c.id === payment.companyId && c.status === "approved" ? { ...c, status: "verified", verifiedAt: day, plan: payment.plan, paidUntil, approvalSeen: false } : c,
+    ),
+  };
 }

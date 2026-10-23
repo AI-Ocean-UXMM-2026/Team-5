@@ -14,7 +14,7 @@ import { progressOf, resetDemo, setState, useStore } from "@/lib/store";
 import type { Lang, State, User } from "@/lib/types";
 import { Notifications } from "./Notifications";
 
-type IconName = "home" | "book" | "flag" | "briefcase" | "people" | "users" | "calendar" | "building" | "clipboard" | "logout" | "menu" | "close";
+type IconName = "home" | "book" | "flag" | "briefcase" | "people" | "users" | "calendar" | "building" | "clipboard" | "wallet" | "logout" | "menu" | "close";
 
 function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   const paths: Record<IconName, ReactNode> = {
@@ -52,6 +52,12 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
         <path d="M9 4V3h6v1M9 11h6M9 15h4" />
       </>
     ),
+    wallet: (
+      <>
+        <rect x="3" y="6" width="18" height="14" rx="2" />
+        <path d="M3 10h18M16 15h2" />
+      </>
+    ),
     logout: <path d="M14 7V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2M10 12h10m-3-3 3 3-3 3" />,
     menu: <path d="M4 7h16M4 12h16M4 17h16" />,
     close: <path d="M6 6l12 12M18 6 6 18" />,
@@ -63,7 +69,7 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   );
 }
 
-type NavItem = { href: string; label: string; icon: IconName; match?: string[] };
+type NavItem = { href: string; label: string; icon: IconName; match?: string[]; exclude?: string[] };
 type NavGroup = { label: string; items: NavItem[] };
 
 function navFor(s: State, lang: Lang): NavGroup[] {
@@ -84,8 +90,18 @@ function navFor(s: State, lang: Lang): NavGroup[] {
       },
       { label: x("Connect", "ချိတ်ဆက်ရန်"), items: [{ href: "/community", label: t.community, icon: "people" }] },
     ];
-  if (s.companies.find((c) => c.id === me.companyId)?.status !== "verified")
-    return [{ label: x("Get verified", "အတည်ပြုရန်"), items: [{ href: "/company/registration", label: x("Registration", "မှတ်ပုံတင်ခြင်း"), icon: "clipboard" }] }];
+  const status = s.companies.find((c) => c.id === me.companyId)?.status;
+  if (status !== "verified")
+    return [
+      {
+        label: x("Get verified", "အတည်ပြုရန်"),
+        items: [
+          { href: "/company/registration", label: x("Registration", "မှတ်ပုံတင်ခြင်း"), icon: "clipboard", exclude: ["/company/registration/pay"] },
+          // Approved companies pay the partner fee before they go live.
+          ...(status === "approved" ? [{ href: "/company/registration/pay", label: x("Partner plan", "Partner အစီအစဉ်"), icon: "wallet" as const }] : []),
+        ],
+      },
+    ];
   return [
     {
       label: x("Hiring", "ခန့်အပ်ရန်"),
@@ -100,8 +116,9 @@ function navFor(s: State, lang: Lang): NavGroup[] {
   ];
 }
 
+const under = (pathname: string, h: string) => pathname === h || pathname.startsWith(`${h}/`);
 const isActive = (pathname: string, item: NavItem) =>
-  [item.href, ...(item.match ?? [])].some((h) => pathname === h || pathname.startsWith(`${h}/`));
+  [item.href, ...(item.match ?? [])].some((h) => under(pathname, h)) && !(item.exclude ?? []).some((h) => under(pathname, h));
 
 const loading = <p className="p-12 text-center text-muted">Loading…</p>;
 

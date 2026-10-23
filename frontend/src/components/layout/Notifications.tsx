@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { notificationsFor } from "@/lib/notifications";
+import { createPortal } from "react-dom";
+import { notificationsFor, type Notification } from "@/lib/notifications";
 import { setState, today } from "@/lib/store";
 import type { State } from "@/lib/types";
 
@@ -16,6 +17,27 @@ export function Notifications({ s, userId }: { s: State; userId: string }) {
   const list = notificationsFor(s, userId);
   const seen = s.seenNotifications?.[userId] ?? [];
   const unread = list.filter((n) => !seen.includes(n.id)).length;
+  const [toast, setToast] = useState<Notification | null>(null);
+  const known = useRef<Set<string> | null>(null);
+  const ids = list.map((n) => n.id).join("|");
+
+  // A notification that arrives while the app is open also pops up, so events like an approval are hard to miss.
+  // Ones that already existed when the page loaded only show in the list.
+  useEffect(() => {
+    const current = new Set(ids ? ids.split("|") : []);
+    const before = known.current;
+    known.current = current;
+    if (!before) return;
+    const fresh = list.find((n) => !before.has(n.id) && !seen.includes(n.id));
+    if (!fresh) return;
+    const show = setTimeout(() => setToast(fresh), 0);
+    const hide = setTimeout(() => setToast((t) => (t?.id === fresh.id ? null : t)), 10000);
+    return () => {
+      clearTimeout(show);
+      clearTimeout(hide);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change in which notifications exist should trigger this
+  }, [ids]);
 
   useEffect(() => {
     if (!open) return;
@@ -29,11 +51,18 @@ export function Notifications({ s, userId }: { s: State; userId: string }) {
     };
   }, [open]);
 
-  const markSeen = (ids: string[]) =>
+  const markSeen = (seenIds: string[]) =>
     setState((st) => {
       const mine = st.seenNotifications?.[userId] ?? [];
-      return { ...st, seenNotifications: { ...st.seenNotifications, [userId]: [...new Set([...mine, ...ids])] } };
+      return { ...st, seenNotifications: { ...st.seenNotifications, [userId]: [...new Set([...mine, ...seenIds])] } };
     });
+  // Opening a notification applies its stand-in staff decision, then marks it read.
+  const openNotification = (n: Notification) => {
+    if (n.approve) setState((st) => n.approve!(st, today()));
+    markSeen([n.id]);
+    setOpenOn(null);
+    setToast(null);
+  };
 
   return (
     <div ref={box} className="relative">
@@ -76,11 +105,7 @@ export function Notifications({ s, userId }: { s: State; userId: string }) {
                   <li key={n.id} className="border-b border-line last:border-0">
                     <Link
                       href={n.href}
-                      onClick={() => {
-                        if (n.approve) setState((st) => n.approve!(st, today()));
-                        markSeen([n.id]);
-                        setOpenOn(null);
-                      }}
+                      onClick={() => openNotification(n)}
                       className={`flex gap-3 px-4 py-3 hover:bg-surface ${isNew ? "bg-burgundy-tint/40" : ""}`}
                     >
                       <span aria-hidden className={`mt-2 size-2 shrink-0 rounded-full ${isNew ? "bg-burgundy" : "bg-transparent"}`} />
@@ -99,6 +124,34 @@ export function Notifications({ s, userId }: { s: State; userId: string }) {
             <p className="px-4 py-8 text-center text-body-sm text-muted">No notifications yet.</p>
           )}
         </div>
+      )}
+      {/* Rendered on <body>: the top bar's backdrop blur would otherwise pin this "fixed" box to the bar instead of the window. */}
+      {createPortal(
+        <div aria-live="polite" className="pointer-events-none fixed inset-x-4 bottom-4 z-50 flex justify-end md:inset-x-auto md:right-6 md:bottom-6">
+          {toast && (
+            <div className="pointer-events-auto flex w-full max-w-sm gap-3 rounded-2xl border border-line bg-white p-4 shadow-lg">
+              <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-burgundy-tint text-burgundy">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 9a6 6 0 1 1 12 0c0 4 1.5 6 2 7H4c.5-1 2-3 2-7Z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
+                  <path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+                </svg>
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-ink">{toast.title}</p>
+                <p className="text-body-sm text-muted">{toast.body}</p>
+                <div className="mt-3 flex gap-2">
+                  <Link href={toast.href} onClick={() => openNotification(toast)} className="inline-flex h-9 items-center rounded-xl bg-burgundy px-3 text-sm font-semibold text-white hover:bg-burgundy-dark">
+                    View
+                  </Link>
+                  <button type="button" onClick={() => setToast(null)} className="inline-flex h-9 items-center rounded-xl px-3 text-sm font-semibold text-muted hover:bg-surface">
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>,
+        document.body,
       )}
     </div>
   );

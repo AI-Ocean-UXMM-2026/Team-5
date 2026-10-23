@@ -215,11 +215,12 @@ test("company email must be on its own domain", () => {
   assert.equal(emailMatchesWebsite("hr@goldenpixel.com.mm", ""), false);
 });
 
-test("approving a company verifies it only while it waits for review", () => {
+test("approving a company asks for the partner fee, only while it waits for review", () => {
   const waiting: State = { ...seed, companies: seed.companies.map((c) => (c.id === "c-yds" ? { ...c, status: "pending", reviewNote: "Old note" } : c)) };
   const approved = approveCompany(waiting, "c-yds", "2026-10-24").companies.find((c) => c.id === "c-yds");
-  assert.equal(approved?.status, "verified");
-  assert.equal(approved?.verifiedAt, "2026-10-24");
+  assert.equal(approved?.status, "approved");
+  assert.equal(approved?.approvedAt, "2026-10-24");
   assert.equal(approved?.reviewNote, undefined);
+  assert.equal(registrationView(approved), "pay");
   assert.equal(approveCompany(seed, "c-yds", "2026-10-24"), seed);
 });
