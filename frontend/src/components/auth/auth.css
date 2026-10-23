@@ -2423,3 +2423,173 @@
     box-shadow: 0 -8px 20px -16px rgb(24 24 27 / 25%);
   }
 }
+
+/* Three-second mascot interlude while the real roadmap is prepared. */
+.ca-roadmapLoading {
+  padding: 20px 0 28px;
+}
+.ca-mascotOrbit {
+  width: 235px;
+  height: 220px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 6px;
+}
+.ca-orbitRing {
+  position: absolute;
+  inset: 16px 22px;
+  border: 1px dashed #dcbcc5;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fcf4df 0%, #fbf5f1 55%, transparent 70%);
+  animation: ca-orbit-turn 12s linear infinite;
+}
+.ca-loaderMascot {
+  position: relative;
+  animation: ca-mascot-bob 1.5s ease-in-out infinite;
+}
+.ca-loaderMascot img {
+  width: 175px;
+  height: auto;
+}
+.ca-orbitSpark {
+  position: absolute;
+  right: 27px;
+  top: 10px;
+  font-size: 33px;
+  color: #e5b83b;
+  animation: ca-spark-glow 1s ease-in-out infinite alternate;
+}
+.ca-orbitBadge {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  border: 1px solid #ead7dd;
+  border-radius: 12px;
+  background: #fff;
+  color: #963d50;
+  box-shadow: 0 5px 14px #8742550d;
+  animation: ca-badge-arrive 0.5s ease both;
+}
+.ca-orbitBadge-learn {
+  left: 5px;
+  top: 55px;
+  transform: rotate(-10deg);
+}
+.ca-orbitBadge-goal {
+  right: 3px;
+  bottom: 48px;
+  animation-delay: 0.7s;
+}
+.ca-orbitBadge-done {
+  left: 34px;
+  bottom: 12px;
+  background: #fdf5dc;
+  border-color: #f1d98f;
+  animation-delay: 1.5s;
+}
+.ca-roadmapLoading h2 {
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+.ca-roadmapLoading p {
+  max-width: 330px;
+  font-size: 12px;
+}
+.ca-loaderPath {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 23px auto 0;
+  width: 170px;
+  gap: 0;
+}
+.ca-loaderPath > span {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: #963d50;
+  animation: ca-node-light 0.5s both;
+}
+.ca-loaderPath > span:nth-of-type(2) {
+  animation-delay: 1s;
+}
+.ca-loaderPath > span:nth-of-type(3) {
+  animation-delay: 2s;
+  background: #e7bb43;
+}
+.ca-loaderPath > i {
+  height: 2px;
+  width: 65px;
+  background: #963d50;
+  transform-origin: left;
+  animation: ca-path-draw 1s ease both;
+}
+.ca-loaderPath > i:nth-of-type(2) {
+  animation-delay: 1s;
+}
+@keyframes ca-mascot-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(2deg);
+  }
+}
+@keyframes ca-orbit-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ca-spark-glow {
+  to {
+    transform: scale(1.2) rotate(18deg);
+    opacity: 0.65;
+  }
+}
+@keyframes ca-badge-arrive {
+  from {
+    opacity: 0;
+    scale: 0.65;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+}
+@keyframes ca-node-light {
+  from {
+    opacity: 0.2;
+    scale: 0.6;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes ca-path-draw {
+  from {
+    transform: scaleX(0);
+    opacity: 0.2;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ca-roadmapLoading * {
+    animation: none !important;
+  }
+  .ca-loaderPath > i {
+    transform: none;
+  }
+  .ca-orbitBadge {
+    opacity: 1;
+  }
+}

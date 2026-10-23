@@ -19,7 +19,11 @@ import { progressOf, setState, updateProgress, useData } from "@/lib/store";
 import type { Lang } from "@/lib/types";
 
 type Step = "language" | "goal" | "review" | "profile";
-type Draft = { roadmap: string[]; roadmapNote: string; reasons?: Record<string, string> };
+type Draft = {
+  roadmap: string[];
+  roadmapNote: string;
+  reasons?: Record<string, string>;
+};
 
 const goalMy: Record<string, string> = {
   frontend: "Frontend Developer",
@@ -73,16 +77,25 @@ export default function Onboarding() {
   const build = async () => {
     setStep("review");
     setAiState("busy");
+    const minimumLoading = new Promise<void>((resolve) => setTimeout(resolve, 3000));
     try {
       // If course search is down, use the standard path for the goal so the learner is never stuck here.
-      setDraft(
-        await makeRoadmap(goal, unsure ? "" : currentSkills, hours, []).catch(() => ({
-          roadmap: coursesForGoal(goal).filter((id) => getCourses().some((c) => c.id === id)),
-          roadmapNote: "We couldn't reach our course search, so this is the standard path for your goal. You can remake it later.",
-        })),
-      );
+      const [roadmap] = await Promise.all([
+        makeRoadmap(goal, unsure ? "" : currentSkills, hours, []).catch(
+          () => ({
+            roadmap: coursesForGoal(goal).filter((id) =>
+              getCourses().some((c) => c.id === id),
+            ),
+            roadmapNote:
+              "We couldn't reach our course search, so this is the standard path for your goal. You can remake it later.",
+          }),
+        ),
+        minimumLoading,
+      ]);
+      setDraft(roadmap);
       setAiState("done");
     } catch {
+      await minimumLoading;
       setAiState("error");
     }
   };
@@ -690,8 +703,14 @@ export default function Onboarding() {
                     </p>
                   </div>
                   {aiState === "busy" && (
-                    <div className="ca-building" role="status">
-                      <Mascot pose="laptop" size={150} />
+                    <div className="ca-building ca-roadmapLoading" role="status" aria-live="polite">
+                      <div className="ca-mascotOrbit" aria-hidden="true">
+                        <span className="ca-orbitRing" /><span className="ca-orbitSpark">✦</span>
+                        <div className="ca-loaderMascot"><Mascot pose="laptop" size={175} /></div>
+                        <span className="ca-orbitBadge ca-orbitBadge-learn"><AuthIcon name="graduate" size={20}/></span>
+                        <span className="ca-orbitBadge ca-orbitBadge-goal"><AuthIcon name="compass" size={20}/></span>
+                        <span className="ca-orbitBadge ca-orbitBadge-done"><AuthIcon name="check" size={20}/></span>
+                      </div>
                       <div className="ca-loadingDots" aria-hidden>
                         <i />
                         <i />
@@ -699,7 +718,7 @@ export default function Onboarding() {
                       </div>
                       <h2>
                         {x(
-                          "Finding your next steps…",
+                          "Making a path just for you…",
                           "သင့်နောက်တစ်ဆင့်ကို ရှာဖွေနေသည်…",
                         )}
                       </h2>
@@ -709,6 +728,7 @@ export default function Onboarding() {
                           "ရည်မှန်းချက်၊ စွမ်းရည်နှင့် အချိန်ကို စုစည်းနေသည်။",
                         )}
                       </p>
+                      <div className="ca-loaderPath" aria-hidden="true"><span/><i/><span/><i/><span/></div>
                     </div>
                   )}
                   {aiState === "error" && (
