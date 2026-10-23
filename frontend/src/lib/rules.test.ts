@@ -13,6 +13,7 @@ import {
   roadmapStepOpen,
   companyChallengeIds,
   challengeUnlocked,
+  challengeWorkFor,
   counted,
   emailMatchesWebsite,
   youtubeVideoId,
@@ -223,4 +224,12 @@ test("approving a company asks for the partner fee, only while it waits for revi
   assert.equal(approved?.reviewNote, undefined);
   assert.equal(registrationView(approved), "pay");
   assert.equal(approveCompany(seed, "c-yds", "2026-10-24"), seed);
+});
+
+test("a learner can rate a company only after sending work to one of its challenges", () => {
+  // Min sent work to Golden Pixel's pricing card; Aye only to Golden Pixel, never to Mingalar Tech.
+  assert.equal(challengeWorkFor(seed, "u-min", "c-gp")?.challengeId, "ch-pricing");
+  assert.ok(challengeWorkFor(seed, "u-aye", "c-gp"));
+  assert.equal(challengeWorkFor(seed, "u-aye", "c-mt"), undefined);
+  assert.equal(challengeWorkFor(seed, "u-min", "c-yds"), undefined);
 });

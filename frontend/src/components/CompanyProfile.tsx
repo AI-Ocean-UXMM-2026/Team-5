@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { RatingsList } from "@/components/RatingForm";
+import { RateButton, RatingsList } from "@/components/RatingForm";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import Link from "next/link";
 import { YouTubeFrame } from "@/components/YouTubeFrame";
@@ -14,7 +14,7 @@ import { Input, Textarea } from "@/components/ui/Field";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { useCourses } from "@/lib/catalogue";
 import { courseTitle } from "@/lib/i18n";
-import { emailMatchesWebsite } from "@/lib/rules";
+import { challengeWorkFor, emailMatchesWebsite } from "@/lib/rules";
 import { setState, useData } from "@/lib/store";
 import type { Company } from "@/lib/types";
 
@@ -70,6 +70,8 @@ export function CompanyProfile({ company, own }: { company: Company; own: boolea
   const courses = useCourses();
   const ratings = s.ratings.filter((r) => r.toId === company.id);
   const challenges = s.challenges.filter((c) => c.companyId === company.id);
+  // Learners rate a company once they have sent work to one of its challenges.
+  const work = me.role === "learner" ? challengeWorkFor(s, me.id, company.id) : undefined;
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(company);
   const [tried, setTried] = useState(false);
@@ -131,10 +133,24 @@ export function CompanyProfile({ company, own }: { company: Company; own: boolea
               >
                 Edit profile
               </Button>
-            ) : challenges.length ? (
-              <LinkButton href="#company-challenges" variant="secondary">
-                See their challenges
-              </LinkButton>
+            ) : work || challenges.length ? (
+              <>
+                {challenges.length > 0 && (
+                  <LinkButton href="#company-challenges" variant="secondary">
+                    See their challenges
+                  </LinkButton>
+                )}
+                {work && (
+                  <RateButton
+                    interviewId={work.id}
+                    toId={company.id}
+                    toName={company.name}
+                    short={company.name}
+                    question={`How was taking ${company.name}'s challenge?`}
+                    hint="Was the brief clear? Was their feedback fair and on time?"
+                  />
+                )}
+              </>
             ) : undefined
           }
         />
@@ -255,9 +271,25 @@ export function CompanyProfile({ company, own }: { company: Company; own: boolea
                 </Detail>
               </dl>
             </Card>
-            <Card>
-              <h2 className="mb-3 text-h4">Ratings from interns</h2>
-              <RatingsList ratings={ratings} empty="No ratings yet." />
+            <Card id="company-ratings" className="scroll-mt-24">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-h4">Ratings from learners</h2>
+                {ratings.length > 0 && (
+                  <span className="inline-flex items-center gap-1.5 text-body-sm">
+                    <StarsFact ratings={ratings} />
+                  </span>
+                )}
+              </div>
+              <RatingsList
+                ratings={ratings}
+                empty={
+                  own
+                    ? "No ratings yet. Learners who send work to your challenges can rate you here."
+                    : work
+                      ? "No ratings yet. You took their challenge, so you can be the first to rate them."
+                      : "No ratings yet. Learners can rate a company once they send work to one of its challenges."
+                }
+              />
             </Card>
           </div>
         </div>

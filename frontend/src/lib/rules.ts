@@ -36,6 +36,12 @@ export function challengeUnlocked(certificates: Certificate[], learnerId: string
   return certificates.some((c) => c.learnerId === learnerId && c.courseId === courseId);
 }
 
+/** A learner may rate a company once they have sent work to one of its challenges; returns that work, if any. */
+export function challengeWorkFor(s: Pick<State, "challenges" | "submissions">, learnerId: string, companyId: string) {
+  const ids = new Set(s.challenges.filter((c) => c.companyId === companyId).map((c) => c.id));
+  return s.submissions.find((x) => x.learnerId === learnerId && ids.has(x.challengeId));
+}
+
 export function canPostAsCompany(company: Company | undefined) {
   return company?.status === "verified";
 }

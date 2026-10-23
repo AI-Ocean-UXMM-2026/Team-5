@@ -34,19 +34,33 @@ export function RatingsList({ ratings, empty }: { ratings: Rating[]; empty: stri
  * A button that opens a rating dialog, used on profiles. Once sent, it shows the stars instead,
  * since ratings can't be changed.
  */
-export function RateButton({ interviewId, toId, toName }: { interviewId: string; toId: string; toName: string }) {
+export function RateButton({
+  interviewId,
+  toId,
+  toName,
+  short = toName.split(" ")[0],
+  question = `How was working with ${short}?`,
+  hint = "What did they do well? What could they improve?",
+}: {
+  interviewId: string;
+  toId: string;
+  toName: string;
+  /** How the button and the note refer to them: a person's first name by default, a company's full name. */
+  short?: string;
+  question?: string;
+  hint?: string;
+}) {
   const { s, me } = useData();
   const [open, setOpen] = useState(false);
   const [stars, setStars] = useState(0);
   const [comment, setComment] = useState("");
   // One rating per person per profile, whichever interview it was given for.
   const existing = s.ratings.find((r) => r.toId === toId && r.fromId === me.id);
-  const first = toName.split(" ")[0];
 
   if (existing)
     return (
       <span className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-surface px-3 text-sm font-medium">
-        You rated {first}
+        You rated {short}
         <span aria-hidden className="text-yellow">
           {"★".repeat(existing.stars)}
         </span>
@@ -60,7 +74,7 @@ export function RateButton({ interviewId, toId, toName }: { interviewId: string;
         <span aria-hidden className="text-yellow">
           ★
         </span>
-        Rate {first}
+        Rate {short}
       </Button>
       <Dialog open={open} onClose={() => setOpen(false)} title={`Rate ${toName}`}>
         <form
@@ -73,7 +87,7 @@ export function RateButton({ interviewId, toId, toName }: { interviewId: string;
           }}
         >
           <fieldset>
-            <legend className="mb-2 text-sm font-medium">How was working with {first}?</legend>
+            <legend className="mb-2 text-sm font-medium">{question}</legend>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
                 <label key={n} className="cursor-pointer">
@@ -87,8 +101,8 @@ export function RateButton({ interviewId, toId, toName }: { interviewId: string;
             </div>
             <p className="mt-1 text-body-sm text-muted">{["Choose 1 to 5 stars.", "Poor", "Below what we hoped", "Good", "Very good", "Excellent"][stars]}</p>
           </fieldset>
-          <Textarea label="Comment (optional)" hint="What did they do well? What could they improve?" value={comment} onChange={(e) => setComment(e.target.value)} className="min-h-24" />
-          <p className="rounded-xl bg-surface p-3 text-body-sm text-muted">Your rating shows on {first}&apos;s profile. You can&apos;t change it after sending.</p>
+          <Textarea label="Comment (optional)" hint={hint} value={comment} onChange={(e) => setComment(e.target.value)} className="min-h-24" />
+          <p className="rounded-xl bg-surface p-3 text-body-sm text-muted">Your rating shows on {short}&apos;s profile. You can&apos;t change it after sending.</p>
           <div className="flex flex-wrap justify-end gap-2">
             <Button variant="secondary" onClick={() => setOpen(false)}>
               Cancel
@@ -108,7 +122,8 @@ export function RatingForm({ interviewId, toId, toName }: { interviewId: string;
   const [stars, setStars] = useState(0);
   const [comment, setComment] = useState("");
   const [confirming, setConfirming] = useState(false);
-  const existing = s.ratings.find((r) => r.interviewId === interviewId && r.fromId === me.id);
+  // One rating per person per profile, so a rating sent from a profile also counts here.
+  const existing = s.ratings.find((r) => r.toId === toId && r.fromId === me.id);
 
   if (existing)
     return (

@@ -124,7 +124,7 @@ export default function Internships() {
           const companyUser = s.users.find((u) => u.companyId === company.id);
           const profileHref = companyUser ? `/profile/${companyUser.id}` : undefined;
           const ratingOpen = rating === i.id;
-          const rated = s.ratings.some((r) => r.interviewId === i.id && r.fromId === me.id);
+          const rated = s.ratings.some((r) => r.toId === company.id && r.fromId === me.id);
           return (
             <li key={i.id}>
               <Card className="flex flex-col gap-4 !p-5">
