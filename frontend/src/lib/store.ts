@@ -13,7 +13,7 @@ function load(): State {
   if (state) return state;
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) state = JSON.parse(raw) as State;
+    if (raw) state = withSeedRatings(JSON.parse(raw) as State);
     else {
       state = structuredClone(seed);
       state.lang = defaultLang(navigator.languages, Intl.DateTimeFormat().resolvedOptions().timeZone);
@@ -22,6 +22,12 @@ function load(): State {
     state = structuredClone(seed);
   }
   return state;
+}
+
+/** Demo data saved before the sample ratings existed gets them too, skipping any pair someone has already rated. */
+function withSeedRatings(s: State): State {
+  const missing = seed.ratings.filter((r) => !s.ratings.some((x) => x.id === r.id || (x.fromId === r.fromId && x.toId === r.toId)));
+  return missing.length ? { ...s, ratings: [...s.ratings, ...missing] } : s;
 }
 
 function emit() {

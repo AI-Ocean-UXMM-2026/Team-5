@@ -119,7 +119,19 @@ export function CompanyProfile({ company, own }: { company: Company; own: boolea
                 </a>
               </>
             ) : null,
-            ratings.length ? <StarsFact ratings={ratings} /> : null,
+            // Always shown, so learners see how others rated the company before taking its challenge.
+            <a key="rating" href="#company-ratings" className="inline-flex items-center gap-1.5 hover:text-burgundy">
+              {ratings.length ? (
+                <StarsFact ratings={ratings} />
+              ) : (
+                <>
+                  <span aria-hidden className="text-subtle">
+                    ★
+                  </span>
+                  <span className="text-muted">No ratings yet</span>
+                </>
+              )}
+            </a>,
             company.verifiedAt ? <span className="text-muted">Partner since {company.verifiedAt}</span> : null,
           ]}
           actions={

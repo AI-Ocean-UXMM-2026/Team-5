@@ -427,7 +427,13 @@ export const seed: State = {
     { id: "iv-min-mt", submissionId: "s-min-booking", challengeId: "ch-booking", learnerId: "u-min", companyId: "c-mt", when: "2026-10-28T14:30", status: "scheduled" },
     { id: "iv-min-sc", submissionId: "s-min-landing", challengeId: "ch-landing", learnerId: "u-min", companyId: "c-sc", when: "2026-10-08T11:00", status: "not-selected" },
   ],
-  ratings: [],
+  // Learners rate a company after sending work to its challenge (see challengeWorkFor).
+  ratings: [
+    { id: "rt-seed-min-gp", interviewId: "s-min", fromId: "u-min", toId: "c-gp", stars: 5, comment: "Clear brief, and their feedback on my pricing card came within two days." },
+    { id: "rt-seed-aye-gp", interviewId: "s-aye", fromId: "u-aye", toId: "c-gp", stars: 4, comment: "A fair review. I'd have liked a bit more detail on what to improve." },
+    { id: "rt-seed-min-mt", interviewId: "s-min-booking", fromId: "u-min", toId: "c-mt", stars: 5, comment: "They invited me to interview the day after I sent my booking form." },
+    { id: "rt-seed-min-sc", interviewId: "s-min-landing", fromId: "u-min", toId: "c-sc", stars: 4, comment: "A good brief. The feedback took about a week, but it was honest." },
+  ],
   posts: [
     {
       id: "p-1",
