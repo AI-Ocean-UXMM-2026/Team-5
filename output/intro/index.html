@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Citadel intro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600&display=block" rel="stylesheet">
+<style>
+  /* Brand: burgundy #963D50, yellow #F8D064, tint #F6ECEE, ink #18181B, muted #6F7078. 1920x1080 frame. */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #fff; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden;
+    background: radial-gradient(1200px 700px at 50% 42%, #ffffff 0%, #ffffff 55%, #fbf7f8 100%); }
+  .abs { position: absolute; will-change: transform, opacity; }
+  /* A soft burgundy-tinted glow behind the emblem, with no hard edge. */
+  #disc { left: 295px; top: 7px; width: 900px; height: 900px; border-radius: 50%; transform-origin: 50% 50%;
+    background: radial-gradient(circle, #f6ecee 0%, rgb(246 236 238 / 75%) 34%, rgb(246 236 238 / 0%) 68%); }
+  .lockup { left: 385px; top: 130px; width: 720px; height: 720px; background: url(logo.png) 0 0 / 720px 720px no-repeat; }
+  /* Rows 0–899 of the 1254px logo are the emblem, 902+ the wordmark. */
+  #emblem { clip-path: inset(0 0 28.31% 0); transform-origin: 50% 45.4%; }
+  #wordmark { clip-path: inset(71.69% 84% 0 0); opacity: 0; }
+  #sweep { left: 385px; top: 130px; width: 720px; height: 720px;
+    -webkit-mask: url(logo.png) 0 0 / 720px 720px no-repeat; mask: url(logo.png) 0 0 / 720px 720px no-repeat; }
+  #tagline { left: 385px; top: 752px; width: 720px; text-align: center; font: 600 34px/1.2 "Plus Jakarta Sans", sans-serif; letter-spacing: 0.01em; color: #6f7078; }
+  #tagline b { color: #963d50; font-weight: 600; }
+  #rule { left: 709px; top: 812px; width: 72px; height: 6px; border-radius: 6px; background: #f8d064; transform-origin: 50% 50%; }
+  /* Stone steps like the landing artwork: cream stone, a burgundy front edge, a yellow tile on top. */
+  .step { bottom: calc(1080px - 730px); width: 122px; border-radius: 16px 16px 4px 4px; transform-origin: 50% 100%;
+    background: linear-gradient(to bottom, #fbf4ec 0 14px, #f1e4d6 14px calc(100% - 26px), #963d50 calc(100% - 26px) calc(100% - 6px), #7c3142 calc(100% - 6px));
+    box-shadow: inset -8px 0 0 rgb(122 70 40 / 8%), 0 14px 22px -14px rgb(94 35 51 / 35%); }
+  .step::before { content: ""; position: absolute; left: 22%; right: 22%; top: 4px; height: 10px; border-radius: 4px; background: #f8d064;
+    box-shadow: inset 0 -3px 0 rgb(122 90 20 / 25%); }
+  #s1 { left: 1060px; height: 90px; z-index: 3; } #s2 { left: 1178px; height: 150px; z-index: 2; } #s3 { left: 1296px; height: 210px; z-index: 1; }
+  #shadow { width: 150px; height: 22px; border-radius: 50%; background: rgb(94 35 51 / 18%); filter: blur(4px); }
+  #mascot { width: 300px; height: 300px; background: url(mascot.png) 0 0 / 300px 300px no-repeat; transform-origin: 50% 88%; }
+  .spark { width: 26px; height: 26px; color: #f8d064; }
+  .spark svg { width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="disc" class="abs"></div>
+  <div id="emblem" class="abs lockup"></div>
+  <div id="wordmark" class="abs lockup"></div>
+  <div id="sweep" class="abs"></div>
+  <p id="tagline" class="abs">Skills that <b>get you in</b></p>
+  <div id="rule" class="abs"></div>
+  <div id="s1" class="abs step"></div>
+  <div id="s2" class="abs step"></div>
+  <div id="s3" class="abs step"></div>
+  <div id="shadow" class="abs"></div>
+  <div id="mascot" class="abs"></div>
+</div>
+<script>
+  // Sparkles: four-point stars around the emblem, in brand yellow.
+  const sparks = [[300, 210, 1.0], [1080, 190, 0.8], [330, 560, 0.7], [1030, 520, 1.1], [690, 70, 0.9]].map(([x, y, s], i) => {
+    const el = document.createElement("div");
+    el.className = "abs spark";
+    el.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 0c.9 6.6 4.8 10.6 12 12-7.2 1.4-11.1 5.4-12 12-.9-6.6-4.8-10.6-12-12C7.2 10.6 11.1 6.6 12 0Z"/></svg>';
+    el.style.left = x + "px"; el.style.top = y + "px";
+    document.getElementById("stage").appendChild(el);
+    return { el, s, delay: i * 0.05 };
+  });
+
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+  const easeOut = (p) => 1 - Math.pow(1 - p, 3);
+  const easeInOut = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+  const backOut = (p, k = 1.7) => 1 + (k + 1) * Math.pow(p - 1, 3) + k * Math.pow(p - 1, 2);
+  const lerp = (a, b, p) => a + (b - a) * p;
+
+  // Mascot path: drop onto step 1, then hop to steps 2 and 3. Feet x and y for each landing.
+  const landings = [[1121, 640], [1239, 580], [1357, 520]];
+  function mascotAt(t) {
+    const hops = [[0.45, 0.78, [1121, 300], landings[0], 0], [0.88, 1.16, landings[0], landings[1], 95], [1.24, 1.52, landings[1], landings[2], 95]];
+    let x = 1121, y = 300, squash = 0, opacity = 0;
+    if (t < hops[0][0]) return { x, y: 300, squash: 0, opacity: 0 };
+    for (const [a, b, from, to, arc] of hops) {
+      if (t < a) break;
+      const p = seg(t, a, b);
+      opacity = 1;
+      if (arc === 0) { x = to[0]; y = lerp(from[1], to[1], p * p); }         // falling in, accelerating
+      else { x = lerp(from[0], to[0], easeInOut(p)); y = lerp(from[1], to[1], p) - arc * 4 * p * (1 - p); }
+      // A short squash right after each landing.
+      const after = t - b;
+      squash = after >= 0 && after < 0.14 ? Math.sin((after / 0.14) * Math.PI) : 0;
+    }
+    // Gentle idle bob once it has arrived.
+    if (t > 1.7) y += Math.sin((t - 1.7) * 3.2) * 4;
+    return { x, y, squash, opacity };
+  }
+
+  window.renderAt = (t) => {
+    // Soft burgundy glow and ring behind the emblem.
+    const d = easeOut(seg(t, 0.0, 0.7));
+    $("disc").style.transform = `scale(${0.3 + 0.7 * d})`; $("disc").style.opacity = d;
+
+    // Steps rise, one after another.
+    ["s1", "s2", "s3"].forEach((id, i) => {
+      const p = seg(t, 0.1 + i * 0.12, 0.55 + i * 0.12);
+      $(id).style.transform = `scaleY(${backOut(p, 1.4) * (p > 0 ? 1 : 0)})`;
+      $(id).style.opacity = p > 0 ? 1 : 0;
+    });
+
+    // Mascot climbs.
+    const m = mascotAt(t);
+    $("mascot").style.left = m.x - 150 + "px";
+    $("mascot").style.top = m.y - 0.88 * 300 + "px";
+    $("mascot").style.opacity = m.opacity;
+    $("mascot").style.transform = `scale(${1 + 0.07 * m.squash}, ${1 - 0.09 * m.squash})`;
+    const ground = t < 0.78 ? landings[0][1] : t < 1.16 ? (t < 0.88 ? landings[0][1] : landings[1][1]) : t < 1.24 ? landings[1][1] : landings[2][1];
+    const lift = Math.max(0, ground - m.y);
+    $("shadow").style.left = m.x - 75 + "px";
+    $("shadow").style.top = ground - 12 + "px";
+    $("shadow").style.opacity = m.opacity * clamp(1 - lift / 260) * 0.9;
+    $("shadow").style.transform = `scale(${clamp(1 - lift / 400, 0.45)})`;
+
+    // Emblem pops in with a little overshoot.
+    const e = seg(t, 1.4, 2.0);
+    $("emblem").style.opacity = clamp(e * 3);
+    $("emblem").style.transform = `scale(${e > 0 ? 0.55 + 0.45 * backOut(e, 1.9) : 0.55})`;
+
+    // Sparkles burst out from behind the emblem, then twinkle.
+    sparks.forEach(({ el, s, delay }) => {
+      const p = seg(t, 1.6 + delay, 2.1 + delay);
+      const tw = t > 2.1 + delay ? 0.85 + 0.15 * Math.sin((t - 2.1) * 5 + delay * 20) : 1;
+      el.style.opacity = p > 0 ? clamp(p * 2) * (t > 4.3 ? 1 - seg(t, 4.3, 4.9) * 0.4 : 1) : 0;
+      el.style.transform = `scale(${backOut(p, 2.2) * s * tw}) rotate(${(1 - p) * -40}deg)`;
+    });
+
+    // Wordmark wipes in from the left.
+    const w = easeInOut(seg(t, 1.95, 2.6));
+    // The wordmark starts at 16.83% of the logo's width, so start the wipe just left of it.
+    $("wordmark").style.clipPath = `inset(71.69% ${84 * (1 - w)}% 0 0)`;
+    $("wordmark").style.opacity = w > 0 ? 1 : 0;
+
+    // Tagline and yellow rule.
+    const g = easeOut(seg(t, 2.5, 3.1));
+    $("tagline").style.opacity = g;
+    $("tagline").style.transform = `translateY(${(1 - g) * 18}px)`;
+    const u = easeOut(seg(t, 2.75, 3.3));
+    $("rule").style.transform = `scaleX(${u})`;
+
+    // One light sweep across the logo once everything is in place.
+    const sw = seg(t, 3.3, 4.2);
+    const pos = lerp(-40, 140, easeInOut(sw));
+    $("sweep").style.opacity = sw > 0 && sw < 1 ? 1 : 0;
+    $("sweep").style.background = `linear-gradient(105deg, transparent ${pos - 18}%, rgb(255 255 255 / 55%) ${pos}%, transparent ${pos + 18}%)`;
+  };
+
+  window.ready = Promise.all([
+    document.fonts.ready,
+    ...["logo.png", "mascot.png"].map((src) => new Promise((res) => { const i = new Image(); i.onload = res; i.src = src; })),
+  ]).then(() => { window.renderAt(0); return true; });
+  window.renderAt(0);
+</script>
+</body>
+</html>

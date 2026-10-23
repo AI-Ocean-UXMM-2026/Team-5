@@ -1,0 +1,14 @@
+Variant 1
+
+Use case: ui-mockup. Generate ONE polished full desktop landing page design screenshot for The Citadel, a Myanmar IT career learning platform for young adults. Flat front-on website screenshot, no device frame, tall image approximately 1440x2000. Crisp readable English copy. Reference image 1 is the exact brand logo identity, reference image 2 is the exact mascot identity; preserve them faithfully, mascot used sparingly. Brand rules: burgundy #963D50 primary buttons and emphasis, yellow #F8D064 selective accents, near-black #18181B text, white and #FAFAFB surfaces, #E8E8EA borders. Sora headings, Plus Jakarta Sans body. Structured editorial alignment, generous whitespace but meaningful content, modest 48px maximum desktop headline, 12px button corners, 16px panels, minimal shadows. No gradients, glassmorphism, decorative blobs, excessive pills, fake statistics, testimonials, pricing, payment plans, price figures or pricing navigation. Header logo, How it works, Learning paths, For companies, EN / မြန်မာ language control, Log in, Start learning. Clear headline, short lead, primary Start learning CTA and secondary See how it works CTA. Prominent How it works section explains platform for BOTH learners and verified companies. Correct sequence: learner chooses goal, AI roadmap, learns, passes test and earns certificate, submits company challenge with AI feedback, company reviews, interview, internship only after offer accepted. Employer registers, team verifies, posts challenge, reviews submissions, interviews, offers internship. AI supports; companies make hiring decisions. Include small trust explanation registration/contact checked and no application fees, no unconditional job promises. Include concise employer section and bottom CTA/footer. No content outside the page, no variant title label inside website. Concept 1: GUIDED ROADMAP. White editorial split hero, strong left typography "Your first IT career starts with a clear path." Right a single coherent preview of a frontend roadmap with learning milestones, certificate, company challenge and interview stage. Small mascot guides current milestone. Under hero prominent "How The Citadel works" five-column connected timeline with readable short descriptions: Choose your goal; Learn and get certified; Solve a company challenge; Company review; Interview and offer. Below timeline a compact employer horizontal process Register → Get verified → Post challenge → Review and interview. Feature one frontend track example as an open split section, then understated verification panel. Warm, calm, learner-first, professional.
+
+
+Variant 2
+
+undefined
+
+
+Variant 3
+
+undefined
+

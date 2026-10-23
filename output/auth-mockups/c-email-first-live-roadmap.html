@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C · Email First + Live Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockups.css">
+<style>
+  .stage { height: 100%; position: relative; background: linear-gradient(180deg, #fff 0%, var(--cream) 100%); overflow: hidden; }
+  .stage .art { position: absolute; right: -40px; bottom: 30px; width: 760px; mix-blend-mode: multiply; }
+  .stage .top { position: absolute; top: 28px; left: 48px; right: 48px; display: flex; justify-content: space-between; align-items: center; }
+  .card { position: absolute; left: 96px; top: 130px; width: 460px; background: #fff; border-radius: 22px; padding: 36px; box-shadow: 0 24px 60px -24px rgba(94, 35, 51, 0.28), 0 0 0 1px #f0e8e2; display: flex; flex-direction: column; gap: 18px; }
+  .card h1 { font-size: 34px; line-height: 1.1; }
+  .card .lead { color: var(--muted); font-size: 15px; line-height: 1.6; margin-top: -6px; }
+  .flow { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  .flow b { width: 22px; height: 22px; border-radius: 50%; background: var(--burgundy-tint); color: var(--burgundy); display: inline-grid; place-items: center; font-size: 11px; margin-right: 6px; }
+  .flow i { flex: 1; height: 1px; background: var(--line); }
+  .promise { display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--muted); padding-top: 16px; border-top: 1px solid var(--line); }
+  .promise svg { width: 18px; height: 18px; color: var(--success); flex-shrink: 0; }
+  .chipmail { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border-radius: 10px; padding: 8px 12px; font-size: 14px; font-weight: 600; align-self: flex-start; }
+  .chipmail svg { width: 16px; height: 16px; color: var(--muted); }
+  .segrole { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); padding: 4px; border-radius: 12px; }
+  .segrole span { display: flex; gap: 8px; align-items: center; justify-content: center; height: 40px; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--muted); }
+  .segrole span.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .segrole svg { width: 16px; height: 16px; }
+  .branch { position: absolute; right: 80px; top: 170px; width: 400px; display: flex; flex-direction: column; gap: 14px; }
+  .branch .lbl { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .branch .mini { background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 0 0 1px #f0e8e2; display: flex; flex-direction: column; gap: 12px; opacity: .95; }
+  .branch .mini h3 { font-size: 20px; }
+  .codes { display: flex; gap: 8px; }
+  .codes span { width: 46px; height: 52px; border: 1.5px solid var(--line); border-radius: 11px; display: grid; place-items: center; font-family: Sora; font-size: 20px; font-weight: 600; }
+  .codes span.cur { border-color: var(--burgundy); box-shadow: 0 0 0 4px var(--burgundy-tint); }
+  .arrowdown { position: absolute; left: 580px; top: 330px; width: 150px; height: 2px; background: repeating-linear-gradient(90deg, var(--subtle) 0 6px, transparent 6px 12px); }
+  /* Onboarding */
+  .ob { height: 100%; display: flex; flex-direction: column; background: var(--tint); }
+  .obbar { height: 72px; padding: 0 36px; display: flex; align-items: center; gap: 32px; background: #fff; border-bottom: 1px solid var(--line); }
+  .tabs { display: flex; gap: 6px; margin: 0 auto; }
+  .tabs span { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--subtle); }
+  .tabs span b { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid currentColor; display: grid; place-items: center; font-size: 11px; }
+  .tabs span.done { color: var(--ink); }
+  .tabs span.done b { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .tabs span.cur { color: var(--burgundy); background: var(--burgundy-tint); }
+  .tabs span.cur b { background: var(--burgundy); color: #fff; border-color: var(--burgundy); }
+  .tabs i { width: 24px; height: 1px; background: var(--line); align-self: center; }
+  .obbody { flex: 1; display: grid; grid-template-columns: 1fr 500px; gap: 32px; padding: 32px 36px; min-height: 0; }
+  .qs { display: flex; flex-direction: column; gap: 12px; }
+  .qs h1 { font-size: 30px; margin-bottom: 6px; }
+  .qc { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+  .qc.done { display: flex; align-items: center; gap: 12px; }
+  .qc.done .ok { width: 26px; height: 26px; border-radius: 50%; background: var(--success-tint); color: var(--success); display: grid; place-items: center; }
+  .qc.done .ok svg { width: 14px; height: 14px; }
+  .qc.done small { display: block; font-size: 12px; color: var(--muted); }
+  .qc.done b { font-size: 15px; }
+  .qc.open { border: 1.5px solid var(--burgundy); box-shadow: 0 0 0 4px var(--burgundy-tint); }
+  .qc.open h2 { font-size: 18px; }
+  .qc.open p { color: var(--muted); font-size: 13.5px; margin: 4px 0 14px; }
+  .qc.later { color: var(--subtle); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; background: #fff; }
+  .chip.on { background: var(--burgundy); color: #fff; border-color: var(--burgundy); }
+  .chip svg { width: 14px; height: 14px; }
+  .preview { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 22px; position: relative; display: flex; flex-direction: column; }
+  .preview .peek { position: absolute; right: 150px; top: -50px; width: 92px; }
+  .ph { display: flex; align-items: center; gap: 10px; }
+  .ph h2 { font-size: 18px; }
+  .live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--success); }
+  .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 4px var(--success-tint); }
+  .path { margin-top: 18px; display: flex; flex-direction: column; position: relative; }
+  .node { display: flex; gap: 14px; padding-bottom: 16px; position: relative; }
+  .node:not(:last-child)::after { content: ""; position: absolute; left: 17px; top: 38px; bottom: 0; width: 2px; background: var(--line); }
+  .num { width: 36px; height: 36px; border-radius: 10px; background: var(--yellow-tint); display: grid; place-items: center; font-family: Sora; font-weight: 700; font-size: 14px; flex-shrink: 0; box-shadow: inset 0 -3px 0 rgba(0,0,0,.05); }
+  .num.lock { background: var(--surface); color: var(--subtle); }
+  .num svg { width: 16px; height: 16px; }
+  .node b { display: block; font-size: 14.5px; }
+  .node .meta { font-size: 12.5px; color: var(--muted); margin-top: 2px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .tip { margin-top: 8px; background: var(--yellow-tint); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; display: flex; gap: 8px; align-items: center; }
+  .tip svg { width: 14px; height: 14px; color: #a07a1c; flex-shrink: 0; }
+  .node.new .num { outline: 3px solid var(--yellow); outline-offset: 2px; }
+  .stats { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { background: var(--surface); border-radius: 12px; padding: 12px 14px; }
+  .stat b { font-family: Sora; font-size: 20px; display: block; }
+  .stat span { font-size: 12px; color: var(--muted); }
+  .save-note { font-size: 12px; color: var(--muted); margin-top: 10px; display: flex; gap: 6px; align-items: center; }
+  .save-note svg { width: 14px; height: 14px; }
+  .obfoot { display: flex; justify-content: space-between; margin-top: auto; }
+  /* phone */
+  .phone .ob { background: var(--tint); }
+  .phone .obbar { height: auto; padding: 54px 16px 12px; gap: 10px; }
+  .phone .pbody { padding: 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .phone .qs h1 { font-size: 22px; }
+  .sheet { background: #fff; border-radius: 22px 22px 0 0; box-shadow: 0 -12px 30px -14px rgba(94,35,51,.25); padding: 12px 18px 30px; }
+  .sheet .grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 12px; }
+  .sheet .row1 { display: flex; align-items: center; gap: 10px; }
+  .sheet .row1 svg { width: 20px; height: 20px; margin-left: auto; color: var(--muted); }
+  .sheet small { color: var(--muted); font-size: 12.5px; }
+  .mini-path { display: flex; gap: 6px; margin-top: 12px; }
+  .mini-path span { flex: 1; height: 8px; border-radius: 4px; background: var(--yellow); }
+  .mini-path span.lk { background: var(--line); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+<symbol id="mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+<symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+<symbol id="code" viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></symbol>
+<symbol id="server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+<symbol id="layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M5 20V11M11 20V5M17 20v-7M3 20h18"/></symbol>
+<symbol id="compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/></symbol>
+<symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+<symbol id="building" viewBox="0 0 24 24"><path d="M4 21V5l8-3v19M12 9h8v12M2 21h20M8 8h.01M8 12h.01M8 16h.01M16 13h.01M16 17h.01"/></symbol>
+<symbol id="shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+<symbol id="back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="grad" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/></symbol>
+<symbol id="send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2-7-8-1z"/></symbol>
+<symbol id="sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="chevdown" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="chevup" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+<symbol id="pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></symbol>
+<symbol id="briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18"/></symbol>
+</svg>
+<header class="deck-head">
+  <div>
+    <p class="tag">Variant C</p>
+    <h1>Email first + live roadmap</h1>
+    <p>One box to start: enter your email and the app works out whether to log you in or create an account. In onboarding, the roadmap builds itself on the right as you answer, so people see the payoff before they finish.</p>
+  </div>
+  <nav class="deck-nav"><a href="index.html">All variants</a><a href="a-split-doorway.html">A</a><a href="b-talk-to-cit.html">B</a><a href="c-email-first-live-roadmap.html" aria-current="page">C</a></nav>
+</header>
+
+<!-- C1 Start -->
+<section class="screen">
+  <div class="screen-label"><b>C1 · Start (one page for log in and sign up)</b><span>No "which button do I press?" moment; the landing CTA and "Log in" both open this</span></div>
+  <div class="frame"><div class="stage">
+    <div class="top"><div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div><span class="lang"><span class="on">EN</span><span>မြန်မာ</span></span></div>
+    <img class="art" src="../../frontend/public/images/landing/career-stairway.webp" alt="">
+    <div class="card">
+      <h1>Start here.</h1>
+      <p class="lead">Enter your email. If you already have an account we'll log you in; if not, we'll set one up together.</p>
+      <div class="field"><label>Email</label><div class="input focus"><svg class="ico"><use href="#mail"/></svg>aye@example.com</div></div>
+      <span class="btn block">Continue with email <svg class="ico"><use href="#arrow"/></svg></span>
+      <div class="flow"><span><b>1</b>Email</span><i></i><span><b>2</b>6-digit code</span><i></i><span><b>3</b>You're in</span></div>
+      <p class="promise"><svg class="ico"><use href="#shield"/></svg>Learners never pay to apply, take a challenge or interview.</p>
+    </div>
+  </div></div>
+</section>
+
+<!-- C2 Branch -->
+<section class="screen">
+  <div class="screen-label"><b>C2 · After "Continue": new vs. returning</b><span>New email → short account form. Known email → straight to the code. Same card, same place</span></div>
+  <div class="frame"><div class="stage">
+    <div class="top"><div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div><span class="lang"><span class="on">EN</span><span>မြန်မာ</span></span></div>
+    <div class="card" style="top:110px">
+      <span class="chipmail"><svg class="ico"><use href="#mail"/></svg>aye@example.com <span class="link" style="font-weight:600">Change</span></span>
+      <h1>You're new here. Welcome!</h1>
+      <div class="segrole"><span class="on"><svg class="ico"><use href="#grad"/></svg>I'm a learner</span><span><svg class="ico"><use href="#building"/></svg>I'm a company</span></div>
+      <div class="field"><label>Your name</label><div class="input">Aye Chan</div></div>
+      <label class="check"><span class="box on"><svg class="ico"><use href="#check"/></svg></span><span>I'm 18 or older and agree to the <span class="link">Terms</span> and <span class="link">Privacy policy</span>.</span></label>
+      <span class="btn block">Create account and send code <svg class="ico"><use href="#arrow"/></svg></span>
+    </div>
+    <div class="arrowdown"></div>
+    <div class="branch">
+      <span class="lbl"><svg class="ico" style="width:16px;height:16px"><use href="#user"/></svg>If the email already has an account</span>
+      <div class="mini">
+        <span class="chipmail"><svg class="ico"><use href="#mail"/></svg>aye@example.com</span>
+        <h3>Welcome back, Aye</h3>
+        <p class="muted" style="font-size:13.5px">Enter the 6-digit code we just emailed you.</p>
+        <div class="codes"><span>4</span><span>8</span><span>1</span><span class="cur"></span><span></span><span></span></div>
+        <p class="hint">Didn't get it? <span class="link">Send a new code</span></p>
+      </div>
+      <img src="../../frontend/mascot/13.png" alt="" style="width:130px;align-self:flex-end;mix-blend-mode:multiply;margin-top:-6px">
+    </div>
+  </div></div>
+</section>
+
+<!-- C3 Onboarding -->
+<section class="screen">
+  <div class="screen-label"><b>C3 · Onboarding with live roadmap</b><span>Answers on the left, the roadmap updates on the right; a highlight shows what just changed</span></div>
+  <div class="frame"><div class="ob">
+    <div class="obbar">
+      <div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div>
+      <div class="tabs"><span class="done"><b>✓</b>Goal</span><i></i><span class="cur"><b>2</b>Skills</span><i></i><span><b>3</b>Hours</span><i></i><span><b>4</b>Review</span></div>
+      <span class="lang"><span class="on">EN</span><span>မြန်မာ</span></span>
+    </div>
+    <div class="obbody">
+      <div class="qs">
+        <h1>Let's build your roadmap, Aye</h1>
+        <div class="qc done"><span class="ok"><svg class="ico"><use href="#check"/></svg></span><div><small>Career goal</small><b>Frontend Developer</b></div><span class="link" style="margin-left:auto;font-size:13px">Change</span></div>
+        <div class="qc open">
+          <h2>What can you do already?</h2>
+          <p>Pick any. We'll speed up the lessons you already know.</p>
+          <div class="chips"><span class="chip on"><svg class="ico"><use href="#check"/></svg>A little HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip on"><svg class="ico"><use href="#check"/></svg>English</span><span class="chip">Excel</span><span class="chip">Figma</span><span class="chip"><svg class="ico"><use href="#plus"/></svg>Add your own</span></div>
+        </div>
+        <div class="qc later"><span>Hours you can study each week</span><svg class="ico" style="width:18px;height:18px"><use href="#chevdown"/></svg></div>
+        <div class="obfoot"><span class="btn ghost"><svg class="ico"><use href="#back"/></svg>Back</span><span class="btn">Next: hours <svg class="ico"><use href="#arrow"/></svg></span></div>
+      </div>
+      <aside class="preview">
+        <img class="peek" src="../../frontend/mascot/17.png" alt="">
+        <div class="ph"><span class="badge ai">AI</span><h2>Your roadmap</h2><span class="live"><i></i>Live preview</span></div>
+        <div class="path">
+          <div class="node"><span class="num">1</span><div><b>Career starter: working in IT</b><div class="meta">3 lessons · 3 h <span class="badge free">Free</span></div></div></div>
+          <div class="node new"><span class="num">2</span><div><b>Frontend basics: HTML, CSS and JavaScript</b><div class="meta">3 lessons · 12 h <span class="badge part">First 25% free</span> 45,000 MMK</div><div class="tip"><svg class="ico"><use href="#sparkle"/></svg>You know some HTML, so the first lessons will go faster.</div></div></div>
+          <div class="node"><span class="num lock"><svg class="ico"><use href="#briefcase"/></svg></span><div><b>Company challenge</b><div class="meta"><span class="badge free">Free</span> Unlocks after your certificate</div></div></div>
+          <div class="node"><span class="num lock"><svg class="ico"><use href="#user"/></svg></span><div><b>Interview</b><div class="meta"><span class="badge free">Always free</span></div></div></div>
+        </div>
+        <div class="stats"><div class="stat"><b>15 h</b><span>of learning</span></div><div class="stat"><b>~3 weeks</b><span>at 5 h a week (set next)</span></div></div>
+        <p class="save-note"><svg class="ico"><use href="#lock"/></svg>Nothing is saved until you accept it on the Review step.</p>
+      </aside>
+    </div>
+  </div></div>
+</section>
+
+<!-- C4 Phone + notes -->
+<section class="screen">
+  <div class="screen-label"><b>C4 · Phone: preview as a bottom sheet</b><span>The roadmap preview collapses to a summary bar; tap to open</span></div>
+  <div class="row">
+    <div class="phone"><div class="ob">
+      <div class="obbar"><div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div><span class="muted" style="margin-left:auto;font-size:13px;font-weight:600">2 of 4</span></div>
+      <div class="pbody qs">
+        <h1>What can you do already?</h1>
+        <p class="muted" style="font-size:14px">Pick any. We'll speed up what you know.</p>
+        <div class="chips"><span class="chip on"><svg class="ico"><use href="#check"/></svg>A little HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip on"><svg class="ico"><use href="#check"/></svg>English</span><span class="chip">Excel</span><span class="chip">Figma</span></div>
+        <span class="btn block" style="margin-top:auto">Next: hours <svg class="ico"><use href="#arrow"/></svg></span>
+      </div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="row1"><span class="badge ai">AI</span><b>Your roadmap</b><svg class="ico"><use href="#chevup"/></svg></div>
+        <small>2 courses · 15 h · first course free</small>
+        <div class="mini-path"><span></span><span></span><span class="lk"></span><span class="lk"></span></div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <h3>Why choose C</h3>
+      <ul>
+        <li>Removes the most common auth mistake: people with an account pressing "Sign up" (and the reverse). One box handles both.</li>
+        <li>Showing the roadmap while people answer proves the value early, which keeps them going to the end.</li>
+        <li>Free vs paid is visible on every course from the first minute, so there are no surprises later.</li>
+        <li>Matches the doc's rule that AI suggests and the learner accepts: the preview is clearly "not saved yet".</li>
+      </ul>
+      <h4>Trade-offs</h4>
+      <ul>
+        <li>Telling people whether an email has an account can leak that it's registered; a real build should rate-limit this check.</li>
+        <li>The live preview needs the roadmap to be quick to recompute; fine for today's rule-based demo, needs care with a real AI call.</li>
+        <li>Two-pane layout needs a different pattern on phones (the bottom sheet).</li>
+      </ul>
+      <h4>Build effort</h4>
+      <ul><li>Medium to high. New auth page logic plus a reactive preview panel.</li></ul>
+    </div>
+  </div>
+</section>
+<script src="mockups.js"></script>
+</body>
+</html>

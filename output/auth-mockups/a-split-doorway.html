@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A · Split Doorway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockups.css">
+<style>
+  .split { display: grid; grid-template-columns: 560px 1fr; height: 100%; }
+  .story { background: var(--cream); padding: 40px 48px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .story h2 { font-size: 38px; line-height: 1.12; margin-top: 44px; max-width: 420px; }
+  .story h2 em { font-style: normal; color: var(--burgundy); }
+  .story > p { color: var(--muted); margin-top: 12px; font-size: 15px; line-height: 1.6; max-width: 400px; }
+  .story .art { width: 470px; margin: 10px 0 0 -14px; mix-blend-mode: multiply; }
+  .trust { margin-top: auto; display: flex; flex-direction: column; gap: 14px; }
+  .trust li { list-style: none; display: flex; gap: 12px; align-items: flex-start; font-size: 13.5px; line-height: 1.5; }
+  .trust .tile { width: 30px; height: 30px; border-radius: 8px; background: var(--yellow); display: grid; place-items: center; flex-shrink: 0; box-shadow: inset 0 -3px 0 rgba(0,0,0,.08); }
+  .trust .tile svg { width: 16px; height: 16px; color: var(--burgundy-deep); }
+  .trust b { display: block; font-weight: 700; }
+  .trust span { color: var(--muted); }
+  .formside { display: flex; flex-direction: column; padding: 32px 56px; }
+  .topbar { display: flex; justify-content: flex-end; align-items: center; gap: 18px; font-size: 14px; }
+  .formwrap { width: 440px; margin: auto; display: flex; flex-direction: column; gap: 18px; }
+  .stepper { display: flex; gap: 6px; }
+  .stepper i { flex: 1; height: 4px; border-radius: 4px; background: var(--line); }
+  .stepper i.on { background: var(--burgundy); }
+  .eyebrow { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .02em; margin-top: -8px; }
+  .formwrap h1 { font-size: 30px; }
+  .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .role { border: 1.5px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px; position: relative; }
+  .role.on { border-color: var(--burgundy); background: var(--burgundy-tint); }
+  .role .ri { width: 34px; height: 34px; border-radius: 10px; background: #fff; display: grid; place-items: center; color: var(--burgundy); border: 1px solid var(--line); }
+  .role b { font-size: 14px; }
+  .role span { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .role .tick { position: absolute; top: 12px; right: 12px; width: 18px; height: 18px; border-radius: 50%; background: var(--burgundy); display: grid; place-items: center; }
+  .role .tick svg { width: 11px; height: 11px; color: #fff; }
+  .codes { display: flex; gap: 10px; }
+  .codes span { width: 58px; height: 64px; border: 1.5px solid var(--line); border-radius: 12px; display: grid; place-items: center; font-family: Sora; font-size: 24px; font-weight: 600; }
+  .codes span.f { border-color: var(--ink); }
+  .codes span.cur { border-color: var(--burgundy); box-shadow: 0 0 0 4px var(--burgundy-tint); }
+  .scene { width: 464px; height: 309px; border-radius: 20px; background: url(../../frontend/public/images/landing/journey-scenes.webp) 100% 0 / 200% auto no-repeat; margin-top: 26px; }
+  /* Onboarding */
+  .onb { display: grid; grid-template-columns: 320px 1fr; height: 100%; }
+  .rail { background: var(--burgundy-deep); color: #fff; padding: 36px 32px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .rail .brand img { filter: brightness(0) invert(1); }
+  .steps { margin-top: 56px; display: flex; flex-direction: column; }
+  .st { display: flex; gap: 14px; position: relative; padding-bottom: 30px; }
+  .st:not(:last-child)::after { content: ""; position: absolute; left: 13px; top: 30px; bottom: 2px; width: 2px; background: rgba(255,255,255,.18); }
+  .st.done::after { background: var(--yellow); }
+  .dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; border: 2px solid rgba(255,255,255,.3); flex-shrink: 0; }
+  .st.done .dot { background: var(--yellow); border-color: var(--yellow); color: var(--burgundy-deep); }
+  .st.cur .dot { background: #fff; color: var(--burgundy-deep); border-color: #fff; box-shadow: 0 0 0 5px rgba(255,255,255,.15); }
+  .st b { display: block; font-size: 15px; }
+  .st span { font-size: 12.5px; color: #e4c3cb; }
+  .st:not(.done):not(.cur) b { color: #d9b8c0; font-weight: 600; }
+  .rail .cit { position: absolute; bottom: -8px; right: -18px; width: 190px; }
+  .rail .time { margin-top: auto; font-size: 13px; color: #e4c3cb; display: flex; gap: 8px; align-items: center; }
+  .rail .time svg { width: 16px; height: 16px; }
+  .q { padding: 44px 64px 0; display: flex; flex-direction: column; height: 100%; }
+  .q h1 { font-size: 32px; }
+  .q > p { color: var(--muted); margin-top: 6px; font-size: 15px; }
+  .goals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 24px; }
+  .goal { border: 1.5px solid var(--line); border-radius: 14px; padding: 16px; display: flex; gap: 12px; align-items: flex-start; }
+  .goal .gi { width: 38px; height: 38px; border-radius: 10px; background: var(--surface); display: grid; place-items: center; color: var(--ink); flex-shrink: 0; }
+  .goal b { font-size: 14.5px; display: block; }
+  .goal span { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+  .goal.on { border-color: var(--burgundy); background: var(--burgundy-tint); }
+  .goal.on .gi { background: var(--burgundy); color: #fff; }
+  .goal.unsure { border-style: dashed; }
+  .sub { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; margin-top: 28px; }
+  .sub h3 { font-family: "Plus Jakarta Sans"; letter-spacing: 0; font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip svg { width: 14px; height: 14px; }
+  .seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+  .seg span { text-align: center; padding: 9px 0; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .seg span.on { background: var(--burgundy); color: #fff; }
+  .next { margin-top: 32px; display: flex; gap: 12px; align-items: center; background: var(--ai); border: 1px solid var(--ai-line); border-radius: 14px; padding: 14px 16px; font-size: 13.5px; color: var(--ai-ink); }
+  .footbar { margin-top: auto; border-top: 1px solid var(--line); padding: 18px 0 22px; display: flex; justify-content: space-between; align-items: center; }
+  /* Phone */
+  .ph-top { display: flex; justify-content: space-between; align-items: center; padding: 54px 20px 0; }
+  .ph-art { height: 170px; background: var(--cream) url(../../frontend/public/images/landing/career-stairway.webp) center 40% / 330px auto no-repeat; margin: 14px 16px 0; border-radius: 18px; background-blend-mode: multiply; }
+  .ph-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .ph-body h1 { font-size: 24px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+<symbol id="mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+<symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+<symbol id="code" viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></symbol>
+<symbol id="server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+<symbol id="layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M5 20V11M11 20V5M17 20v-7M3 20h18"/></symbol>
+<symbol id="compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/></symbol>
+<symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+<symbol id="building" viewBox="0 0 24 24"><path d="M4 21V5l8-3v19M12 9h8v12M2 21h20M8 8h.01M8 12h.01M8 16h.01M16 13h.01M16 17h.01"/></symbol>
+<symbol id="shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+<symbol id="back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="grad" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/></symbol>
+<symbol id="send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2-7-8-1z"/></symbol>
+<symbol id="sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="chevdown" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="chevup" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+<symbol id="pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></symbol>
+<symbol id="briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18"/></symbol>
+</svg>
+<header class="deck-head">
+  <div>
+    <p class="tag">Variant A</p>
+    <h1>Split doorway</h1>
+    <p>A calm split layout. The left side shows the brand art and the three promises; the right side is a short form. Onboarding uses a burgundy step rail so learners always see how far they are.</p>
+  </div>
+  <nav class="deck-nav"><a href="index.html">All variants</a><a href="a-split-doorway.html" aria-current="page">A</a><a href="b-talk-to-cit.html">B</a><a href="c-email-first-live-roadmap.html">C</a></nav>
+</header>
+
+<!-- A1 Sign up -->
+<section class="screen">
+  <div class="screen-label"><b>A1 · Sign up</b><span>Role as two cards, consent inline, a 3-part progress bar (account → confirm email → get started)</span></div>
+  <div class="frame"><div class="split">
+    <aside class="story">
+      <div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div>
+      <h2>Your first IT job starts <em>one step</em> at a time.</h2>
+      <p>Learn the skills, prove them on a real company task, and get an interview.</p>
+      <img class="art" src="../../frontend/public/images/landing/career-stairway.webp" alt="">
+      <ul class="trust">
+        <li><span class="tile"><svg class="ico"><use href="#check"/></svg></span><div><b>Free to start</b><span>Career starter course and the first 25% of every course.</span></div></li>
+        <li><span class="tile"><svg class="ico"><use href="#shield"/></svg></span><div><b>Every company is verified</b><span>Documents and a call before they can post.</span></div></li>
+      </ul>
+    </aside>
+    <main class="formside">
+      <div class="topbar"><span class="muted">Already have an account? <span class="link">Log in</span></span><span class="lang"><span class="on">EN</span><span>မြန်မာ</span></span></div>
+      <div class="formwrap">
+        <div class="stepper"><i class="on"></i><i></i><i></i></div>
+        <p class="eyebrow">STEP 1 OF 3 · YOUR ACCOUNT</p>
+        <h1>Create your account</h1>
+        <div class="roles">
+          <div class="role on"><span class="tick"><svg class="ico"><use href="#check"/></svg></span><span class="ri"><svg class="ico"><use href="#grad"/></svg></span><b>I'm a learner</b><span>Learn, get certified, get an interview.</span></div>
+          <div class="role"><span class="ri"><svg class="ico"><use href="#building"/></svg></span><b>I'm a company</b><span>Post challenges and hire interns.</span></div>
+        </div>
+        <div class="field"><label>Your name</label><div class="input">Aye Chan</div></div>
+        <div class="field"><label>Email</label><div class="input focus"><svg class="ico"><use href="#mail"/></svg>aye@example.com</div><span class="hint">We'll send a 6-digit code to confirm it.</span></div>
+        <label class="check"><span class="box on"><svg class="ico"><use href="#check"/></svg></span><span>I'm 18 or older and agree to the <span class="link">Terms</span> and <span class="link">Privacy policy</span>.</span></label>
+        <span class="btn block">Continue <svg class="ico"><use href="#arrow"/></svg></span>
+      </div>
+    </main>
+  </div></div>
+</section>
+
+<!-- A2 Log in -->
+<section class="screen">
+  <div class="screen-label"><b>A2 · Log in</b><span>No password: email, then a one-time code. Left panel swaps to a "welcome back" scene</span></div>
+  <div class="frame"><div class="split">
+    <aside class="story">
+      <div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div>
+      <h2>Welcome back. <em>Pick up</em> where you left off.</h2>
+      <div class="scene" role="img" aria-label=""></div>
+      <ul class="trust">
+        <li><span class="tile"><svg class="ico"><use href="#lock"/></svg></span><div><b>No password to remember</b><span>We email you a code each time you log in.</span></div></li>
+      </ul>
+    </aside>
+    <main class="formside">
+      <div class="topbar"><span class="muted">New here? <span class="link">Create an account</span></span><span class="lang"><span class="on">EN</span><span>မြန်မာ</span></span></div>
+      <div class="formwrap">
+        <h1>Log in</h1>
+        <div class="field"><label>Email</label><div class="input"><svg class="ico"><use href="#mail"/></svg>aye@example.com<span class="link" style="margin-left:auto;font-size:13px">Change</span></div></div>
+        <div class="field"><label>Code we emailed you</label>
+          <div class="codes"><span class="f">4</span><span class="f">8</span><span class="f">1</span><span class="cur"></span><span></span><span></span></div>
+          <span class="hint">Didn't get it? <span class="link">Send a new code</span> in 0:42</span>
+        </div>
+        <span class="btn block">Log in <svg class="ico"><use href="#arrow"/></svg></span>
+        <div class="divider">One login for learners and companies</div>
+      </div>
+    </main>
+  </div></div>
+</section>
+
+<!-- A3 Onboarding -->
+<section class="screen">
+  <div class="screen-label"><b>A3 · Onboarding: your goal</b><span>Step rail on the left; goal cards, skill chips and an hours selector replace the select box and text area</span></div>
+  <div class="frame"><div class="onb">
+    <aside class="rail">
+      <div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div>
+      <div class="steps">
+        <div class="st done"><span class="dot"><svg class="ico" style="width:14px;height:14px"><use href="#check"/></svg></span><div><b>Language</b><span>English</span></div></div>
+        <div class="st cur"><span class="dot">2</span><div><b>Your goal</b><span>Where you want to go</span></div></div>
+        <div class="st"><span class="dot">3</span><div><b>Your roadmap</b><span>Check it, then save</span></div></div>
+        <div class="st"><span class="dot">4</span><div><b>Your profile</b><span>Optional</span></div></div>
+      </div>
+      <p class="time"><svg class="ico"><use href="#clock"/></svg>About 2 minutes</p>
+      <img class="cit" src="../../frontend/mascot/15.png" alt="">
+    </aside>
+    <main class="q">
+      <h1>Where do you want to go, Aye?</h1>
+      <p>Pick one. You can change it any time from your roadmap.</p>
+      <div class="goals">
+        <div class="goal on"><span class="gi"><svg class="ico"><use href="#code"/></svg></span><div><b>Frontend Developer</b><span>Build the websites people use.</span></div></div>
+        <div class="goal"><span class="gi"><svg class="ico"><use href="#server"/></svg></span><div><b>Backend Developer</b><span>Make the data and logic work.</span></div></div>
+        <div class="goal"><span class="gi"><svg class="ico"><use href="#layers"/></svg></span><div><b>Full-Stack Developer</b><span>Front and back, end to end.</span></div></div>
+        <div class="goal"><span class="gi"><svg class="ico"><use href="#pen"/></svg></span><div><b>UI/UX Designer</b><span>Design screens that feel easy.</span></div></div>
+        <div class="goal"><span class="gi"><svg class="ico"><use href="#chart"/></svg></span><div><b>Data Analyst</b><span>Turn numbers into decisions.</span></div></div>
+        <div class="goal unsure"><span class="gi"><svg class="ico"><use href="#compass"/></svg></span><div><b>Not sure yet</b><span>Start with the free career starter.</span></div></div>
+      </div>
+      <div class="sub">
+        <div><h3>What can you do already? <span class="muted" style="font-weight:500">Pick any</span></h3>
+          <div class="chips"><span class="chip on"><svg class="ico"><use href="#check"/></svg>A little HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip on"><svg class="ico"><use href="#check"/></svg>English</span><span class="chip">Excel</span><span class="chip">Figma</span><span class="chip"><svg class="ico"><use href="#plus"/></svg>Add your own</span></div>
+        </div>
+        <div><h3>Hours you can study each week</h3>
+          <div class="seg"><span>2</span><span class="on">5</span><span>10</span><span>15+</span></div>
+          <p class="hint" style="margin-top:8px">At 5 hours a week, most roadmaps take 3–4 weeks.</p>
+        </div>
+      </div>
+      <div class="next"><span class="badge ai">AI</span><p><b>Next:</b> AI puts the right courses in order for you. You check the roadmap, see what's free, and only then save it.</p></div>
+      <div class="footbar"><span class="btn ghost"><svg class="ico"><use href="#back"/></svg>Back</span><span class="btn">Make my roadmap <svg class="ico"><use href="#arrow"/></svg></span></div>
+    </main>
+  </div></div>
+</section>
+
+<!-- A4 Phone + notes -->
+<section class="screen">
+  <div class="screen-label"><b>A4 · Phone</b><span>The art shrinks to a banner; the form keeps the same order</span></div>
+  <div class="row">
+    <div class="phone">
+      <div class="ph-top"><div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div><span class="lang"><span class="on">EN</span><span>မြန်မာ</span></span></div>
+      <div class="ph-art"></div>
+      <div class="ph-body">
+        <div class="stepper"><i class="on"></i><i></i><i></i></div>
+        <h1>Create your account</h1>
+        <div class="roles">
+          <div class="role on"><span class="tick"><svg class="ico"><use href="#check"/></svg></span><span class="ri"><svg class="ico"><use href="#grad"/></svg></span><b>Learner</b></div>
+          <div class="role"><span class="ri"><svg class="ico"><use href="#building"/></svg></span><b>Company</b></div>
+        </div>
+        <div class="field"><label>Your name</label><div class="input">Aye Chan</div></div>
+        <div class="field"><label>Email</label><div class="input ph">you@email.com</div></div>
+        <label class="check"><span class="box"></span><span>I'm 18+ and agree to the <span class="link">Terms</span> and <span class="link">Privacy</span>.</span></label>
+        <span class="btn block">Continue <svg class="ico"><use href="#arrow"/></svg></span>
+        <p class="muted" style="text-align:center;font-size:13px">Have an account? <span class="link">Log in</span></p>
+      </div>
+    </div>
+    <div class="notes">
+      <h3>Why choose A</h3>
+      <ul>
+        <li>Most familiar pattern, so it's the lowest risk and quickest to build from today's code.</li>
+        <li>The trust points (free to start, verified companies) sit next to the form, right when people decide to sign up.</li>
+        <li>The step rail answers "how long is this?" and "where am I?" on every onboarding screen.</li>
+        <li>Chips and an hours selector are faster than typing on a phone, and give the AI cleaner input.</li>
+      </ul>
+      <h4>Trade-offs</h4>
+      <ul>
+        <li>Looks like many other products; the personality comes mostly from the artwork.</li>
+        <li>On phones the left panel shrinks to a banner, so the trust points move below the form.</li>
+      </ul>
+      <h4>Build effort</h4>
+      <ul><li>Low. Same screens and steps as now, new layout and controls.</li></ul>
+    </div>
+  </div>
+</section>
+<script src="mockups.js"></script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B · Talk to Cit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockups.css">
+<style>
+  .app { height: 100%; background: var(--cream); display: flex; flex-direction: column; }
+  .bar { height: 72px; padding: 0 32px; display: flex; align-items: center; gap: 24px; border-bottom: 1px solid #efe7df; background: #fffdfb; }
+  .bar .back { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); display: grid; place-items: center; background: #fff; }
+  .bar .back svg { width: 18px; height: 18px; }
+  .prog { flex: 1; max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; }
+  .prog span { font-size: 12px; font-weight: 700; color: var(--muted); text-align: center; }
+  .prog i { display: block; height: 6px; border-radius: 6px; background: #ece4dc; overflow: hidden; }
+  .prog i b { display: block; height: 100%; background: var(--burgundy); border-radius: 6px; }
+  .body { flex: 1; display: grid; grid-template-columns: 280px 620px 280px; justify-content: center; gap: 32px; padding: 28px 32px 0; min-height: 0; }
+  .side { padding-top: 8px; }
+  .answers { background: #fff; border: 1px solid #efe7df; border-radius: 16px; padding: 18px; }
+  .answers h3 { font-family: "Plus Jakarta Sans"; letter-spacing: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: .1em; margin-bottom: 12px; }
+  .ans { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: 13px; }
+  .ans:first-of-type { border-top: 0; padding-top: 0; }
+  .ans small { display: block; color: var(--muted); font-size: 11.5px; }
+  .ans b { font-weight: 600; }
+  .ans svg { width: 15px; height: 15px; color: var(--burgundy); }
+  .ans.todo b { color: var(--subtle); font-weight: 500; }
+  .upnext { margin-top: 14px; font-size: 12.5px; color: var(--muted); line-height: 1.6; padding: 0 4px; }
+  .chat { display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+  .msg { display: flex; gap: 10px; align-items: flex-end; max-width: 520px; }
+  .av { width: 40px; height: 40px; border-radius: 50%; background: var(--burgundy-tint); overflow: hidden; flex-shrink: 0; display: grid; place-items: center; }
+  .av.cit { background: var(--burgundy-tint) url(../../frontend/mascot/18.png) 71% 52% / 230% auto no-repeat; border: 1px solid #efe1e4; }
+  .av.ghost { visibility: hidden; }
+  .bub { background: #fff; border: 1px solid #efe7df; padding: 12px 15px; border-radius: 18px 18px 18px 6px; font-size: 15px; line-height: 1.5; }
+  .me { align-self: flex-end; }
+  .me .bub { background: var(--burgundy); color: #fff; border-color: var(--burgundy); border-radius: 18px 18px 6px 18px; display: flex; gap: 10px; align-items: center; }
+  .me .bub .edit { font-size: 12px; color: #f3d6dc; text-decoration: underline; }
+  .typing { display: inline-flex; gap: 4px; padding: 14px 16px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--subtle); opacity: .6; }
+  .replies { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-left: 50px; max-width: 520px; }
+  .reply { background: #fff; border: 1.5px solid #e9dfd6; border-radius: 14px; padding: 12px 14px; display: flex; gap: 10px; align-items: center; font-size: 14px; font-weight: 600; }
+  .reply .ri { width: 34px; height: 34px; border-radius: 10px; background: var(--burgundy-tint); color: var(--burgundy); display: grid; place-items: center; flex-shrink: 0; }
+  .reply small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+  .reply.unsure { border-style: dashed; }
+  .composer { margin-top: auto; background: #fff; border: 1px solid #efe7df; border-bottom: 0; border-radius: 20px 20px 0 0; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .send { display: flex; gap: 10px; }
+  .send .input { flex: 1; }
+  .send .go { width: 48px; height: 48px; border-radius: 14px; background: var(--burgundy); color: #fff; display: grid; place-items: center; flex-shrink: 0; }
+  .send .go svg { width: 20px; height: 20px; }
+  .codes { display: flex; gap: 8px; }
+  .codes span { width: 52px; height: 58px; border: 1.5px solid var(--line); border-radius: 12px; display: grid; place-items: center; font-family: Sora; font-size: 22px; font-weight: 600; background: #fff; }
+  .codes span.f { border-color: var(--ink); }
+  .codes span.cur { border-color: var(--burgundy); box-shadow: 0 0 0 4px var(--burgundy-tint); }
+  .hero-cit { position: relative; display: flex; justify-content: center; align-items: flex-start; padding-top: 70px; }
+  .hero-cit::before { content: ""; position: absolute; width: 240px; height: 240px; border-radius: 50%; background: var(--yellow-tint); top: 75px; left: 50%; translate: -50% 0; }
+  .hero-cit img { width: 250px; position: relative; mix-blend-mode: multiply; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { height: 40px; padding: 0 14px; border-radius: 12px; border: 1.5px solid #e9dfd6; background: #fff; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
+  .chip.on { background: var(--burgundy-tint); color: var(--burgundy); border-color: var(--burgundy); }
+  .chip svg { width: 14px; height: 14px; }
+  /* phone */
+  .phone .app { height: 100%; }
+  .phone .bar { height: auto; padding: 54px 16px 12px; gap: 12px; }
+  .phone .body { display: flex; flex-direction: column; padding: 16px 14px 0; gap: 0; }
+  .phone .bub { font-size: 14.5px; }
+  .phone .composer { margin: auto -14px 0; border-radius: 22px 22px 0 0; padding: 16px 16px 34px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+<symbol id="mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+<symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+<symbol id="code" viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></symbol>
+<symbol id="server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+<symbol id="layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M5 20V11M11 20V5M17 20v-7M3 20h18"/></symbol>
+<symbol id="compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/></symbol>
+<symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+<symbol id="building" viewBox="0 0 24 24"><path d="M4 21V5l8-3v19M12 9h8v12M2 21h20M8 8h.01M8 12h.01M8 16h.01M16 13h.01M16 17h.01"/></symbol>
+<symbol id="shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+<symbol id="back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="grad" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/></symbol>
+<symbol id="send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2-7-8-1z"/></symbol>
+<symbol id="sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="chevdown" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="chevup" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+<symbol id="pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></symbol>
+<symbol id="briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18"/></symbol>
+</svg>
+<header class="deck-head">
+  <div>
+    <p class="tag">Variant B</p>
+    <h1>Talk to Cit</h1>
+    <p>The mascot asks one question at a time, like a chat. Big tap-friendly answers, a clear progress bar, and a side card where every answer can be edited. Built for phones first.</p>
+  </div>
+  <nav class="deck-nav"><a href="index.html">All variants</a><a href="a-split-doorway.html">A</a><a href="b-talk-to-cit.html" aria-current="page">B</a><a href="c-email-first-live-roadmap.html">C</a></nav>
+</header>
+
+<!-- B1 Sign up -->
+<section class="screen">
+  <div class="screen-label"><b>B1 · Sign up</b><span>One question at a time; consent sits right above the email box, the step where it applies</span></div>
+  <div class="frame"><div class="app">
+    <div class="bar">
+      <div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div>
+      <div class="prog"><span>About you · 3 of 4</span><i><b style="width:62%"></b></i></div>
+      <span class="lang"><span class="on">EN</span><span>မြန်မာ</span></span>
+    </div>
+    <div class="body">
+      <aside class="side">
+        <div class="answers">
+          <h3>Your answers</h3>
+          <div class="ans"><div><small>I'm here to</small><b>Learn</b></div><svg class="ico"><use href="#pen"/></svg></div>
+          <div class="ans"><div><small>Name</small><b>Aye Chan</b></div><svg class="ico"><use href="#pen"/></svg></div>
+          <div class="ans todo"><div><small>Email</small><b>Next</b></div></div>
+        </div>
+        <p class="upnext">After this: confirm your email, pick a goal, and check the roadmap AI makes for you.</p>
+      </aside>
+      <div class="chat">
+        <div class="msg"><span class="av cit"></span><div class="bub">Mingalaba! I'm Cit, your guide at The Citadel. Are you here to learn or to hire?</div></div>
+        <div class="msg me"><div class="bub">I'm here to learn</div></div>
+        <div class="msg"><span class="av cit"></span><div class="bub">Great. What should I call you?</div></div>
+        <div class="msg me"><div class="bub">Aye Chan</div></div>
+        <div class="msg"><span class="av cit"></span><div class="bub">Nice to meet you, Aye. What's your email? I'll send a code to make sure it's yours.</div></div>
+        <div class="composer">
+          <label class="check"><span class="box on"><svg class="ico"><use href="#check"/></svg></span><span>I'm 18 or older and agree to the <span class="link">Terms</span> and <span class="link">Privacy policy</span>.</span></label>
+          <div class="send"><div class="input focus"><svg class="ico"><use href="#mail"/></svg>aye@example.com</div><span class="go"><svg class="ico"><use href="#send"/></svg></span></div>
+          <p class="hint">Already have an account? <span class="link">Log in</span></p>
+        </div>
+      </div>
+      <aside></aside>
+    </div>
+  </div></div>
+</section>
+
+<!-- B2 Log in -->
+<section class="screen">
+  <div class="screen-label"><b>B2 · Log in</b><span>Same voice for returning users: email, then the code. No password</span></div>
+  <div class="frame"><div class="app">
+    <div class="bar">
+      <div class="brand"><img src="../../frontend/public/logo/the-citadel-icon-primary.png" alt="">the citadel</div>
+      <div class="prog"><span>Log in</span></div>
+      <span class="lang"><span class="on">EN</span><span>မြန်မာ</span></span>
+    </div>
+    <div class="body">
+      <aside class="hero-cit"><img src="../../frontend/mascot/1.png" alt=""></aside>
+      <div class="chat">
+        <div class="msg"><span class="av cit"></span><div class="bub">Welcome back! Which email do you use with us?</div></div>
+        <div class="msg me"><div class="bub">aye@example.com <span class="edit">Change</span></div></div>
+        <div class="msg"><span class="av cit"></span><div class="bub">I've sent a 6-digit code to aye@example.com. It works for 10 minutes.</div></div>
+        <div class="msg"><span class="av ghost"></span><div class="bub typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
+        <div class="composer">
+          <label style="font-size:13px;font-weight:600">Your code</label>
+          <div style="display:flex;gap:12px;align-items:center"><div class="codes"><span class="f">4</span><span class="f">8</span><span class="f">1</span><span class="f">9</span><span class="cur"></span><span></span></div><span class="btn" style="margin-left:auto">Log in <svg class="ico"><use href="#arrow"/></svg></span></div>
+          <p class="hint">Didn't get it? <span class="link">Send a new code</span> · New here? <span class="link">Create an account</span></p>
+        </div>
+      </div>
+      <aside></aside>
+    </div>
+  </div></div>
+</section>
+
+<!-- B3 Onboarding -->
+<section class="screen">
+  <div class="screen-label"><b>B3 · Onboarding: your goal</b><span>Goals are answer cards inside the chat; "Not sure yet" is a first-class answer, not a hidden option</span></div>
+  <div class="frame"><div class="app">
+    <div class="bar">
+      <span class="back"><svg class="ico"><use href="#back"/></svg></span>
+      <div class="prog"><span>Your goal · 2 of 4</span><i><b style="width:38%"></b></i></div>
+      <span class="lang"><span class="on">EN</span><span>မြန်မာ</span></span>
+    </div>
+    <div class="body">
+      <aside class="side">
+        <div class="answers">
+          <h3>Your answers</h3>
+          <div class="ans"><div><small>Language</small><b>English</b></div><svg class="ico"><use href="#pen"/></svg></div>
+          <div class="ans todo"><div><small>Goal</small><b>Now</b></div></div>
+          <div class="ans todo"><div><small>Skills</small><b>Next</b></div></div>
+          <div class="ans todo"><div><small>Hours a week</small><b>Next</b></div></div>
+        </div>
+        <p class="upnext">Then AI suggests your roadmap. You check it before anything is saved.</p>
+      </aside>
+      <div class="chat">
+        <div class="msg"><span class="av cit"></span><div class="bub">Which language should I use?</div></div>
+        <div class="msg me"><div class="bub">English</div></div>
+        <div class="msg"><span class="av cit"></span><div class="bub">Where do you want to go, Aye? Pick one. If you're not sure yet, that's fine too.</div></div>
+        <div class="replies">
+          <div class="reply"><span class="ri"><svg class="ico"><use href="#code"/></svg></span><div>Frontend Developer<small>Build websites</small></div></div>
+          <div class="reply"><span class="ri"><svg class="ico"><use href="#server"/></svg></span><div>Backend Developer<small>Data and logic</small></div></div>
+          <div class="reply"><span class="ri"><svg class="ico"><use href="#layers"/></svg></span><div>Full-Stack Developer<small>End to end</small></div></div>
+          <div class="reply"><span class="ri"><svg class="ico"><use href="#pen"/></svg></span><div>UI/UX Designer<small>Design screens</small></div></div>
+          <div class="reply"><span class="ri"><svg class="ico"><use href="#chart"/></svg></span><div>Data Analyst<small>Numbers to decisions</small></div></div>
+          <div class="reply unsure"><span class="ri"><svg class="ico"><use href="#compass"/></svg></span><div>Not sure yet<small>Start with the free starter</small></div></div>
+        </div>
+        <div class="composer">
+          <div class="send"><div class="input ph">Or tell Cit in your own words, like "I want to build mobile apps"</div><span class="go"><svg class="ico"><use href="#send"/></svg></span></div>
+        </div>
+      </div>
+      <aside></aside>
+    </div>
+  </div></div>
+</section>
+
+<!-- B4 Phone + notes -->
+<section class="screen">
+  <div class="screen-label"><b>B4 · Phone: skills question</b><span>Multi-select chips with a sticky "Done" button; the chat scrolls above</span></div>
+  <div class="row">
+    <div class="phone"><div class="app">
+      <div class="bar"><span class="back"><svg class="ico"><use href="#back"/></svg></span><div class="prog"><span>Your skills · 2 of 4</span><i><b style="width:55%"></b></i></div></div>
+      <div class="body">
+        <div class="chat">
+          <div class="msg me"><div class="bub">Frontend Developer</div></div>
+          <div class="msg"><span class="av cit"></span><div class="bub">Good choice! What can you do already? Pick any. It helps me skip what you know.</div></div>
+        </div>
+        <div class="composer">
+          <div class="chips"><span class="chip on"><svg class="ico"><use href="#check"/></svg>A little HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip on"><svg class="ico"><use href="#check"/></svg>English</span><span class="chip">Excel</span><span class="chip">Figma</span><span class="chip"><svg class="ico"><use href="#plus"/></svg>Other</span></div>
+          <span class="btn block">Done · 2 picked <svg class="ico"><use href="#arrow"/></svg></span>
+          <p class="hint" style="text-align:center">Nothing yet? <span class="link">Skip this</span></p>
+        </div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <h3>Why choose B</h3>
+      <ul>
+        <li>Feels friendly and low-pressure for 18–30 first-timers; one small question at a time is easy on a phone.</li>
+        <li>Gives Cit, the mascot, a real job instead of decoration, which makes the brand memorable.</li>
+        <li>The "Your answers" card fixes the usual chat problem: every answer stays visible and editable.</li>
+        <li>Translates well: short bubbles work in Burmese without cramped layouts.</li>
+      </ul>
+      <h4>Trade-offs</h4>
+      <ul>
+        <li>More taps for people who just want a form; offer "fill in a form instead" for companies.</li>
+        <li>Chat UIs need care for screen readers (announce new messages) and the Back button.</li>
+        <li>Can feel slow on desktop if the bubble animations are long; keep them under 300 ms.</li>
+      </ul>
+      <h4>Build effort</h4>
+      <ul><li>Medium. Same data and steps, but a new chat component and per-question state.</li></ul>
+    </div>
+  </div>
+</section>
+<script src="mockups.js"></script>
+</body>
+</html>

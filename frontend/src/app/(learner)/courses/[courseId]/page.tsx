@@ -8,7 +8,7 @@ import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, PageHeader } from "
 import { LockIcon } from "@/components/ui/LockIcon";
 import { courseTitle, formatMmk } from "@/lib/i18n";
 import { latestPayment } from "@/lib/payments";
-import { allLessonsDone, challengeUnlocked, lessonIncluded, paidTrackOpen, previewLessonCount } from "@/lib/rules";
+import { allLessonsDone, challengeUnlocked, counted, lessonIncluded, paidTrackOpen, previewLessonCount } from "@/lib/rules";
 import { useCourses } from "@/lib/catalogue";
 import { progressOf, useData } from "@/lib/store";
 
@@ -28,6 +28,8 @@ export default function CourseDetail() {
   const challenges = s.challenges.filter((c) => c.courseId === course.id);
 
   const title = courseTitle(course, lang);
+  // The lesson to pick up next: the first open one not done yet.
+  const nextLessonId = course.lessons.find((l, i) => !p.doneLessons.includes(l.id) && lessonIncluded(course, i, p.paidCourseIds, !!cert))?.id;
 
   return (
     <>
@@ -36,29 +38,53 @@ export default function CourseDetail() {
       <div className="grid items-stretch gap-6 lg:grid-cols-[2fr_1fr]">
         <Card className="h-full">
           <h2 className="mb-4 text-h3">Lessons</h2>
-          <ol className="flex flex-col divide-y divide-line">
+          <ol className="-mx-2 flex flex-col gap-1">
             {course.lessons.map((l, i) => {
               const done = p.doneLessons.includes(l.id);
               const open = lessonIncluded(course, i, p.paidCourseIds, !!cert);
+              const next = l.id === nextLessonId;
+              const marker = (
+                <span
+                  aria-hidden
+                  className={`grid size-8 shrink-0 place-items-center rounded-full text-body-sm font-semibold ${done ? "bg-success text-white" : next ? "bg-burgundy text-white" : open ? "border border-line bg-white text-ink" : "bg-surface text-subtle"}`}
+                >
+                  {done ? "✓" : open ? i + 1 : <LockIcon size={13} />}
+                </span>
+              );
+              const text = (
+                <span className="min-w-0 flex-1">
+                  <span className={`block font-medium ${open ? "" : "text-muted"}`}>{l.title}</span>
+                  <span className="block text-body-sm text-muted">
+                    Lesson {i + 1} · {done ? "Quiz passed" : `Practice quiz · ${counted(l.quiz.length, "question")}`}
+                  </span>
+                </span>
+              );
               return (
-                <li key={l.id} className="flex items-center justify-between gap-4 py-3">
+                <li key={l.id}>
                   {open ? (
-                    <Link href={`/courses/${course.id}/lessons/${l.id}`} className="font-medium hover:text-burgundy">
-                      {i + 1}. {l.title}
+                    <Link
+                      href={`/courses/${course.id}/lessons/${l.id}`}
+                      className={`group flex items-center gap-3 rounded-xl px-2 py-3 transition-colors focus-visible:ring-2 focus-visible:ring-burgundy ${next ? "bg-burgundy-tint/50 hover:bg-burgundy-tint" : "hover:bg-surface"}`}
+                    >
+                      {marker}
+                      {text}
+                      <span
+                        className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-semibold ${next ? "bg-burgundy text-white" : "border border-line bg-white text-ink group-hover:border-subtle"}`}
+                      >
+                        {done ? "Review" : next && p.doneLessons.some((id) => course.lessons.some((x) => x.id === id)) ? "Continue" : "Start"}
+                      </span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0 text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-burgundy">
+                        <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     </Link>
                   ) : (
-                    <span className="font-medium text-muted">
-                      {i + 1}. {l.title}
-                    </span>
-                  )}
-                  {done ? (
-                    <Badge tone="success">✓ Done</Badge>
-                  ) : open ? (
-                    <Badge>To do</Badge>
-                  ) : (
-                    <Badge>
-                      <LockIcon /> Locked
-                    </Badge>
+                    <div className="flex items-center gap-3 px-2 py-3">
+                      {marker}
+                      {text}
+                      <Badge>
+                        <LockIcon /> Locked
+                      </Badge>
+                    </div>
                   )}
                 </li>
               );

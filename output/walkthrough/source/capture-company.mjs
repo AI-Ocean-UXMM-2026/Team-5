@@ -1,0 +1,133 @@
+// Walks the company flow in the real app and saves every screen the video uses into shots-company/.
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { open, sleep } from "./cdp.mjs";
+const b = await open("shots-company");
+const files = resolve("files");
+const dismiss = () => b.js(`[...document.querySelectorAll('[aria-live=polite] button')].find(x => x.textContent.trim() === 'Dismiss')?.click()`);
+
+await b.go("/", 3000);
+await b.click("text:button|EN"); await sleep(400);
+await b.patch(`(st) => { st.sessionUserId = null; }`);
+
+// 1. Register
+await b.go("/signup", 3500);
+const su = { company: "input[name=role][value=company]@label", name: "label:Your name", cname: "label:Company name", email: "label:Email address", agree: "label:I agree@label", go: "text:button|Continue with email", card: "form" };
+await b.shot("signup", { company: "input[name=role][value=company]@label", name: "label:Your name", card: "form" });
+await b.click("input[name=role][value=company]"); await sleep(600);
+await b.shot("signup-company", su);
+await b.type("Your name", "Thiri Aung");
+await b.type("Company name", "Bagan Apps");
+await b.type("Email address", "hr@baganapps.com.mm");
+await b.js(`[...document.querySelectorAll('input[type=checkbox]')].forEach(c => !c.checked && c.click())`); await sleep(300);
+await b.shot("signup-filled", su);
+await b.click("text:button|Continue with email"); await sleep(2500);
+const code = await b.js(`document.body.innerText.match(/code is (\\d{6})/)[1]`);
+await b.js(`document.querySelector('input').focus()`); await b.send("Input.insertText", { text: code }); await sleep(300);
+await b.click("text:button|Confirm email"); await sleep(3500);
+
+const reg = { name: "label:Company name", about: "label:About the company", web: "label:Website", social: "label:LinkedIn", email: "label:Work email", phone: "label:Phone number", address: "label:Office address", doc: "label:Business registration", role: "label:Role", duration: "label:Duration", location: "label:Location", stipend: "label:Stipend", pledge: "text:label|We will never ask", submit: "text:button|Submit for verification", details: "h:1. Company details@section, div.rounded-2xl", terms: "h:3. Internship terms@section, div.rounded-2xl" };
+await b.shot("reg", reg, { full: true });
+await b.type("About the company", "Bagan Apps builds mobile apps for shops and clinics across Myanmar. Our team of 25 ships apps used by 200,000 people.");
+await b.type("Website", "https://baganapps.com.mm");
+await b.type("LinkedIn", "https://facebook.com/baganapps");
+await b.type("Phone number", "09 450 123 456");
+await b.type("Office address", "No. 42, Kabar Aye Pagoda Road, Yangon");
+await b.type("Role", "Frontend intern");
+await b.type("Duration", "3 months");
+await b.type("Location", "Yangon (hybrid)");
+await b.type("Stipend", "300,000 MMK / month");
+await b.upload("Business registration", `${files}/Bagan-Apps-DICA-registration.pdf`);
+await b.js(`[...document.querySelectorAll('main input[type=checkbox]')].forEach(c => !c.checked && c.click())`); await sleep(300);
+await b.shot("reg-filled", reg, { full: true });
+await b.js(`[...document.querySelectorAll('button')].find(x => x.textContent.trim() === 'Submit for verification').scrollIntoView({ block: 'center' })`);
+const regScroll = await b.js("Math.round(scrollY)");
+await b.click("text:button|Submit for verification"); await sleep(900);
+await b.shot("reg-confirm", { dialog: "dialog[open] > *", ok: "text:dialog[open] button|Submit for verification" }, { scroll: regScroll });
+await b.click("text:dialog[open] button|Submit for verification"); await sleep(2500);
+
+// 2. Verified
+await b.shot("status-toast", { toast: "[aria-live=polite] .shadow-lg", view: "text:[aria-live=polite] a|View", status: "h1@section, div.rounded-2xl" }, { scroll: 0 });
+await dismiss(); await sleep(500);
+await b.shot("status", { status: "h1@section, div.rounded-2xl" }, { scroll: 0 });
+await b.click("button[aria-controls=notifications]"); await sleep(600);
+await b.click("text:#notifications a|approved & ready"); await sleep(3000);
+const pay = { plans: "h:1. Choose a plan@section, div.rounded-2xl", yearly: "input[name=plan][value=yearly]@label", wallets: "h:2. Send@section, div.rounded-2xl", kpay: "input[name=method]@label", txn: "label:Transaction number", receipt: "label:Receipt screenshot", send: "text:button|Send receipt", summary: "h:Your plan@section, div.rounded-2xl" };
+await b.shot("pay", pay, { full: true });
+await b.click("input[name=plan][value=yearly]"); await sleep(200);
+await b.type("Transaction number", "0123456789");
+await b.upload("Receipt", `${files}/receipt.png`);
+await b.shot("pay-filled", { ...pay, preview: "img[alt='Your receipt screenshot']" }, { full: true });
+await b.click("text:button|Send receipt"); await sleep(900);
+if (await b.js("!!document.querySelector('dialog[open]')")) { console.log("pay has a confirm dialog"); await b.click("text:dialog[open] button|Send"); await sleep(1500); }
+await sleep(1200);
+await b.shot("pay-sent", { toast: "[aria-live=polite] .shadow-lg", view: "text:[aria-live=polite] a|View", checking: "h:checking your payment@section, div.rounded-2xl" }, { scroll: 0 });
+await dismiss(); await sleep(500);
+await b.shot("pay-pending", { checking: "h:checking your payment@section, div.rounded-2xl" }, { scroll: 0 });
+await b.click("button[aria-controls=notifications]"); await sleep(600);
+await b.click("text:#notifications a|Payment confirmed"); await sleep(3000);
+await b.shot("live", { title: "h1", next: "h:Next steps@section, div.rounded-2xl", page: "text:a|View company page", post: "text:a|Post a challenge" }, { scroll: 0 });
+const logo = "data:image/png;base64," + readFileSync(`${files}/bagan-apps-logo.png`).toString("base64");
+await b.patch(`(st) => { st.companies.find(c => c.name === 'Bagan Apps').logo = ${JSON.stringify(logo)}; }`);
+await b.click("text:a|View company page"); await sleep(3000);
+await b.shot("company-page", { hero: "h1@section", badge: "text:h1 button|Verified", terms: "h:Internship terms@section" }, { full: true });
+await b.shot("company-page-v", { hero: "h1@section", badge: "text:h1 button|Verified" });
+
+// 3. Challenge post
+await b.go("/company/challenges/new", 3500);
+const nc = { skill: "label:Skill", title: "label:Title", task: "label:Task", rubric: "label:Rubric", post: "text:button|Post challenge", ai: "text:button|Draft with AI", form: "form" };
+await b.shot("new", nc);
+await b.type("Title", "Build a shop order tracker");
+await b.type("Task", "Build a page where a shop owner sees today's orders, marks one as delivered and filters by status. Use HTML, CSS and JavaScript. It must work on a 360px phone. Share a link to your code and explain your choices.");
+await b.type("Rubric", "Works on a 360px phone\nMarking an order updates the list\nClear explanation of choices");
+await b.shot("new-filled", nc);
+await b.click("text:button|Post challenge"); await sleep(900);
+await b.shot("new-confirm", { dialog: "dialog[open] > *", ok: "text:dialog[open] button|Post challenge" }, { scroll: 0 });
+await b.click("text:dialog[open] button|Post challenge"); await sleep(3000);
+await b.shot("posted", { title: "h1", subs: "h:Submissions@section, div", brief: "h:The brief@section, aside, div.rounded-2xl" }, { scroll: 0 });
+
+// 4. Recruit candidate: two certified learners send work.
+const chId = await b.js("location.pathname.split('/').pop()");
+await b.patch(`(st) => { const rub = ['Works on a 360px phone','Marking an order updates the list','Clear explanation of choices'];
+  st.submissions = st.submissions.filter(s => s.challengeId !== '${chId}');
+  st.submissions.push({ id: 's-min-shop', challengeId: '${chId}', learnerId: 'u-min', answer: 'Orders are a list of cards with a status chip. A filter row at the top shows All, New and Delivered. Marking an order as delivered updates the list without a reload, and the layout is one column on a 360px phone.', link: 'https://github.com/minthu/shop-orders', aiFeedback: ['Clear structure and good keyboard support.'], aiSummary: 'One-column layout that works at 360px, live status updates and a clear explanation. Meets all three points, so this is 91.', aiScore: 91, aiRubric: rub.map(point => ({ point, met: true })), status: 'submitted', submittedAt: '2026-10-23' });
+  st.submissions.push({ id: 's-aye-shop', challengeId: '${chId}', learnerId: 'u-aye', answer: 'I made a table of orders with a button to mark each one delivered.', link: 'https://github.com/ayechan/orders', aiFeedback: [], aiSummary: 'A working table. The phone layout and explanation are thin, so this is 64.', aiScore: 64, aiRubric: rub.map((point, i) => ({ point, met: i === 1 })), status: 'submitted', submittedAt: '2026-10-23' }); }`);
+await sleep(1500);
+await b.js(`(() => { const h = [...document.querySelectorAll('h3')].find(x => x.textContent.trim() === 'Min Thu'); const card = h.closest('li, article, section, div.rounded-2xl'); card.id = '__min'; const f = card.querySelector('form'); if (f) f.id = '__invite'; const s = card.querySelector('[class*=bg-]'); })()`);
+const minIn = (q) => `#__min ${q}`;
+const rec = { min: "#__min", score: "text:#__min *|AI SCORE@div", date: minIn("input[type=date]"), time: minIn("input[type=time]"), video: minIn("input[value=video]") + "@label", link: minIn("input[type=url]"), send: "text:#__min button|Send invite", tabs: minIn("[role=tablist]"), offerTab: "text:#__min [role=tab]|Send offer", subs: "h:Submissions@section, div" };
+await b.shot("subs", rec, { full: true });
+await b.fill(minIn("input[type=date]"), "2026-10-28"); await b.fill(minIn("input[type=time]"), "10:00");
+await b.type(minIn("input[type=url]"), "https://meet.google.com/bga-mint-int");
+await b.shot("subs-invite", rec, { full: true });
+await b.js(`document.querySelector('#__min').scrollIntoView({ block: 'start' }); scrollBy(0, -90)`);
+const invScroll = await b.js("Math.round(scrollY)");
+await b.click("text:#__min button|Send invite"); await sleep(900);
+await b.shot("invite-confirm", { dialog: "dialog[open] > *", ok: "text:dialog[open] button|Send invite" }, { scroll: invScroll });
+await b.click("text:dialog[open] button|Send invite"); await sleep(2500);
+await dismiss(); await sleep(400);
+await b.js(`(() => { const h = [...document.querySelectorAll('h3')].find(x => x.textContent.trim() === 'Min Thu'); h.closest('li, article, section, div.rounded-2xl').id = '__min'; })()`);
+const rec2 = { min: "#__min", interview: "text:#__min *|Interview scheduled", offer: "text:#__min button|Send offer", name: "text:#__min a|Min Thu" };
+await b.shot("invited", rec2, { full: true });
+await b.click("text:#__min button|Send offer"); await sleep(900);
+await b.shot("offer-confirm", { dialog: "dialog[open] > *", ok: "text:dialog[open] button|Yes, send offer" }, { scroll: invScroll });
+await b.click("text:dialog[open] button|Yes, send offer"); await sleep(2500);
+await dismiss(); await sleep(400);
+await b.js(`(() => { const h = [...document.querySelectorAll('h3')].find(x => x.textContent.trim() === 'Min Thu'); h.closest('li, article, section, div.rounded-2xl').id = '__min'; })()`);
+await b.shot("offered", { min: "#__min", sent: "text:#__min *|Offer sent", name: "text:#__min a|Min Thu" }, { full: true });
+await b.click("text:#__min a|Min Thu"); await sleep(3000);
+const prof = { hero: "h1@section", rate: "text:main button|Rate", certs: "h:Certificates@section", work: "h:Challenge work@section", skills: "h:Skills@section" };
+await b.shot("candidate", prof, { full: true });
+await b.shot("candidate-v", prof);
+await b.click("text:main button|Rate"); await sleep(900);
+const rate = { dialog: "dialog[open] > *", star5: "dialog[open] input[type=radio]:last-of-type@label", comment: "dialog[open] textarea", send: "text:dialog[open] button|Send rating" };
+await b.js(`[...document.querySelectorAll('dialog[open] input[type=radio]')].at(-1).closest('label').id = '__star5'`);
+rate.star5 = "#__star5";
+await b.shot("rate", rate, { scroll: 0 });
+await b.js(`document.querySelectorAll('dialog[open] input[type=radio]')[4].click()`); await sleep(200);
+await b.type("dialog[open] textarea", "Strong, well explained work and a great interview. Welcome to the team!");
+await b.shot("rate-filled", rate, { scroll: 0 });
+await b.click("#__star5"); 
+await b.js(`document.querySelector('dialog[open] button[type=submit]').click()`); await sleep(1500);
+await b.shot("rated", { hero: "h1@section", ratings: "h:Ratings from companies@section", rated: "text:main span|You rated" }, { full: true });
+b.close();

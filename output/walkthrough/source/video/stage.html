@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Citadel walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Sora:wght@600;700&display=block" rel="stylesheet">
+<style>
+  /* Brand: burgundy #963D50, dark #5E2333, yellow #F8D064, tint #F6ECEE, cream #FBF4EC, ink #18181B, muted #6F7078, line #ECE6E8. Frame 1920x1080. */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #fff; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: "Plus Jakarta Sans", sans-serif; color: #18181b;
+    background: radial-gradient(900px 600px at 8% 0%, #f9eff1 0%, rgb(249 239 241 / 0%) 70%), radial-gradient(900px 700px at 100% 100%, #fdf6e3 0%, rgb(253 246 227 / 0%) 70%), #fff; }
+  .abs { position: absolute; }
+
+  /* Caption band */
+  .cap { left: 304px; top: 44px; width: 1000px; will-change: transform, opacity; }
+  .cap .chip { display: inline-flex; align-items: center; gap: 10px; height: 34px; padding: 0 14px; border-radius: 999px; background: #f6ecee; color: #963d50; font: 700 16px/1 "Plus Jakarta Sans"; letter-spacing: 0.08em; text-transform: uppercase; }
+  .cap .chip i { width: 8px; height: 8px; border-radius: 50%; background: #963d50; }
+  .cap.text { top: 92px; font: 700 40px/1.15 "Sora"; letter-spacing: -0.02em; white-space: nowrap; }
+  #journey { right: 304px; top: 52px; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+  #journey .who { font: 600 16px/1 "Plus Jakarta Sans"; color: #6f7078; letter-spacing: 0.02em; }
+  .bars { display: flex; gap: 8px; }
+  .bars span { width: 46px; height: 8px; border-radius: 8px; background: #ece6e8; overflow: hidden; position: relative; }
+  .bars span b { position: absolute; inset: 0; border-radius: 8px; background: #963d50; transform-origin: 0 50%; }
+  .bars span.now b { background: #f8d064; }
+
+  /* Browser window */
+  #win { left: 304px; top: 168px; width: 1312px; height: 864px; border-radius: 18px; background: #fff; overflow: hidden;
+    box-shadow: 0 0 0 1px #e9e2e4, 0 30px 60px -20px rgb(94 35 51 / 28%), 0 12px 24px -12px rgb(24 24 27 / 12%); }
+  #bar { left: 0; top: 0; width: 1312px; height: 44px; background: #faf8f8; border-bottom: 1px solid #eee8ea; display: flex; align-items: center; padding: 0 18px; gap: 8px; }
+  #bar .dot { width: 12px; height: 12px; border-radius: 50%; background: #e3dcde; }
+  #bar .url { position: absolute; left: 50%; transform: translateX(-50%); height: 28px; min-width: 360px; padding: 0 16px; border-radius: 8px; background: #fff; border: 1px solid #eee8ea; display: flex; align-items: center; justify-content: center; gap: 8px; font: 600 14px/1 "Plus Jakarta Sans"; color: #6f7078; }
+  #bar .url svg { width: 13px; height: 13px; }
+  #screen { left: 0; top: 44px; width: 1312px; height: 820px; overflow: hidden; background: #fff; }
+  #comp { left: 0; top: 0; width: 1440px; height: 900px; transform-origin: 0 0; will-change: transform; }
+  .page { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; overflow: hidden; background: #fff; }
+  .content, .chrome, .fixed { position: absolute; left: 0; top: 0; width: 1440px; }
+  .page img { position: absolute; left: 0; width: 1440px; display: none; transform-origin: 0 0; }
+  .ring { position: absolute; border: 3px solid #f8d064; border-radius: 14px; box-shadow: 0 0 0 6px rgb(248 208 100 / 28%), 0 0 24px rgb(248 208 100 / 45%); display: none; }
+
+  /* Cursor and clicks (screen space) */
+  #cursor { left: 0; top: 0; width: 34px; height: 34px; transform-origin: 4px 3px; will-change: transform; filter: drop-shadow(0 3px 4px rgb(0 0 0 / 25%)); }
+  .ripple { width: 0; height: 0; border-radius: 50%; border: 3px solid #963d50; display: none; }
+
+  /* Chapter card */
+  #card { left: 0; top: 0; width: 1920px; height: 1080px; display: none; overflow: hidden; box-shadow: 0 40px 80px rgb(24 24 27 / 18%), 0 -40px 80px rgb(24 24 27 / 18%);
+    background: radial-gradient(760px 620px at 74% 52%, #f6ecee 0%, rgb(246 236 238 / 0%) 72%), radial-gradient(900px 600px at 0% 100%, #fdf6e3 0%, rgb(253 246 227 / 0%) 70%), #fff; }
+  #card .kick { left: 230px; top: 330px; font: 700 24px/1 "Plus Jakarta Sans"; letter-spacing: 0.16em; color: #963d50; }
+  #card .title { left: 222px; top: 382px; width: 900px; font: 700 112px/1.02 "Sora"; letter-spacing: -0.035em; }
+  #card .sub { left: 230px; top: 0; width: 760px; font: 500 34px/1.35 "Plus Jakarta Sans"; color: #6f7078; }
+  #card .bars { left: 230px; top: 0; }
+  #card .bars span { width: 64px; height: 10px; }
+  .stone { width: 300px; border-radius: 22px 22px 6px 6px; transform-origin: 50% 100%;
+    background: linear-gradient(to bottom, #fbf4ec 0 18px, #f1e4d6 18px calc(100% - 34px), #963d50 calc(100% - 34px) calc(100% - 8px), #7c3142 calc(100% - 8px));
+    box-shadow: inset -10px 0 0 rgb(122 70 40 / 8%), 0 22px 36px -20px rgb(94 35 51 / 40%); }
+  .stone::before { content: ""; position: absolute; left: 22%; right: 22%; top: 5px; height: 13px; border-radius: 5px; background: #f8d064; box-shadow: inset 0 -4px 0 rgb(122 90 20 / 25%); }
+  #card .mascot, #end .mascot { width: 460px; height: 460px; background-size: 460px 460px; transform-origin: 50% 90%; }
+  .shadow { width: 220px; height: 26px; border-radius: 50%; background: rgb(94 35 51 / 18%); filter: blur(5px); }
+  .spark { width: 30px; height: 30px; color: #f8d064; }
+  .spark svg { width: 100%; height: 100%; display: block; }
+
+  /* End card */
+  #end { left: 0; top: 0; width: 1920px; height: 1080px; display: none;
+    background: radial-gradient(900px 700px at 50% 40%, #f6ecee 0%, rgb(246 236 238 / 0%) 70%), #fff; }
+  #end .logo { left: 610px; top: 120px; width: 700px; height: 700px; background: url(assets/logo.png) 0 0 / 700px 700px no-repeat; transform-origin: 50% 50%; }
+  #end .line { left: 0; top: 806px; width: 1920px; text-align: center; font: 700 48px/1.2 "Sora"; letter-spacing: -0.02em; }
+  #end .line b { color: #963d50; font-weight: 700; }
+  #end .rule { left: 924px; top: 890px; width: 72px; height: 7px; border-radius: 7px; background: #f8d064; }
+  #end .mascot { width: 300px; height: 300px; background-size: 300px 300px; }
+
+  .confetti { width: 14px; height: 22px; border-radius: 3px; display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="chipBox" class="abs cap"><span class="chip"><i></i><span></span></span></div>
+  <p id="capA" class="abs cap text"></p>
+  <p id="capB" class="abs cap text"></p>
+  <div id="journey" class="abs"><span class="who"></span><div class="bars"></div></div>
+  <div id="win" class="abs">
+    <div id="bar" class="abs"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="url"><svg viewBox="0 0 16 16" fill="none" stroke="#963d50" stroke-width="1.8"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg><span id="urlText">The Citadel</span></span></div>
+    <div id="screen" class="abs"><div id="comp" class="abs"></div></div>
+  </div>
+  <svg id="cursor" class="abs" viewBox="0 0 34 34"><path d="M4 3 L4 27 L10.5 21 L15 31 L19.5 29 L15 19.5 L24 19.5 Z" fill="#18181b" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/></svg>
+  <div id="card" class="abs">
+    <div class="kick abs"></div><div class="title abs"></div><div class="sub abs"></div><div class="bars abs"></div>
+    <div class="stone abs"></div><div class="shadow abs"></div><div class="mascot abs"></div>
+  </div>
+  <div id="end" class="abs"><div class="logo abs"></div><div class="line abs"></div><div class="rule abs"></div><div class="mascot abs"></div></div>
+</div>
+<script>document.write('<script src="tl-' + (new URLSearchParams(location.search).get("v") || "learner") + '.js"><\/script>');</script>
+<script>
+const tl = window.TL;
+// Each pose's feet line and visible height, as fractions of the 1080px image.
+const POSE = {"10": [0.843, 0.733], "13": [0.767, 0.579], "17": [0.863, 0.629], "18": [0.803, 0.614], "20": [0.912, 0.693], "21": [0.86, 0.647], "22": [0.729, 0.571], "25": [0.844, 0.656], "3": [0.904, 0.81], "4": [0.907, 0.77], "5": [0.884, 0.711], "6": [0.806, 0.63], "7": [0.856, 0.695]};
+const VW = 1440, VH = 900, S = 1312 / 1440, SW = 1312, SH = 820, SX = 304, SY = 168 + 44;
+const $ = (q, r = document) => r.querySelector(q);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seg = (t, a, b) => (b <= a ? (t >= a ? 1 : 0) : clamp((t - a) / (b - a)));
+const ease = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+const easeOut = (p) => 1 - Math.pow(1 - p, 3);
+const backOut = (p, k = 1.7) => 1 + (k + 1) * Math.pow(p - 1, 3) + k * Math.pow(p - 1, 2);
+const lerp = (a, b, p) => a + (b - a) * p;
+const src = (shot) => `${tl.dir}/${shot}.png`;
+const starSvg = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 0c.9 6.6 4.8 10.6 12 12-7.2 1.4-11.1 5.4-12 12-.9-6.6-4.8-10.6-12-12C7.2 10.6 11.1 6.6 12 0Z"/></svg>';
+// Small deterministic random, so every render of a frame is identical.
+const rnd = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// ---------- Build the DOM ----------
+const comp = $("#comp");
+const imgs = [];
+function mkImg(parent, shot, top) { const im = document.createElement("img"); im.dataset.src = src(shot); im.style.top = top + "px"; im.decoding = "sync"; parent.appendChild(im); imgs.push(im); return im; }
+for (const p of tl.pages) {
+  const el = document.createElement("div"); el.className = "page"; comp.appendChild(el); p.el = el;
+  const content = document.createElement("div"); content.className = "content"; el.appendChild(content); p.contentEl = content;
+  const base = tl.shots[p.base];
+  p.baseImg = mkImg(content, p.base, base.kind === "view" ? base.scroll : 0);
+  const chrome = document.createElement("div"); chrome.className = "chrome"; el.appendChild(chrome);
+  const fixed = document.createElement("div"); fixed.className = "fixed"; el.appendChild(fixed);
+  p.chromeImgs = [];
+  if (p.chrome) {
+    const cb = tl.shots[p.chrome].boxes;
+    for (const k of ["aside", "header"]) if (cb[k]) { const im = mkImg(chrome, p.chrome, 0); const [x, y, w, h] = cb[k]; im.style.clipPath = `inset(${y}px ${VW - x - w}px ${VH - y - h}px ${x}px)`; p.chromeImgs.push(im); }
+  }
+  for (const L of p.layers) { L.img = mkImg(L.fixed ? fixed : content, L.shot, L.fixed ? 0 : (tl.shots[L.shot].kind === "view" ? L.top : 0)); L.H = tl.shots[L.shot].h; }
+}
+for (const r of tl.rings) { r.el = document.createElement("div"); r.el.className = "ring"; comp.appendChild(r.el); }
+const ripples = tl.clicks.map(() => { const d = document.createElement("div"); d.className = "abs ripple"; $("#stage").insertBefore(d, $("#cursor")); return d; });
+const fxEls = tl.fx.map((f) => {
+  const n = f.type === "confetti" ? 70 : 7;
+  return Array.from({ length: n }, (_, i) => { const d = document.createElement("div"); d.className = f.type === "confetti" ? "abs confetti" : "abs spark"; if (f.type !== "confetti") d.innerHTML = starSvg; else d.style.background = ["#f8d064", "#963d50", "#f1c9d2", "#f8d064", "#5e2333"][i % 5]; d.style.display = "none"; $("#stage").insertBefore(d, $("#cursor")); return d; });
+});
+// Journey bars in the band and on cards.
+for (const bars of document.querySelectorAll(".bars")) bars.innerHTML = tl.steps.map(() => "<span><b></b></span>").join("");
+$("#journey .who").textContent = tl.name === "company" ? "Company journey" : "Learner journey";
+// Card sparkles.
+const cardSparks = [[1180, 250, 1.1], [1640, 300, 0.8], [1160, 620, 0.7], [1700, 640, 1.0]].map(([x, y, s], i) => { const d = document.createElement("div"); d.className = "abs spark"; d.innerHTML = starSvg; d.style.left = x + "px"; d.style.top = y + "px"; $("#card").appendChild(d); return { d, s, i }; });
+
+// ---------- Timeline helpers ----------
+function scrollAt(p, t) { let y = p.scroll[0][1]; for (const k of p.scroll.slice(1)) { const [a, b, from, to] = k; if (t >= b) y = to; else if (t > a) { y = lerp(from, to, ease((t - a) / (b - a))); break; } else break; } return y; }
+function camAt(t) {
+  let s = { cx: VW / 2, cy: VH / 2, z: 1 };
+  for (const c of tl.cam) { if (t >= c.t1) s = c; else if (t > c.t0) { const p = ease((t - c.t0) / (c.t1 - c.t0)); s = { cx: lerp(s.cx, c.cx, p), cy: lerp(s.cy, c.cy, p), z: lerp(s.z, c.z, p) }; break; } else break; }
+  const z = s.z, hw = VW / (2 * z), hh = VH / (2 * z);
+  return { cx: clamp(s.cx, hw, VW - hw), cy: clamp(s.cy, hh, VH - hh), z };
+}
+function cursorAt(t) {
+  let s = { x: VW * 0.72, y: VH * 0.9 };
+  for (const c of tl.cursor) { if (t >= c.t1) s = c; else if (t > c.t0) { const p = ease((t - c.t0) / (c.t1 - c.t0)); s = { x: lerp(s.x, c.x, p), y: lerp(s.y, c.y, p) - Math.sin(p * Math.PI) * 18 }; break; } else break; }
+  return s;
+}
+const toScreen = (cam, x, y) => ({ x: SX + SW / 2 + (x - cam.cx) * S * cam.z, y: SY + SH / 2 + (y - cam.cy) * S * cam.z });
+function inCard(t) { for (const c of tl.cards) if (t >= c.t0 && t < c.t1) return c; return null; }
+function show(el, on) { el.style.display = on ? "block" : "none"; }
+
+// Clip for typing: rows fill top to bottom, each left to right.
+function typeClip(c, p) {
+  const [x, y, w, h] = c;
+  if (p >= 1) return `polygon(${x}px ${y}px, ${x + w}px ${y}px, ${x + w}px ${y + h}px, ${x}px ${y + h}px)`;
+  const lh = 22, pad = 8, rows = h < 60 ? 1 : Math.max(1, Math.round((h - pad * 2) / lh));
+  const k = p * rows, full = Math.floor(k), frac = k - full;
+  if (rows === 1) return `polygon(${x}px ${y}px, ${x + w * p}px ${y}px, ${x + w * p}px ${y + h}px, ${x}px ${y + h}px)`;
+  const y1 = y + pad + full * lh, y2 = y1 + lh, xf = x + w * frac;
+  return `polygon(${x}px ${y}px, ${x + w}px ${y}px, ${x + w}px ${y1}px, ${xf}px ${y1}px, ${xf}px ${y2}px, ${x}px ${y2}px)`;
+}
+const rectClip = ([x, y, w, h]) => `polygon(${x}px ${y}px, ${x + w}px ${y}px, ${x + w}px ${y + h}px, ${x}px ${y + h}px)`;
+const holeClip = (H, [x, y, w, h]) => `polygon(evenodd, 0 0, ${VW}px 0, ${VW}px ${H}px, 0 ${H}px, 0 0, ${x}px ${y}px, ${x}px ${y + h}px, ${x + w}px ${y + h}px, ${x + w}px ${y}px, ${x}px ${y}px)`;
+
+// ---------- Render one frame ----------
+const need = new Set();
+function want(im) { need.add(im); if (!im.src) im.src = im.dataset.src; }
+
+function renderPages(t) {
+  let top = null;
+  for (const p of tl.pages) {
+    const on = t >= p.t0 && t < p.tEnd + 0.02;
+    show(p.el, on);
+    if (!on) continue;
+    top = p;
+    p.el.style.opacity = easeOut(seg(t, p.t0, p.t0 + p.fade));
+    p.el.style.transform = p.still ? "" : `translateY(${(1 - easeOut(seg(t, p.t0, p.t0 + p.fade))) * 14}px)`;
+    p.contentEl.style.transform = `translateY(${-scrollAt(p, t)}px)`;
+    show(p.baseImg, true); want(p.baseImg);
+    for (const im of p.chromeImgs) { show(im, true); want(im); }
+    for (const L of p.layers) {
+      const vis = t >= L.t0 && t < L.tEnd + L.out;
+      show(L.img, vis);
+      if (!vis) continue;
+      want(L.img);
+      const pr = seg(t, L.t0, L.t0 + L.dur);
+      const out = 1 - seg(t, L.tEnd, L.tEnd + L.out);
+      let op = 1, tf = "", clip = L.clip ? rectClip(L.clip) : "none";
+      if (L.effect === "type") clip = typeClip(L.clip, pr);
+      else if (L.effect === "fade") op = easeOut(pr);
+      else if (L.effect === "pop") { op = clamp(pr * 1.8); const sc = 0.92 + 0.08 * backOut(pr, 1.6); const [x, y, w, h] = L.clip; tf = `translate(${x + w / 2}px, ${y + h / 2}px) scale(${sc}) translate(${-(x + w / 2)}px, ${-(y + h / 2)}px)`; }
+      else if (L.effect === "slide") { op = easeOut(pr); tf = `translateY(${(1 - easeOut(pr)) * 36}px)`; }
+      if (L.hole) clip = holeClip(L.fixed ? VH : L.H, L.hole);
+      L.img.style.opacity = op * out;
+      L.img.style.transform = tf;
+      L.img.style.clipPath = clip;
+    }
+  }
+  $("#urlText").textContent = top?.label || "The Citadel";
+}
+
+function renderRings(t) {
+  for (const r of tl.rings) {
+    const on = t >= r.t0 && t < r.t1; show(r.el, on); if (!on) continue;
+    const a = easeOut(seg(t, r.t0, r.t0 + 0.3)) * (1 - seg(t, r.t1 - 0.3, r.t1));
+    const pulse = 1 + 0.015 * Math.sin((t - r.t0) * 6);
+    const [x, y, w, h] = r.box, pad = 8;
+    Object.assign(r.el.style, { left: x - pad + "px", top: y - pad + "px", width: w + pad * 2 + "px", height: h + pad * 2 + "px", opacity: a, transform: `scale(${(1.06 - 0.06 * easeOut(seg(t, r.t0, r.t0 + 0.35))) * pulse})` });
+  }
+}
+
+function renderCaption(t) {
+  let i = -1; tl.captions.forEach((c, k) => { if (c.t <= t) i = k; });
+  const card = inCard(t);
+  const band = clamp(card ? 1 - easeOut(seg(t, card.t0, card.t0 + 0.35)) + easeOut(seg(t, card.t1 - 0.4, card.t1)) : 1);
+  const endFade = tl.endCard && t >= tl.endCard.t0 ? 1 - seg(t, tl.endCard.t0, tl.endCard.t0 + 0.4) : 1;
+  const cur = tl.captions[i], prev = tl.captions[i - 1];
+  // The step chip only changes under a card; the line swaps out, then in.
+  const chip = $("#chipBox"); chip.style.display = cur ? "block" : "none";
+  if (cur) { $(".chip > span", chip).textContent = cur.chip; chip.style.opacity = band * endFade; }
+  const outP = cur ? seg(t, cur.t, cur.t + 0.18) : 1, inP = cur ? easeOut(seg(t, cur.t + 0.14, cur.t + 0.5)) : 0;
+  const paint = (el, c, a, dy) => { el.style.display = c && a > 0.001 ? "block" : "none"; if (!c) return; el.textContent = c.text; el.style.opacity = a * band * endFade; el.style.transform = `translateY(${dy}px)`; };
+  paint($("#capA"), cur, inP, (1 - inP) * 14);
+  paint($("#capB"), prev && prev.chip === cur?.chip ? prev : null, 1 - outP, -outP * 8);
+  const chapter = tl.cards.filter((c) => c.t0 <= t).length;
+  $("#journey").style.opacity = band * endFade;
+  paintBars($("#journey .bars"), chapter, t);
+}
+function paintBars(bars, chapter, t) {
+  [...bars.children].forEach((s, k) => {
+    s.className = k + 1 === chapter ? "now" : "";
+    const c = tl.cards[k];
+    const fill = k + 1 < chapter ? 1 : k + 1 === chapter && c ? easeOut(seg(t, c.t0 + 0.4, c.t0 + 1.2)) : 0;
+    s.firstChild.style.transform = `scaleX(${fill})`;
+  });
+}
+
+function renderCursor(t, cam) {
+  const card = inCard(t);
+  const first = tl.cursor[0]?.t0 ?? 1e9;
+  let a = seg(t, first - 0.3, first);
+  if (card) a *= 1 - seg(t, card.t0, card.t0 + 0.25) + seg(t, card.t1 - 0.35, card.t1);
+  if (tl.endCard && t > tl.endCard.t0) a *= 1 - seg(t, tl.endCard.t0, tl.endCard.t0 + 0.3);
+  const c = cursorAt(t), s = toScreen(cam, c.x, c.y);
+  let press = 1; for (const k of tl.clicks) if (t >= k && t < k + 0.18) press = 1 - 0.14 * Math.sin(((t - k) / 0.18) * Math.PI);
+  const el = $("#cursor"); el.style.opacity = clamp(a); el.style.transform = `translate(${s.x - 4}px, ${s.y - 3}px) scale(${press})`;
+  tl.clicks.forEach((k, i) => {
+    const d = ripples[i], on = t >= k && t < k + 0.5; show(d, on); if (!on) return;
+    const p = (t - k) / 0.5, r = 6 + 34 * easeOut(p);
+    Object.assign(d.style, { left: s.x - r + "px", top: s.y - r + "px", width: r * 2 + "px", height: r * 2 + "px", opacity: (1 - p) * 0.75 * clamp(a) });
+  });
+}
+
+function renderFx(t, cam) {
+  tl.fx.forEach((f, fi) => {
+    const els = fxEls[fi], on = t >= f.t0 && t < f.t1;
+    els.forEach((d, i) => {
+      d.style.display = on ? "block" : "none"; if (!on) return;
+      const lt = t - f.t0;
+      if (f.type === "confetti") {
+        const x0 = SX + rnd(i + fi * 97) * SW, delay = rnd(i * 3.1 + 7) * 0.7, sp = 380 + rnd(i * 5.3) * 360;
+        const tt = Math.max(0, lt - delay), y = SY - 40 + tt * sp + 0.5 * 260 * tt * tt;
+        const x = x0 + Math.sin(tt * (2 + rnd(i) * 3) + i) * 40;
+        const a = clamp(tt * 6) * (1 - seg(lt, f.t1 - f.t0 - 0.5, f.t1 - f.t0));
+        d.style.opacity = y > SY + SH + 40 ? 0 : a;
+        d.style.transform = `translate(${x}px, ${y}px) rotate(${tt * (300 + rnd(i * 9) * 500)}deg) scale(${0.7 + rnd(i * 2) * 0.6})`;
+      } else {
+        const [x, y, w, h] = f.box;
+        const ang = (i / els.length) * Math.PI * 2 + 0.4, rx = w / 2 + 40, ry = h / 2 + 34;
+        const p = backOut(seg(lt, i * 0.06, i * 0.06 + 0.5), 2);
+        const s = toScreen(cam, x + w / 2 + Math.cos(ang) * rx, y + h / 2 + Math.sin(ang) * ry);
+        const tw = 0.8 + 0.2 * Math.sin(lt * 6 + i * 2);
+        d.style.opacity = clamp(p * 2) * (1 - seg(lt, f.t1 - f.t0 - 0.4, f.t1 - f.t0));
+        d.style.transform = `translate(${s.x - 15}px, ${s.y - 15}px) scale(${p * tw * (0.7 + rnd(i) * 0.6)}) rotate(${(1 - p) * -60}deg)`;
+      }
+    });
+  });
+}
+
+function renderCard(t) {
+  const c = inCard(t), el = $("#card");
+  show(el, !!c); if (!c) return;
+  const lt = t - c.t0, dur = c.t1 - c.t0;
+  // Curtain: slides up over the window, holds, then lifts away. The very first card is already in place.
+  const inY = c.t0 === 0 ? 0 : (1 - ease(seg(lt, 0, 0.45))) * 1080;
+  const outY = -ease(seg(lt, dur - 0.45, dur)) * 1080;
+  el.style.opacity = 1;
+  el.style.transform = `translateY(${inY + outY}px)`;
+  const up = (a, b, d = 30) => { const p = easeOut(seg(lt, a, b)); return { o: p, y: (1 - p) * d }; };
+  const k = up(0.1, 0.5), ti = up(0.18, 0.62, 40), su = up(0.3, 0.75);
+  $(".kick", el).textContent = `STEP ${String(c.n).padStart(2, "0")} / ${String(c.of).padStart(2, "0")}`;
+  $(".title", el).textContent = c.title;
+  $(".sub", el).textContent = c.sub;
+  const lines = c.title.length > 15 ? 2 : 1;
+  const subTop = 382 + lines * 116 + 26;
+  Object.assign($(".kick", el).style, { opacity: k.o, transform: `translateY(${k.y}px)` });
+  Object.assign($(".title", el).style, { opacity: ti.o, transform: `translateY(${ti.y}px)` });
+  Object.assign($(".sub", el).style, { opacity: su.o, transform: `translateY(${su.y}px)`, top: subTop + "px" });
+  Object.assign($(".bars", el).style, { opacity: su.o, top: subTop + 120 + "px" });
+  paintBars($(".bars", el), c.n, t);
+  // Mascot drops onto its stone step, squashes, then bobs.
+  const stone = $(".stone", el), sx = 1290, stoneTop = 760;
+  const sp = seg(lt, 0.05, 0.5);
+  Object.assign(stone.style, { left: sx + "px", top: stoneTop + "px", height: "150px", transform: `scaleY(${sp > 0 ? backOut(sp, 1.3) : 0})` });
+  const m = $(".mascot", el), [fr, hr] = POSE[c.pose], size = Math.round(400 / hr), feet = fr * size;
+  m.style.width = m.style.height = size + "px"; m.style.backgroundSize = `${size}px ${size}px`; m.style.transformOrigin = `50% ${fr * 100}%`;
+  const fp = seg(lt, 0.35, 0.72);
+  let y = lerp(stoneTop - 380, stoneTop, fp * fp);
+  const after = lt - 0.72, squash = after > 0 && after < 0.16 ? Math.sin((after / 0.16) * Math.PI) : 0;
+  if (lt > 0.9) y += Math.sin((lt - 0.9) * 3.4) * 6;
+  m.style.backgroundImage = `url(assets/m${c.pose}.png)`;
+  Object.assign(m.style, { left: sx + 150 - size / 2 + "px", top: y - feet + "px", opacity: clamp(fp * 4), transform: `scale(${1 + 0.06 * squash}, ${1 - 0.08 * squash})` });
+  Object.assign($(".shadow", el).style, { left: sx + 150 - 110 + "px", top: stoneTop - 14 + "px", opacity: clamp(fp * 2) * 0.9, transform: `scale(${0.5 + 0.5 * fp})` });
+  for (const { d, s, i } of cardSparks) { const p = seg(lt, 0.7 + i * 0.07, 1.15 + i * 0.07); d.style.opacity = clamp(p * 2); d.style.transform = `scale(${backOut(p, 2.2) * s * (0.85 + 0.15 * Math.sin(lt * 5 + i))}) rotate(${(1 - p) * -40}deg)`; }
+}
+
+function renderEnd(t) {
+  const e = tl.endCard, el = $("#end");
+  const on = e && t >= e.t0; show(el, on); if (!on) return;
+  const lt = t - e.t0;
+  el.style.opacity = easeOut(seg(lt, 0, 0.45));
+  const lp = seg(lt, 0.25, 0.9);
+  Object.assign($(".logo", el).style, { opacity: clamp(lp * 3), transform: `scale(${0.6 + 0.4 * backOut(lp, 1.8)})` });
+  const l = easeOut(seg(lt, 0.8, 1.35));
+  $(".line", el).innerHTML = e.line;
+  Object.assign($(".line", el).style, { opacity: l, transform: `translateY(${(1 - l) * 18}px)` });
+  $(".rule", el).style.transform = `scaleX(${easeOut(seg(lt, 1.0, 1.5))})`;
+  const m = $(".mascot", el), mp = seg(lt, 0.9, 1.3);
+  m.style.backgroundImage = `url(assets/m${e.pose}.png)`;
+  Object.assign(m.style, { left: "1400px", top: 500 - (1 - mp) * 60 + Math.sin(Math.max(0, lt - 1.3) * 3.2) * 6 + "px", opacity: clamp(mp * 3) });
+}
+
+window.renderAt = async (t) => {
+  need.clear();
+  const cam = camAt(t);
+  comp.style.transform = `translate(${SW / 2 - cam.cx * S * cam.z}px, ${SH / 2 - cam.cy * S * cam.z}px) scale(${S * cam.z})`;
+  renderPages(t); renderRings(t); renderCaption(t); renderCursor(t, cam); renderFx(t, cam); renderCard(t); renderEnd(t);
+  await Promise.all([...need].map((im) => (im.complete && im.naturalWidth ? null : im.decode().catch(() => console.log("img fail", im.src)))));
+  return true;
+};
+window.ready = document.fonts.ready.then(async () => { await window.renderAt(0); return true; });
+</script>
+</body>
+</html>

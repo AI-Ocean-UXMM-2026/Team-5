@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auth Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockups.css">
+<style>
+  .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .v { background: #fff; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+  .v img { width: 100%; aspect-ratio: 1328 / 884; object-fit: cover; object-position: top; border-bottom: 1px solid var(--line); }
+  .v img + img { border-top: 0; }
+  .v .t { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 8px; }
+  .v .t small { font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--burgundy); }
+  .v .t h2 { font-size: 22px; }
+  .v .t p { font-size: 14px; color: var(--muted); line-height: 1.55; }
+  .v .t dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; margin-top: 6px; }
+  .v .t dt { color: var(--muted); }
+  .v .t dd { font-weight: 600; }
+  .pick { max-width: 1280px; margin: 32px auto 0; background: var(--burgundy-deep); color: #fff; border-radius: 18px; padding: 28px 32px; display: grid; grid-template-columns: 1fr 2fr; gap: 32px; }
+  .pick h2 { font-size: 24px; }
+  .pick small { color: var(--yellow); font-weight: 700; letter-spacing: .14em; font-size: 12px; }
+  .pick ul { padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.55; color: #f1dde2; }
+  .pick b { color: #fff; }
+</style>
+</head>
+<body>
+<header class="deck-head">
+  <div>
+    <p class="tag">The Citadel · Sign up, log in and onboarding</p>
+    <h1>Three design directions</h1>
+    <p>All three follow the corrected flow in docs/citadel-flow-and-ia.md: choose role, accept terms (18+), confirm email with a code, then language, goal (or "not sure yet"), roadmap review and an optional profile. They differ in how the screens work, not only in looks.</p>
+  </div>
+  <nav class="deck-nav"><a href="index.html" aria-current="page">All variants</a><a href="a-split-doorway.html">A</a><a href="b-talk-to-cit.html">B</a><a href="c-email-first-live-roadmap.html">C</a></nav>
+</header>
+<div class="grid">
+  <a class="v" href="a-split-doorway.html">
+    <img src="A-1.png" alt="Variant A sign up screen"><img src="A-3.png" alt="Variant A onboarding goal screen">
+    <div class="t"><small>VARIANT A</small><h2>Split doorway</h2><p>Brand art and promises on the left, a short form on the right. Onboarding has a burgundy step rail.</p>
+      <dl><dt>Feel</dt><dd>Calm, trustworthy</dd><dt>Best for</dt><dd>Fast, low-risk rebuild</dd><dt>Effort</dt><dd>Low</dd></dl></div>
+  </a>
+  <a class="v" href="b-talk-to-cit.html">
+    <img src="B-1.png" alt="Variant B sign up as a chat"><img src="B-3.png" alt="Variant B onboarding goal question in chat">
+    <div class="t"><small>VARIANT B</small><h2>Talk to Cit</h2><p>The mascot asks one question at a time like a chat, with an editable "Your answers" card.</p>
+      <dl><dt>Feel</dt><dd>Friendly, playful</dd><dt>Best for</dt><dd>Phone-first first-timers</dd><dt>Effort</dt><dd>Medium</dd></dl></div>
+  </a>
+  <a class="v" href="c-email-first-live-roadmap.html">
+    <img src="C-1.png" alt="Variant C single email start page"><img src="C-3.png" alt="Variant C onboarding with live roadmap preview">
+    <div class="t"><small>VARIANT C</small><h2>Email first + live roadmap</h2><p>One email box decides log in or sign up. The roadmap builds itself beside the questions.</p>
+      <dl><dt>Feel</dt><dd>Smart, rewarding</dd><dt>Best for</dt><dd>Showing value early</dd><dt>Effort</dt><dd>Medium–high</dd></dl></div>
+  </a>
+</div>
+<section class="pick">
+  <div><small>MY RECOMMENDATION</small><h2>C's structure, with A's controls and B's voice</h2></div>
+  <ul>
+    <li><b>Auth: C.</b> One "Start here" email box removes the sign up vs log in confusion, and there's no password to forget.</li>
+    <li><b>Onboarding: C's live roadmap</b> with A's goal cards, skill chips and hours selector, which are faster than typing on a phone.</li>
+    <li><b>Microcopy: B's friendly tone</b>, with Cit appearing at key moments (welcome, code sent, roadmap ready) instead of a full chat.</li>
+  </ul>
+</section>
+</body>
+</html>
