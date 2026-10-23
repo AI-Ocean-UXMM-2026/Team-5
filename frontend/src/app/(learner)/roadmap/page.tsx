@@ -179,8 +179,6 @@ export default function Home() {
   const hoursLeft = path.reduce((n, c) => n + (certified(c.id) ? 0 : c.hours * (1 - doneIn(c) / c.lessons.length)), 0);
   const weeksLeft = Math.ceil(hoursLeft / Math.max(1, p.hoursPerWeek));
   const completedCount = path.filter((c) => certified(c.id)).length;
-  const lessonsTotal = path.reduce((n, c) => n + c.lessons.length, 0);
-  const lessonsDone = path.reduce((n, c) => n + doneIn(c), 0);
   const now = new Date();
   const finishBy = new Date(now.getFullYear(), now.getMonth(), now.getDate() + weeksLeft * 7).toLocaleDateString(lang === "my" ? "my-MM" : "en-GB", { day: "numeric", month: "short" });
   const today = now.toLocaleDateString(lang === "my" ? "my-MM" : "en-GB", { weekday: "long", day: "numeric", month: "long" });
@@ -199,7 +197,7 @@ export default function Home() {
               {p.hoursPerWeek} {x("hours a week", "နာရီ / တစ်ပတ်")}
             </span>
             {hoursLeft > 0 && (
-              <span className="lh-chipYellow">{x(`About ${weeksLeft} ${weeksLeft === 1 ? "week" : "weeks"} to go`, `နောက်ထပ် ${weeksLeft} ပတ်ခန့်`)}</span>
+              <span className="lh-chipYellow">{x(`About ${weeksLeft} ${weeksLeft === 1 ? "week" : "weeks"} to go · finish around ${finishBy}`, `နောက်ထပ် ${weeksLeft} ပတ်ခန့် · ${finishBy} ခန့်တွင် ပြီးမည်`)}</span>
             )}
           </div>
           <Link href="/onboarding" className="lh-heroButton">
@@ -441,44 +439,9 @@ export default function Home() {
                 </li>
               );
             })}
-            <li className="flex gap-4">
-              <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-t-full rounded-b-md border border-dashed border-[#e2c6ce] bg-[#fbf3f5] text-[#b48896]">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 21V10a7 7 0 0 1 14 0v11M9 21v-6a3 3 0 0 1 6 0v6" />
-                </svg>
-              </span>
-              <div className="min-w-0 pt-1">
-                <p className="font-semibold">{x(`After ${path.length === 1 ? "this course" : `these ${path.length} courses`}`, `ဒီသင်တန်း ${path.length} ခု ပြီးရင်`)}</p>
-                <p className="text-body-sm text-muted">{x("Company challenge → interview → internship. Applying and interviews are always free.", "ကုမ္ပဏီစိန်ခေါ်မှု → အင်တာဗျူး → အလုပ်သင်။ လျှောက်ထားခြင်းနဲ့ အင်တာဗျူးက အမြဲအခမဲ့။")}</p>
-              </div>
-            </li>
           </ol>
         </section>
         <div className="flex flex-col gap-6">
-          <Card>
-            <h2 className="text-h4">{x("Roadmap at a glance", "လမ်းပြမြေပုံ အကျဉ်း")}</h2>
-            <dl className="mt-4 grid grid-cols-2 gap-3">
-              {(
-                [
-                  [x("Courses done", "ပြီးသည့်သင်တန်း"), `${completedCount} / ${path.length}`],
-                  [x("Lessons done", "ပြီးသည့်သင်ခန်းစာ"), `${lessonsDone} / ${lessonsTotal}`],
-                  [x("Time left", "ကျန်အချိန်"), hoursLeft > 0 ? x(`${Math.ceil(hoursLeft)} h`, `${Math.ceil(hoursLeft)} နာရီ`) : "—"],
-                  [x("Finish around", "ပြီးမည့်ရက်"), hoursLeft > 0 ? finishBy : x("Done", "ပြီးပြီ")],
-                ] as const
-              ).map(([k, v]) => (
-                <div key={k} className="rounded-xl bg-surface p-3">
-                  <dt className="text-caption text-muted">{k}</dt>
-                  <dd className="mt-1 font-heading text-h4 font-semibold tabular-nums">{v}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-3 text-caption text-muted">
-              {x(`Based on ${p.hoursPerWeek} hours of study a week.`, `တစ်ပတ် ${p.hoursPerWeek} နာရီ လေ့လာမှုအပေါ် အခြေခံသည်။`)}{" "}
-              <Link href="/onboarding" className="font-semibold text-burgundy hover:underline">
-                {x("Change", "ပြောင်းမယ်")}
-              </Link>
-            </p>
-          </Card>
           <AiPanel title={x("Why this order", "ဘာကြောင့် ဒီအစီအစဉ်လဲ")}>
             <p>{p.roadmapNote}</p>
           </AiPanel>

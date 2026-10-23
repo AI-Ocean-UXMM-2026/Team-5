@@ -1007,6 +1007,14 @@ export default function Landing() {
             <Action href={companyStart}>
               {x("Get started as a company", "ကုမ္ပဏီအဖြစ် စတင်မယ်")}
             </Action>
+            {!signedIn && (
+              <p className="mt-3 text-sm">
+                {x("Already registered?", "မှတ်ပုံတင်ပြီးပြီလား။")}{" "}
+                <Link href="/login?role=company" className="font-semibold text-burgundy underline-offset-2 hover:underline">
+                  {x("Log in as a company", "ကုမ္ပဏီအဖြစ် ဝင်ရန်")}
+                </Link>
+              </p>
+            )}
           </div>
         </section>
 

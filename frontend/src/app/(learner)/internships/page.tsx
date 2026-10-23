@@ -42,14 +42,14 @@ export default function Internships() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="flex flex-wrap items-center gap-2 text-h4">
-                    {company.terms.role || "Internship"} at{" "}
+                    <span>{company.terms.role || "Internship"} at</span>
                     {companyUser ? (
                       <Link href={`/profile/${companyUser.id}`} className="hover:text-burgundy">
                         {company.name}
                       </Link>
                     ) : (
-                      company.name
-                    )}{" "}
+                      <span>{company.name}</span>
+                    )}
                     <VerifiedBadge company={company} />
                   </h2>
                   <p className="mt-2 text-muted">

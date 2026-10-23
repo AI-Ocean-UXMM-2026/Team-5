@@ -296,7 +296,12 @@ function Shell({ area, children }: { area: Area; children: React.ReactNode }) {
   const me = s.users.find((u) => u.id === s.sessionUserId);
   const nav = navFor(s, lang);
   const t = copy[lang];
-  const current = nav.flatMap((g) => g.items.map((item) => ({ group: g.label, item }))).find(({ item }) => isActive(pathname, item));
+  // Profiles sit outside the sidebar groups (they open from the account card), so they get their own label.
+  const current =
+    nav.flatMap((g) => g.items.map((item) => ({ group: g.label, item }))).find(({ item }) => isActive(pathname, item)) ??
+    (pathname.startsWith("/profile/")
+      ? { group: lang === "my" ? "အကောင့်" : "Account", item: { href: pathname, icon: "users" as const, label: lang === "my" ? "ကိုယ်ရေးအကျဉ်း" : "Profile" } }
+      : undefined);
   const footer = (
     <footer className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-5 text-caption text-muted md:px-8 lg:px-10">
       <p>{t.rights}</p>

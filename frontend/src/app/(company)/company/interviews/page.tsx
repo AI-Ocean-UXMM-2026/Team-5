@@ -24,7 +24,6 @@ const setStatus = (id: string, status: Interview["status"]) =>
 export default function Interviews() {
   const { s, company } = useData();
   const mine = s.interviews.filter((i) => i.companyId === company?.id);
-  const offers = mine.filter((i) => i.status === "offered" || i.status === "accepted" || i.status === "declined");
   const [ask, setAsk] = useState<{ id: string; status: "offered" | "not-selected" } | null>(null);
   const asked = mine.find((i) => i.id === ask?.id);
   const askedLearner = nameOf(s, asked?.learnerId ?? "");
@@ -33,21 +32,6 @@ export default function Interviews() {
     <>
       <PageHeader title="Interviews and hiring" intro="Meet the learners you invited, then decide. The internship starts when the learner accepts your offer." pose="wink" />
       {!mine.length && <Empty pose="sleep">No interviews yet. Invite learners from a challenge&apos;s submissions.</Empty>}
-      {!!offers.length && (
-        <Card className="mb-6">
-          <h2 className="mb-2 text-h4">Sent offers</h2>
-          <ul className="flex flex-col gap-2">
-            {offers.map((i) => (
-              <li key={i.id} className="flex flex-wrap items-center justify-between gap-2">
-                <Link href={`/profile/${i.learnerId}`} className="font-medium hover:text-burgundy">
-                  {nameOf(s, i.learnerId)}
-                </Link>
-                <Badge tone={i.status === "accepted" ? "success" : i.status === "offered" ? "highlight" : "neutral"}>{label[i.status]}</Badge>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
       <div className="flex flex-col gap-4">
         {mine.map((i) => {
           const learner = nameOf(s, i.learnerId);

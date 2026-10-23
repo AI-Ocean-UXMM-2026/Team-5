@@ -313,6 +313,42 @@
 .ca-loginFoot .ca-note {
   margin-top: 10px;
 }
+.ca-demoAccounts {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ca-demoAccounts button {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 14px;
+  border: 1px solid #e1e1e8;
+  border-radius: 10px;
+  background: #fafafb;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.ca-demoAccounts button:hover {
+  border-color: #963d50;
+  background: #fbf4f6;
+}
+.ca-demoAccounts button:focus-visible {
+  outline: 2px solid #963d50;
+  outline-offset: 2px;
+}
+.ca-demoAccounts strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+.ca-demoAccounts small {
+  font-size: 11px;
+  color: #9797a4;
+}
 .ca-roleChoices {
   display: grid;
   grid-template-columns: 1fr 1fr;

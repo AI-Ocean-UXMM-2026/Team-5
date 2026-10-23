@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { LinkButton } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/Card";
+import { SearchBar } from "@/components/ui/SearchBar";
 import { Mascot } from "@/components/ui/Mascot";
 import { courseTitle, formatMmk } from "@/lib/i18n";
 import { useCourses } from "@/lib/catalogue";
@@ -147,13 +150,6 @@ export default function Courses() {
   const roadmapCourses = progress.roadmap
     .map((id) => courses.find((c) => c.id === id))
     .filter((c): c is (typeof courses)[number] => !!c);
-  const next = [...roadmapCourses, ...courses].find(
-    (c) => done(c) < c.lessons.length,
-  );
-  const lesson = next?.lessons.find(
-    (l) => !progress.doneLessons.includes(l.id),
-  );
-  const totalDone = courses.reduce((n, c) => n + done(c), 0);
   const shown = courses.filter(
     (c) =>
       (filter === "all" ||
@@ -167,169 +163,20 @@ export default function Courses() {
 
   return (
     <div className="lc-workspace">
-      <header className="lc-pageHeading">
-        <div>
-          <p className="lc-kicker">
-            {my ? "သင့်ရဲ့ သင်ယူမှုနေရာ" : "YOUR LEARNING SPACE"}
-          </p>
-          <h1>
-            {my
-              ? "တစ်နေ့ထက်တစ်နေ့ ပိုတိုးတက်လာမယ်။"
-              : "A little progress. A bigger future."}
-          </h1>
-          <p>
-            {my
-              ? `${me.name}၊ သင့်အနာဂတ်အတွက် ဆက်လေ့လာလိုက်ပါ။`
-              : `Good to see you, ${me.name.split(" ")[0]}. Let's build what comes next.`}
-          </p>
-        </div>
-        <Link href="/roadmap" className="lc-textLink">
-          {my ? "ကျွန်ုပ်၏ လမ်းပြမြေပုံ" : "View my roadmap"}{" "}
-          <span aria-hidden>↗</span>
-        </Link>
-      </header>
-      <div className="lc-topGrid">
-        <section className="lc-nextCard" aria-labelledby="lc-next-title">
-          <div className="lc-nextCopy">
-            <span className="lc-pill">
-              {next && done(next) > 0
-                ? my
-                  ? "ဆက်လက်သင်ယူရန်"
-                  : "PICK UP WHERE YOU LEFT OFF"
-                : my
-                  ? "သင့်ရဲ့ နောက်တစ်ဆင့်"
-                  : "YOUR NEXT SMALL STEP"}
-            </span>
-            <h2 id="lc-next-title">
-              {next
-                ? courseTitle(next, lang)
-                : my
-                  ? "သင်ယူမှု ပြီးမြောက်ပါပြီ။"
-                  : "Look how far you've come."}
-            </h2>
-            <p>
-              {lesson
-                ? `${my ? "နောက်သင်ခန်းစာ" : "Up next"}: ${lesson.title}`
-                : my
-                  ? "သင့်ကျွမ်းကျင်မှုကို စိန်ခေါ်မှုဖြင့် ပြသပါ။"
-                  : "Put your new skills to work on a company challenge."}
-            </p>
-            {next && (
-              <div className="lc-nextProgress">
-                <div
-                  className="lc-track"
-                  role="progressbar"
-                  aria-label="Course progress"
-                  aria-valuemin={0}
-                  aria-valuemax={next.lessons.length}
-                  aria-valuenow={done(next)}
-                >
-                  <span
-                    style={{
-                      width: `${(done(next) / next.lessons.length) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span>
-                  {done(next)} / {next.lessons.length}{" "}
-                  {my ? "သင်ခန်းစာ" : "lessons"}
-                </span>
-              </div>
-            )}
-            <Link
-              className="lc-button"
-              href={
-                next && lesson
-                  ? `/courses/${next.id}/lessons/${lesson.id}`
-                  : "/challenges"
-              }
-            >
-              {next
-                ? done(next) > 0
-                  ? my
-                    ? "ဆက်သင်ယူမည်"
-                    : "Continue learning"
-                  : my
-                    ? "စတင်သင်ယူမည်"
-                    : "Start learning"
-                : my
-                  ? "စိန်ခေါ်မှုများ ကြည့်ရန်"
-                  : "Explore challenges"}{" "}
-              <span aria-hidden>→</span>
-            </Link>
-          </div>
-          <div className="lc-nextVisual">
-            <span className="lc-orbit" />
-            <Mascot pose="laptop" size={235} priority />
-            <span className="lc-visualNote">
-              {my ? "သင် လုပ်နိုင်ပါတယ်။" : "You've got this!"} <span>✦</span>
-            </span>
-          </div>
-        </section>
-        <aside className="lc-progressCard">
-          <div className="lc-progressTitle">
-            <h2>{my ? "သင့်ရဲ့ တိုးတက်မှု" : "Your learning snapshot"}</h2>
-            <span aria-hidden>✦</span>
-          </div>
-          <div className="lc-stat">
-            <strong>{String(totalDone).padStart(2, "0")}</strong>
-            <span>{my ? "ပြီးမြောက်သည့် သင်ခန်းစာ" : "Lessons completed"}</span>
-          </div>
-          <div className="lc-statRow">
-            <div>
-              <b>{roadmapCourses.length}</b>
-              <span>{my ? "လမ်းပြမြေပုံရှိ သင်တန်း" : "On your roadmap"}</span>
-            </div>
-            <div>
-              <b>{completed.length}</b>
-              <span>{my ? "ပြီးမြောက်သည့် သင်တန်း" : "Courses completed"}</span>
-            </div>
-          </div>
-          <Link href="/roadmap">
-            {my ? "နောက်တစ်ဆင့်ကို ကြည့်ရန်" : "One step closer to your goal"}{" "}
-            <span aria-hidden>→</span>
-          </Link>
-        </aside>
-      </div>
-      <section className="lc-catalog" aria-labelledby="lc-catalog-title">
-        <div className="lc-catalogHeading">
-          <div>
-            <h2 id="lc-catalog-title">
-              {my ? "သင်ယူစရာများ" : "Make room for your next skill."}
-            </h2>
-            <p>
-              {my
-                ? "လေ့လာပါ။ လေ့ကျင့်ပါ။ လက်တွေ့ပြသပါ။"
-                : "Learn it. Practise it. Put it to work."}
-            </p>
-          </div>
-          <label className="lc-search">
-            <svg
-              aria-hidden
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                cx="10.5"
-                cy="10.5"
-                r="6.5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-              />
-              <path d="m16 16 5 5" stroke="currentColor" strokeWidth="1.6" />
-            </svg>
-            <span className="sr-only">
-              {my ? "သင်တန်းရှာရန်" : "Search courses"}
-            </span>
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder={my ? "သင်တန်းရှာရန်" : "Search courses"}
-            />
-          </label>
-        </div>
+      <PageHeader
+        title={my ? "သင်တန်းများ" : "Courses"}
+        intro={
+          my
+            ? "လေ့လာပါ။ လေ့ကျင့်ပါ။ လက်တွေ့ပြသပါ။ သင်တန်းတိုင်းကို အခမဲ့ စမ်းလေ့လာနိုင်သည်။"
+            : "Learn it. Practise it. Put it to work. Every course starts with a free first step."
+        }
+      >
+        <SearchBar label={my ? "သင်တန်းရှာရန်" : "Search courses"} placeholder={my ? "သင်တန်းရှာရန်" : "Search courses"} value={q} onChange={setQ} />
+        <LinkButton href="/roadmap" variant="secondary">
+          {my ? "ကျွန်ုပ်၏ လမ်းပြမြေပုံ" : "View my roadmap"}
+        </LinkButton>
+      </PageHeader>
+      <section className="lc-catalog" aria-label={my ? "သင်တန်းများ" : "Course catalogue"}>
         <div className="lc-filterRow">
           <div
             className="lc-filters"
@@ -359,12 +206,6 @@ export default function Courses() {
               </button>
             ))}
           </div>
-          <span className="lc-freeNote">
-            ✧{" "}
-            {my
-              ? "အခမဲ့ စမ်းလေ့လာနိုင်သည်"
-              : "Every course starts with a free first step"}
-          </span>
         </div>
         <div className="lc-courseGrid" aria-live="polite">
           {shown.map((c) => {
@@ -480,27 +321,6 @@ export default function Courses() {
             </button>
           </div>
         )}
-      </section>
-      <section className="lc-bottomBanner">
-        <span className="lc-bannerIcon" aria-hidden>
-          ↗
-        </span>
-        <div>
-          <h2>
-            {my
-              ? "သင်ယူခြင်းမှ အခွင့်အလမ်းဆီသို့။"
-              : "Skills are just the beginning."}
-          </h2>
-          <p>
-            {my
-              ? "သင်ယူထားသည်ကို ကုမ္ပဏီစိန်ခေါ်မှုများတွင် အသုံးချပါ။"
-              : "Turn what you learn into real work with company challenges."}
-          </p>
-        </div>
-        <Link href="/challenges">
-          {my ? "စိန်ခေါ်မှုများ ကြည့်ရန်" : "Discover challenges"}{" "}
-          <span aria-hidden>→</span>
-        </Link>
       </section>
     </div>
   );

@@ -7,7 +7,7 @@ import { YouTubeFrame } from "@/components/YouTubeFrame";
 import { AiPanel } from "@/components/ui/AiPanel";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button, LinkButton } from "@/components/ui/Button";
-import { Card, Empty } from "@/components/ui/Card";
+import { Card, Empty, PageHeader } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
 import { summarizeLesson } from "@/lib/ai";
@@ -100,7 +100,7 @@ export default function LessonPage() {
   return (
     <>
       <Breadcrumb items={crumbs} />
-      <h1 className="mb-8 text-h2 sm:text-h1">{lesson.title}</h1>
+      <PageHeader title={lesson.title} intro={`Lesson ${index + 1} of ${course.lessons.length} · ${courseTitle(course, lang)}`} />
       <LessonVideo videoId={lesson.videoId} title={lesson.title} />
       <div className="grid items-stretch gap-6 lg:grid-cols-[3fr_2fr]">
         <div className="flex h-full flex-col gap-6">

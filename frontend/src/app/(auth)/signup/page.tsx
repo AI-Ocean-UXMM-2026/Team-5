@@ -294,7 +294,7 @@ export default function Signup() {
       </form>
       <p className="ca-switch">
         {x("Already have an account?", "အကောင့်ရှိပြီးပြီလား။")}{" "}
-        <Link href="/login">{x("Sign in", "ဝင်ရန်")}</Link>
+        <Link href={role === "company" ? "/login?role=company" : "/login"}>{x("Sign in", "ဝင်ရန်")}</Link>
       </p>
       <AuthNote>
         {x("Verify your email next.", "နောက်တစ်ဆင့်တွင် အီးမေးလ်အတည်ပြုပါ။")}
