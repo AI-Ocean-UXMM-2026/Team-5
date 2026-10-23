@@ -31,29 +31,23 @@ export function Badge({ tone = "neutral", children }: { tone?: keyof typeof tone
   return <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-caption font-medium ${tones[tone]}`}>{children}</span>;
 }
 
-export function LockIcon({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={`shrink-0 ${className}`} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <rect x="5" y="11" width="14" height="10" rx="2" />
-      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-    </svg>
-  );
-}
+export { LockIcon } from "./LockIcon";
 
-export function PageHeader({ title, intro, pose, media, badge, children }: { title: string; intro?: string; pose?: Pose; media?: React.ReactNode; badge?: React.ReactNode; children?: React.ReactNode }) {
+/** The one page header used across the signed-in app: title, optional intro and actions, then a divider. */
+export function PageHeader({ title, intro, media, badge, children }: { title: string; intro?: string; pose?: Pose; media?: React.ReactNode; badge?: React.ReactNode; children?: React.ReactNode }) {
   return (
-    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-      <div className="flex items-center gap-4">
-        {media ?? (pose ? <Mascot pose={pose} size={88} className="hidden sm:block" priority /> : null)}
-        <div>
-          <h1 className="flex flex-wrap items-center gap-3 text-h2 sm:text-h1">
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
+      <div className="flex min-w-0 items-center gap-4">
+        {media}
+        <div className="min-w-0">
+          <h1 className="flex flex-wrap items-center gap-3 text-h2 tracking-[-0.03em] sm:text-h1">
             {title}
             {badge}
           </h1>
           {intro && <p className="mt-2 max-w-2xl text-body-lg text-muted">{intro}</p>}
         </div>
       </div>
-      {children}
+      {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </div>
   );
 }

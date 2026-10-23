@@ -5,6 +5,7 @@ const variants = {
   primary: "bg-burgundy text-white hover:bg-burgundy-dark",
   secondary: "bg-white text-ink border border-line hover:bg-surface",
   tertiary: "text-burgundy hover:bg-burgundy-tint",
+  danger: "bg-danger text-white hover:bg-[#912018]",
 };
 
 type Variant = keyof typeof variants;

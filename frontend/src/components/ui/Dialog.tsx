@@ -8,7 +8,11 @@ export function Dialog({ open, onClose, title, children }: { open: boolean; onCl
 
   useEffect(() => {
     const d = ref.current;
-    if (open && !d?.open) d?.showModal();
+    if (open && !d?.open) {
+      d?.showModal();
+      // Lets a dialog choose its first focus (for example Cancel on a destructive confirm) instead of the close button.
+      d?.querySelector<HTMLElement>("[data-autofocus]")?.focus();
+    }
     if (!open && d?.open) d.close();
   }, [open]);
 

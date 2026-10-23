@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
 import { summarizeLesson } from "@/lib/ai";
 import { courseTitle } from "@/lib/i18n";
-import { lessonIncluded } from "@/lib/rules";
+import { allLessonsDone, lessonIncluded, paidTrackOpen } from "@/lib/rules";
 import { gradeLessonQuiz } from "@/lib/answers";
 import { useCourses } from "@/lib/catalogue";
 import { progressOf, updateProgress, useData } from "@/lib/store";
@@ -34,6 +34,8 @@ function LessonVideo({ videoId, title }: { videoId?: string; title: string }) {
 
 function LessonNotes({ lessonId, saved, userId }: { lessonId: string; saved: string; userId: string }) {
   const [note, setNote] = useState(saved);
+  const [savedNote, setSavedNote] = useState(saved);
+  const dirty = note !== savedNote;
   return (
     <Card className="flex flex-1 flex-col">
       <form
@@ -41,11 +43,17 @@ function LessonNotes({ lessonId, saved, userId }: { lessonId: string; saved: str
         onSubmit={(e) => {
           e.preventDefault();
           updateProgress(userId, (pr) => ({ ...pr, notes: { ...pr.notes, [lessonId]: note } }));
+          setSavedNote(note);
         }}
       >
         <Textarea label="My notes" hint="Saved on this device when you press Save." value={note} onChange={(e) => setNote(e.target.value)} className="min-h-48" />
-        <div className="mt-auto pt-4">
-          <Button type="submit">Save</Button>
+        <div className="mt-auto flex items-center gap-3 pt-4">
+          <Button type="submit" disabled={!dirty}>
+            Save
+          </Button>
+          <p role="status" className="text-body-sm text-muted">
+            {dirty ? "Unsaved changes" : savedNote ? "✓ Saved on this device" : ""}
+          </p>
         </div>
       </form>
     </Card>
@@ -84,6 +92,9 @@ export default function LessonPage() {
   const done = p.doneLessons.includes(lesson.id);
   const complete = done || passedId === lesson.id;
   const lastLesson = !next;
+  const trackOpen = paidTrackOpen(course, p.paidCourseIds, certified);
+  // Counts this lesson as done straight after a perfect quiz, before the store update re-renders.
+  const allDone = allLessonsDone([...p.doneLessons, ...(passedId === lesson.id ? [lesson.id] : [])], course);
   const summary = result?.lessonId === lesson.id ? result : null;
 
   return (
@@ -132,6 +143,18 @@ export default function LessonPage() {
                   )}
                 </Quiz>
               </>
+            )}
+            {/* Last open lesson: point to what comes next instead of leaving a dead end. */}
+            {passedId === lesson.id && !nextOpen && !lastLesson && (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {allDone && trackOpen ? (
+                  <LinkButton href={`/courses/${course.id}/test`}>Take the final test</LinkButton>
+                ) : (
+                  <LinkButton href={`/courses/${course.id}`} variant="secondary">
+                    {next ? "Unlock the next lessons" : "Back to the course"}
+                  </LinkButton>
+                )}
+              </div>
             )}
           </Card>
         </div>

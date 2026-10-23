@@ -4,6 +4,7 @@ import { useState } from "react";
 import { nameOf, newId, setState, useData } from "@/lib/store";
 import type { Rating } from "@/lib/types";
 import { Button } from "./ui/Button";
+import { ConfirmDialog } from "./ui/ConfirmDialog";
 import { Textarea } from "./ui/Field";
 
 export function RatingsList({ ratings, empty }: { ratings: Rating[]; empty: string }) {
@@ -28,6 +29,7 @@ export function RatingForm({ interviewId, toId, toName }: { interviewId: string;
   const { s, me } = useData();
   const [stars, setStars] = useState(0);
   const [comment, setComment] = useState("");
+  const [confirming, setConfirming] = useState(false);
   const existing = s.ratings.find((r) => r.interviewId === interviewId && r.fromId === me.id);
 
   if (existing)
@@ -43,9 +45,20 @@ export function RatingForm({ interviewId, toId, toName }: { interviewId: string;
       className="flex flex-col gap-3"
       onSubmit={(e) => {
         e.preventDefault();
-        setState((st) => ({ ...st, ratings: [...st.ratings, { id: newId("rt"), interviewId, fromId: me.id, toId, stars, comment: comment.trim() }] }));
+        setConfirming(true);
       }}
     >
+      <ConfirmDialog
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        onConfirm={() => setState((st) => ({ ...st, ratings: [...st.ratings, { id: newId("rt"), interviewId, fromId: me.id, toId, stars, comment: comment.trim() }] }))}
+        title={`Send ${stars} ${stars === 1 ? "star" : "stars"} to ${toName}?`}
+        confirmLabel="Send rating"
+      >
+        <p>
+          Your rating{comment.trim() ? " and comment" : ""} will show on {toName}&apos;s profile. You can&apos;t change it after sending.
+        </p>
+      </ConfirmDialog>
       <fieldset>
         <legend className="mb-1 text-sm font-medium">Rate {toName}</legend>
         <div className="flex gap-1">

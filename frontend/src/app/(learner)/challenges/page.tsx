@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, LockIcon, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, PageHeader } from "@/components/ui/Card";
+import { LockIcon } from "@/components/ui/LockIcon";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { courseTitle } from "@/lib/i18n";
 import { challengeUnlocked } from "@/lib/rules";
@@ -51,7 +52,8 @@ export default function Challenges() {
                   <Badge tone="brand">Open to you</Badge>
                 ) : (
                   <Badge>
-                    <LockIcon /> Get certified in {courseTitle(course, lang)} to unlock
+                    <LockIcon />
+                    <span className="ml-1">Get certified in {courseTitle(course, lang)} to unlock</span>
                   </Badge>
                 )}
               </div>

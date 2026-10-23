@@ -31,6 +31,8 @@ const as = (userId: string | null): State => ({ ...seed, sessionUserId: userId }
 test("each role only reaches its own area", () => {
   assert.equal(redirectFor(as(null), "learner", "/courses"), "/login");
   assert.equal(redirectFor(as(null), "guest", "/login"), null);
+  assert.equal(redirectFor(as("u-aye"), "guest", "/"), null);
+  assert.equal(redirectFor(as("u-gp"), "guest", "/"), null);
   assert.equal(redirectFor(as("u-aye"), "guest", "/login"), "/onboarding");
   assert.equal(redirectFor(as("u-aye"), "learner", "/courses"), null);
   assert.equal(redirectFor(as("u-aye"), "company", "/company/challenges"), "/onboarding");

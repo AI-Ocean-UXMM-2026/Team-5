@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { LinkButton } from "@/components/ui/Button";
-import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, LockIcon, PageHeader } from "@/components/ui/Card";
+import { Badge, Card, cardLinkClass, cardLinkStretch, Empty, PageHeader } from "@/components/ui/Card";
+import { LockIcon } from "@/components/ui/LockIcon";
 import { courseTitle, formatMmk } from "@/lib/i18n";
 import { latestPayment } from "@/lib/payments";
 import { allLessonsDone, challengeUnlocked, lessonIncluded, paidTrackOpen, previewLessonCount } from "@/lib/rules";
@@ -118,8 +119,9 @@ export default function CourseDetail() {
                       {c.title}
                     </Link>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-muted">
-                      <LockIcon /> {c.title}
+                    <span className="inline-flex items-center gap-1.5 text-muted">
+                      <LockIcon />
+                      {c.title}
                     </span>
                   )}
                 </li>

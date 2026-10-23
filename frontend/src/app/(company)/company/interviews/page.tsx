@@ -5,7 +5,7 @@ import { useState } from "react";
 import { RatingForm } from "@/components/RatingForm";
 import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
-import { Dialog } from "@/components/ui/Dialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { applyOffer } from "@/lib/rules";
 import { nameOf, newId, setState, useData } from "@/lib/store";
 import type { Interview } from "@/lib/types";
@@ -23,10 +23,11 @@ const setStatus = (id: string, status: Interview["status"]) =>
 
 export default function Interviews() {
   const { s, company } = useData();
-  const [confirming, setConfirming] = useState<string | null>(null);
   const mine = s.interviews.filter((i) => i.companyId === company?.id);
   const offers = mine.filter((i) => i.status === "offered" || i.status === "accepted" || i.status === "declined");
-  const pending = confirming ? mine.find((i) => i.id === confirming) : undefined;
+  const [ask, setAsk] = useState<{ id: string; status: "offered" | "not-selected" } | null>(null);
+  const asked = mine.find((i) => i.id === ask?.id);
+  const askedLearner = nameOf(s, asked?.learnerId ?? "");
 
   return (
     <>
@@ -69,8 +70,8 @@ export default function Interviews() {
               </div>
               {i.status === "scheduled" && (
                 <div className="flex flex-wrap gap-3">
-                  <Button onClick={() => setConfirming(i.id)}>Make an offer</Button>
-                  <Button variant="secondary" onClick={() => setStatus(i.id, "not-selected")}>
+                  <Button onClick={() => setAsk({ id: i.id, status: "offered" })}>Make an offer</Button>
+                  <Button variant="secondary" onClick={() => setAsk({ id: i.id, status: "not-selected" })}>
                     Not selected
                   </Button>
                 </div>
@@ -93,25 +94,29 @@ export default function Interviews() {
           );
         })}
       </div>
-      <Dialog open={!!pending} onClose={() => setConfirming(null)} title={`Send an offer to ${pending ? nameOf(s, pending.learnerId) : "this learner"}?`}>
-        <p className="mb-4 text-muted">
-          They get an offer for {company?.terms.role || "an internship"} ({company?.terms.duration}, {company?.terms.stipend}) and can accept or decline it on their Internships page.
-        </p>
-        <div className="flex flex-wrap justify-end gap-2">
-          <Button variant="secondary" onClick={() => setConfirming(null)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              if (!pending) return;
-              setState((st) => applyOffer(st, pending.submissionId, newId("iv")));
-              setConfirming(null);
-            }}
-          >
-            Yes, send offer
-          </Button>
-        </div>
-      </Dialog>
+      <ConfirmDialog
+        open={!!ask}
+        onClose={() => setAsk(null)}
+        onConfirm={() => {
+          if (!ask || !asked) return;
+          if (ask.status === "offered") setState((st) => applyOffer(st, asked.submissionId, newId("iv")));
+          else setStatus(ask.id, ask.status);
+        }}
+        title={ask?.status === "offered" ? `Offer ${askedLearner} the internship?` : `Mark ${askedLearner} as not selected?`}
+        confirmLabel={ask?.status === "offered" ? "Send offer" : "Not selected"}
+        danger={ask?.status === "not-selected"}
+      >
+        {ask?.status === "offered" ? (
+          <>
+            <p>
+              {company?.terms.role || "Internship"} · {company?.terms.duration} · {company?.terms.location} · {company?.terms.stipend}
+            </p>
+            <p>These are your approved terms. {askedLearner} can accept or decline the offer on their Internships page.</p>
+          </>
+        ) : (
+          <p>{askedLearner} is told they weren&apos;t selected this time. You can&apos;t undo this, but you can review other candidates from the same challenge.</p>
+        )}
+      </ConfirmDialog>
     </>
   );
 }

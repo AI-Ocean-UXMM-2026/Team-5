@@ -6,6 +6,7 @@ import { YouTubeFrame } from "@/components/YouTubeFrame";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Card";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input, Textarea } from "@/components/ui/Field";
 import { emailMatchesWebsite, youtubeVideoId } from "@/lib/rules";
 import { setState, useData } from "@/lib/store";
@@ -18,6 +19,7 @@ export default function Registration() {
   const [agreed, setAgreed] = useState(false);
   const [tried, setTried] = useState(false);
   const [videoUrl, setVideoUrl] = useState(company?.videoId ? `https://youtu.be/${company.videoId}` : "");
+  const [confirming, setConfirming] = useState(false);
   const set = (patch: Partial<Company>) => setForm((f) => ({ ...f, ...patch }));
   const setTerms = (patch: Partial<Company["terms"]>) => setForm((f) => ({ ...f, terms: { ...f.terms, ...patch } }));
   const domainError = tried && !emailMatchesWebsite(form.email, form.website) ? "The email must be on your website's domain, not Gmail or similar." : undefined;
@@ -43,11 +45,7 @@ export default function Registration() {
           e.preventDefault();
           setTried(true);
           if (!emailMatchesWebsite(form.email, form.website) || !form.documents.length || videoId === undefined) return;
-          setState((st) => ({
-            ...st,
-            companies: st.companies.map((c) => (c.id === form.id ? { ...form, videoId: videoId || undefined, status: "pending", reviewNote: undefined } : c)),
-          }));
-          router.push("/company/registration/status");
+          setConfirming(true);
         }}
       >
         <Card className="flex flex-col gap-4">
@@ -107,6 +105,20 @@ export default function Registration() {
           Submit for verification
         </Button>
       </form>
+      <ConfirmDialog
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        onConfirm={() => {
+          setState((st) => ({ ...st, companies: st.companies.map((c) => (c.id === form.id ? { ...form, videoId: videoId || undefined, status: "pending", reviewNote: undefined } : c)) }));
+          router.push("/company/registration/status");
+        }}
+        title={`Submit ${form.name || "your company"} for verification?`}
+        confirmLabel="Submit for verification"
+        cancelLabel="Keep editing"
+      >
+        <p>Our team checks your documents and books a short call. You can&apos;t change these details while we review them, which usually takes 2–3 working days.</p>
+        <p>We&apos;ll email {form.email} with the result.</p>
+      </ConfirmDialog>
     </>
   );
 }

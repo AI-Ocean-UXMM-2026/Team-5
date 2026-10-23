@@ -1,0 +1,332 @@
+/* Learner home. "The climb" draws the roadmap as steps rising to the Citadel gate, like the clay stairway on the landing page. */
+.lh-climb {
+  --steps: 5;
+  display: grid;
+  grid-template-columns: repeat(var(--steps), minmax(0, 1fr));
+  /* Row 1 holds every block (aligned to one floor), row 2 every label, so a two-line label can't lift its step. */
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 12px;
+  list-style: none;
+  padding-top: 52px;
+}
+.lh-step {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  min-width: 0;
+}
+.lh-blockWrap {
+  align-self: end;
+}
+.lh-blockWrap {
+  position: relative;
+}
+.lh-block {
+  height: calc(48px + var(--rise, 0) * 20px);
+  border: 1.5px dashed #d8cfd3;
+  border-radius: 12px 12px 6px 6px;
+  background: #fff;
+  color: #9a9098;
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+.lh-block svg {
+  width: 20px;
+  height: 20px;
+}
+/* Finished and current steps read as solid stone: a darker lower edge gives the clay-block depth. */
+.lh-done .lh-block {
+  border: 0;
+  background: #963d50;
+  color: #fff;
+  box-shadow:
+    inset 0 -7px 0 rgb(0 0 0 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 18%);
+}
+.lh-current .lh-block {
+  border: 0;
+  background: #f8d064;
+  color: #5e2333;
+  box-shadow:
+    inset 0 -7px 0 rgb(122 90 20 / 22%),
+    inset 0 1px 0 rgb(255 255 255 / 45%);
+}
+.lh-gate .lh-block {
+  border-radius: 999px 999px 6px 6px;
+  padding-top: 16px;
+}
+.lh-gate.lh-done .lh-block {
+  background: radial-gradient(circle at 50% 70%, #ffe7a3 0 28%, #963d50 29%);
+}
+.lh-here {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: #18181b;
+  color: #fff;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  width: max-content;
+  z-index: 1;
+}
+.lh-here img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fdf5dc;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+.lh-here::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  translate: -50% 0;
+  border: 5px solid transparent;
+  border-top-color: #18181b;
+}
+.lh-stepLabel {
+  min-width: 0;
+}
+.lh-stepLabel b {
+  display: block;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #18181b;
+}
+.lh-stepLabel span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 17px;
+  color: #6f7078;
+}
+.lh-upcoming .lh-block {
+  background: #fbf3f5;
+  border-color: #e2c6ce;
+  color: #b48896;
+}
+.lh-upcoming .lh-stepLabel b {
+  color: #6f7078;
+}
+
+/* Greeting banner: the one coloured panel on the page. Cit stands on the same yellow stone as "You're here". */
+.lh-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: end;
+  gap: 16px;
+  min-height: 210px;
+  padding: 28px 32px;
+  border-radius: 24px;
+  color: #fff;
+  background: radial-gradient(120% 150% at 88% 0%, #b65a6f 0%, #963d50 40%, #5e2333 100%);
+}
+.lh-hero::before {
+  /* Faint stair outline in the corner, echoing the citadel steps. */
+  content: "";
+  position: absolute;
+  inset: auto -40px -60px auto;
+  width: 420px;
+  height: 220px;
+  z-index: -1;
+  opacity: 0.12;
+  background:
+    linear-gradient(#fff 0 0) 0 100% / 25% 30% no-repeat,
+    linear-gradient(#fff 0 0) 33% 100% / 25% 55% no-repeat,
+    linear-gradient(#fff 0 0) 66% 100% / 25% 80% no-repeat;
+}
+.lh-heroCopy {
+  align-self: center;
+  min-width: 0;
+}
+.lh-heroCopy .lh-date {
+  font-size: 13px;
+  color: rgb(255 255 255 / 72%);
+}
+.lh-heroCopy h1 {
+  margin-top: 4px;
+  font-size: clamp(28px, 3.4vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  color: #fff;
+}
+.lh-heroChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.lh-heroChips span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgb(255 255 255 / 12%);
+  border: 1px solid rgb(255 255 255 / 18%);
+}
+.lh-heroChips .lh-chipYellow {
+  background: #f8d064;
+  border-color: #f8d064;
+  color: #5e2333;
+  font-weight: 600;
+}
+.lh-heroButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  margin-top: 18px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: #fff;
+  color: #963d50;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.lh-heroButton:hover {
+  background: #fbf3f5;
+}
+.lh-heroArt {
+  position: relative;
+  height: 210px;
+  align-self: end;
+  margin-bottom: -28px;
+}
+.lh-heroStone {
+  position: absolute;
+  right: 26px;
+  bottom: 0;
+  width: 170px;
+  height: 46px;
+  border-radius: 12px 12px 0 0;
+  background: #f8d064;
+  box-shadow:
+    inset 0 -8px 0 rgb(122 90 20 / 22%),
+    inset 0 1px 0 rgb(255 255 255 / 50%);
+}
+.lh-heroMascot {
+  position: absolute;
+  right: 22px;
+  /* The image has transparent space under the feet; this sinks them onto the stone. */
+  bottom: 6px;
+  filter: drop-shadow(0 10px 12px rgb(40 8 16 / 30%));
+}
+.lh-bubble {
+  position: absolute;
+  left: -64px;
+  top: 6px;
+  max-width: 160px;
+  padding: 8px 12px;
+  border-radius: 14px 14px 14px 4px;
+  background: #fff;
+  color: #18181b;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  box-shadow: 0 8px 20px rgb(40 8 16 / 18%);
+}
+.lh-spark {
+  position: absolute;
+  color: #f8d064;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Phones: the steps become a vertical list, so labels stay readable. */
+@media (max-width: 640px) {
+  .lh-climb {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    gap: 0;
+    padding-top: 4px;
+  }
+  .lh-step {
+    display: flex;
+    grid-row: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0;
+  }
+  .lh-step:not(:last-child) {
+    border-bottom: 1px solid #f1eef0;
+  }
+  .lh-block {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    align-items: center;
+    padding-top: 0;
+  }
+  .lh-gate .lh-block {
+    padding-top: 0;
+  }
+  .lh-step {
+    position: relative;
+  }
+  .lh-blockWrap {
+    position: static;
+  }
+  .lh-here {
+    top: 50%;
+    bottom: auto;
+    left: auto;
+    right: 0;
+    translate: 0 -50%;
+  }
+  .lh-here::after {
+    display: none;
+  }
+  .lh-current .lh-stepLabel {
+    padding-right: 110px;
+  }
+  .lh-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 22px 20px;
+  }
+  .lh-heroCopy .lh-date,
+  .lh-heroCopy h1 {
+    padding-right: 96px;
+  }
+  .lh-heroArt {
+    position: absolute;
+    top: 8px;
+    right: 4px;
+    width: 110px;
+    height: 110px;
+    margin: 0;
+  }
+  .lh-heroStone,
+  .lh-bubble {
+    display: none;
+  }
+  .lh-heroMascot {
+    right: 0;
+    bottom: 0;
+    width: 104px;
+    height: 104px;
+  }
+}

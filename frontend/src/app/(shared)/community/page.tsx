@@ -28,6 +28,7 @@ export default function Community() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [tried, setTried] = useState(false);
+  const [posted, setPosted] = useState("");
 
   const challengeIds = companyChallengeIds(company, s.challenges);
   const postingKind = communityPostKind(me.role);
@@ -118,6 +119,7 @@ export default function Community() {
                   ...st,
                   posts: [...st.posts, { id: newId("p"), authorId: me.id, kind: postingKind, topicId: selectedTopic, title: title.trim(), body: body.trim(), at: today(), replies: [] }],
                 }));
+                setPosted(title.trim());
                 setTitle("");
                 setBody("");
                 setTried(false);
@@ -135,7 +137,10 @@ export default function Community() {
                 required
                 placeholder={postingKind === "challenge" ? "Notes, rules, or a question" : "What do you want to ask?"}
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setPosted("");
+                }}
               />
               <Textarea
                 label="Message"
@@ -148,6 +153,9 @@ export default function Community() {
               <Button type="submit" className="self-start">
                 Post
               </Button>
+              <p role="status" className="text-body-sm text-success">
+                {posted && `✓ Posted “${posted}”.`}
+              </p>
             </form>
           ) : (
             <p className="text-muted">

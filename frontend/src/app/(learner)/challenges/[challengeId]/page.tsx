@@ -7,6 +7,7 @@ import { AiPanel } from "@/components/ui/AiPanel";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Card, Empty, PageHeader } from "@/components/ui/Card";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input, Textarea } from "@/components/ui/Field";
 import { Mascot } from "@/components/ui/Mascot";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
@@ -27,6 +28,7 @@ export default function ChallengeDetail() {
   const [feedback, setFeedback] = useState<string[] | null>(null);
   const [busy, setBusy] = useState<"" | "feedback" | "submit">("");
   const [error, setError] = useState("");
+  const [confirming, setConfirming] = useState(false);
 
   const company = s.companies.find((c) => c.id === challenge?.companyId);
   const crumbs = [
@@ -138,7 +140,7 @@ export default function ChallengeDetail() {
                 className="flex flex-col gap-4"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  submit();
+                  setConfirming(true);
                 }}
               >
                 <Textarea label="Your answer" required value={answer} onChange={(e) => setAnswer(e.target.value)} hint="Explain what you did and why." className="min-h-48" />
@@ -168,6 +170,18 @@ export default function ChallengeDetail() {
                 </div>
                 {error ? <p className="text-body-sm text-danger">{error}</p> : null}
               </form>
+              <ConfirmDialog
+                open={confirming}
+                onClose={() => setConfirming(false)}
+                onConfirm={submit}
+                title={`Send your work to ${company.name}?`}
+                confirmLabel={sub ? "Submit again" : "Submit to company"}
+                cancelLabel="Keep editing"
+              >
+                <p>{company.name} will see your answer{link.trim() ? " and your link" : ""}. You can&apos;t edit it while they review it.</p>
+                {!feedback && !sub?.aiFeedback.length && <p className="text-body-sm">Tip: you haven&apos;t asked for AI feedback yet. It can point out gaps before the company sees your work.</p>}
+                {!link.trim() && <p className="text-body-sm">You haven&apos;t added a link to your work.</p>}
+              </ConfirmDialog>
             </Card>
           ) : (
             <Card>

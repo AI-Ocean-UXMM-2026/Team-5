@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
-import { Dialog } from "@/components/ui/Dialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input, Textarea } from "@/components/ui/Field";
 import { courseTitle } from "@/lib/i18n";
 import { applyOffer, rubricMarks } from "@/lib/rules";
@@ -20,7 +20,10 @@ function Review({ sub }: { sub: Submission }) {
   const { s, company } = useData();
   const [feedback, setFeedback] = useState("");
   const [when, setWhen] = useState("");
-  const [confirming, setConfirming] = useState(false);
+  const [ask, setAsk] = useState<"" | "feedback" | "invite" | "offer">("");
+  // Earliest interview slot is now, in the local time format datetime-local expects.
+  const [minWhen] = useState(() => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16));
+  const learner = nameOf(s, sub.learnerId);
   const interview = s.interviews.find((i) => i.submissionId === sub.id);
   const rubric = s.challenges.find((c) => c.id === sub.challengeId)?.rubric ?? [];
   const marks = sub.aiRubric ?? rubricMarks(sub.answer, rubric);
@@ -85,7 +88,7 @@ function Review({ sub }: { sub: Submission }) {
             className="flex flex-col gap-3"
             onSubmit={(e) => {
               e.preventDefault();
-              update({ status: "needs-work", companyFeedback: feedback.trim() });
+              setAsk("feedback");
             }}
           >
             <p className="text-sm font-medium">Not ready yet?</p>
@@ -98,6 +101,28 @@ function Review({ sub }: { sub: Submission }) {
             className="flex flex-col gap-3"
             onSubmit={(e) => {
               e.preventDefault();
+              setAsk("invite");
+            }}
+          >
+            <Input label="Good enough? Invite to interview" type="datetime-local" required min={minWhen} value={when} onChange={(e) => setWhen(e.target.value)} hint="Pick a time from now on." />
+            <Button type="submit" className="self-start">
+              Invite to interview
+            </Button>
+          </form>
+          <ConfirmDialog
+            open={ask === "feedback"}
+            onClose={() => setAsk("")}
+            onConfirm={() => update({ status: "needs-work", companyFeedback: feedback.trim() })}
+            title={`Send feedback to ${learner}?`}
+            confirmLabel="Send feedback"
+          >
+            <p>{learner} sees your note and can improve the answer and submit again. You can&apos;t edit the note after sending.</p>
+            <p className="rounded-xl bg-surface p-3 text-ink">“{feedback.trim()}”</p>
+          </ConfirmDialog>
+          <ConfirmDialog
+            open={ask === "invite"}
+            onClose={() => setAsk("")}
+            onConfirm={() => {
               const ch = s.challenges.find((c) => c.id === sub.challengeId)!;
               setState((st) => ({
                 ...st,
@@ -105,15 +130,14 @@ function Review({ sub }: { sub: Submission }) {
                 interviews: [...st.interviews, { id: newId("iv"), submissionId: sub.id, challengeId: ch.id, learnerId: sub.learnerId, companyId: ch.companyId, when, status: "scheduled" }],
               }));
             }}
+            title={`Invite ${learner} to interview?`}
+            confirmLabel="Send invite"
           >
-            <Input label="Good enough? Invite to interview" type="datetime-local" required value={when} onChange={(e) => setWhen(e.target.value)} />
-            <Button type="submit" className="self-start">
-              Invite to interview
-            </Button>
-          </form>
+            <p>Interview on {when.replace("T", " at ")}. {learner} is told right away, and you decide on the offer after you meet.</p>
+          </ConfirmDialog>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 md:col-span-2">
             <p className="text-sm font-medium">Already sure? Skip the interview.</p>
-            <Button onClick={() => setConfirming(true)}>Send offer</Button>
+            <Button onClick={() => setAsk("offer")}>Send offer</Button>
           </div>
         </div>
       )}
@@ -121,27 +145,20 @@ function Review({ sub }: { sub: Submission }) {
       {sub.status === "interview" && interview?.status === "scheduled" && (
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
           <p className="text-sm font-medium">Ready to hire? Send an offer.</p>
-          <Button onClick={() => setConfirming(true)}>Send offer</Button>
+          <Button onClick={() => setAsk("offer")}>Send offer</Button>
         </div>
       )}
-      <Dialog open={confirming} onClose={() => setConfirming(false)} title={`Send an offer to ${nameOf(s, sub.learnerId)}?`}>
-        <p className="mb-4 text-muted">
+      <ConfirmDialog
+        open={ask === "offer"}
+        onClose={() => setAsk("")}
+        onConfirm={() => setState((st) => applyOffer(st, sub.id, newId("iv")))}
+        title={`Send an offer to ${learner}?`}
+        confirmLabel="Yes, send offer"
+      >
+        <p>
           They get an offer for {company?.terms.role || "an internship"} ({company?.terms.duration}, {company?.terms.stipend}) and can accept or decline it on their Internships page.
         </p>
-        <div className="flex flex-wrap justify-end gap-2">
-          <Button variant="secondary" onClick={() => setConfirming(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              setConfirming(false);
-              setState((st) => applyOffer(st, sub.id, newId("iv")));
-            }}
-          >
-            Yes, send offer
-          </Button>
-        </div>
-      </Dialog>
+      </ConfirmDialog>
       {sub.status === "offered" && (
         <p role="status" className="font-medium text-success">
           Offer sent to {nameOf(s, sub.learnerId)}. They can accept or decline it on their Internships page.

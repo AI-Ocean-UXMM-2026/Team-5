@@ -8,6 +8,7 @@ import { RatingsList } from "@/components/RatingForm";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
 import { Badge, Card, cardLinkClass, Empty, PageHeader } from "@/components/ui/Card";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Detail, FieldIcon } from "@/components/ui/Detail";
 import { Input } from "@/components/ui/Field";
 import { courseTitle } from "@/lib/i18n";
@@ -22,6 +23,8 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [headline, setHeadline] = useState(user?.headline ?? "");
   const [skills, setSkills] = useState(user?.skills.join(", ") ?? "");
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [saved, setSaved] = useState(false);
   if (!user) return <Empty>Profile not found.</Empty>;
 
   const own = user.id === me.id;
@@ -30,7 +33,15 @@ export default function Profile() {
 
   const certs = s.certificates.filter((c) => c.learnerId === user.id);
   const ratings = s.ratings.filter((r) => r.toId === user.id);
-  const closeEdit = () => setEditing(false);
+
+  const dirty = headline !== user.headline || skills !== user.skills.join(", ");
+  // Cancel drops unsaved edits, so reopening the form shows what is actually saved.
+  const discard = () => {
+    setHeadline(user.headline);
+    setSkills(user.skills.join(", "));
+    setEditing(false);
+  };
+  const closeEdit = () => (dirty ? setConfirmDiscard(true) : discard());
 
   return (
     <>
@@ -43,9 +54,22 @@ export default function Profile() {
       ) : (
         <PageHeader title={user.name} intro={user.headline}>
           {own && (
-            <Button variant="secondary" onClick={() => setEditing(true)}>
-              Edit profile
-            </Button>
+            <div className="flex items-center gap-3">
+              {saved && (
+                <p role="status" className="text-body-sm text-success">
+                  ✓ Profile saved
+                </p>
+              )}
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setSaved(false);
+                  setEditing(true);
+                }}
+              >
+                Edit profile
+              </Button>
+            </div>
           )}
         </PageHeader>
       )}
@@ -62,7 +86,10 @@ export default function Profile() {
                 .map((x) => x.trim())
                 .filter(Boolean);
               setState((st) => ({ ...st, users: st.users.map((u) => (u.id === user.id ? { ...u, headline: headline.trim(), skills: list } : u)) }));
+              setHeadline(headline.trim());
+              setSkills(list.join(", "));
               setEditing(false);
+              setSaved(true);
             }}
           >
             <Input label="Headline" placeholder="Frontend learner from Yangon" value={headline} onChange={(e) => setHeadline(e.target.value)} />
@@ -76,6 +103,17 @@ export default function Profile() {
           </form>
         </Card>
       )}
+      <ConfirmDialog
+        open={confirmDiscard}
+        onClose={() => setConfirmDiscard(false)}
+        onConfirm={discard}
+        title="Discard your changes?"
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        danger
+      >
+        <p>Your new headline and skills haven&apos;t been saved.</p>
+      </ConfirmDialog>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <h2 className="mb-4 text-h4">Details</h2>

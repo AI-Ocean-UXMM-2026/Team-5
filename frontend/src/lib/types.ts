@@ -43,6 +43,8 @@ export type User = {
   headline: string;
   skills: string[];
   companyId?: string;
+  /** Date the user accepted the terms and privacy policy and confirmed they are 18 or older. */
+  acceptedTermsAt?: string;
 };
 
 export type CompanyStatus = "draft" | "pending" | "verified" | "rejected";

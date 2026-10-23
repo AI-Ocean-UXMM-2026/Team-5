@@ -88,12 +88,18 @@ export default function TestPage() {
             submitLabel="Submit test"
             grade={(picked) => gradeFinalTest(course, picked)}
             retry={false}
+            confirmSubmit={{
+              title: "Submit your final test?",
+              body: `You've answered all ${course.test.length} questions. Your score is recorded when you submit, and you can't change these answers after.`,
+              confirmLabel: "Submit test",
+            }}
             onChecked={(correct) => {
               const score = Math.round((correct / course.test.length) * 100);
               const passed = testPassed(correct, course.test.length);
               setResult({ score, passed });
               if (passed) issueCertificate(score);
               updateProgress(me.id, (p) => ({ ...p, testScores: { ...p.testScores, [course.id]: score }, testDates: { ...p.testDates, [course.id]: today() } }));
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           />
         </Card>

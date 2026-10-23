@@ -5,8 +5,8 @@ import { useState } from "react";
 import { RatingForm } from "@/components/RatingForm";
 import { Button } from "@/components/ui/Button";
 import { Badge, Card, Empty, PageHeader } from "@/components/ui/Card";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Detail } from "@/components/ui/Detail";
-import { Dialog } from "@/components/ui/Dialog";
 import { Mascot } from "@/components/ui/Mascot";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { replyToOffer } from "@/lib/rules";
@@ -23,10 +23,10 @@ const label: Record<Interview["status"], string> = {
 
 export default function Internships() {
   const { s, me } = useData();
-  const [confirming, setConfirming] = useState<string | null>(null);
   const mine = s.interviews.filter((i) => i.learnerId === me.id);
-  const pending = confirming ? mine.find((i) => i.id === confirming) : undefined;
-  const pendingCompany = pending ? s.companies.find((c) => c.id === pending.companyId) : undefined;
+  const [ask, setAsk] = useState<{ id: string; status: "accepted" | "declined" } | null>(null);
+  const asked = mine.find((i) => i.id === ask?.id);
+  const askedCompany = s.companies.find((c) => c.id === asked?.companyId);
 
   return (
     <>
@@ -71,8 +71,8 @@ export default function Internships() {
               </dl>
               {i.status === "offered" && (
                 <div className="flex flex-wrap gap-3 pt-2">
-                  <Button onClick={() => setConfirming(i.id)}>Accept offer</Button>
-                  <Button variant="secondary" onClick={() => setState((st) => replyToOffer(st, i.id, false))}>
+                  <Button onClick={() => setAsk({ id: i.id, status: "accepted" })}>Accept offer</Button>
+                  <Button variant="secondary" onClick={() => setAsk({ id: i.id, status: "declined" })}>
                     Decline
                   </Button>
                 </div>
@@ -90,26 +90,25 @@ export default function Internships() {
           );
         })}
       </div>
-      {pending && pendingCompany && (
-        <Dialog open onClose={() => setConfirming(null)} title={`Accept the offer from ${pendingCompany.name}?`}>
-          <p className="mb-4 text-muted">
-            You accept the {pendingCompany.terms.role || "internship"} ({pendingCompany.terms.duration}, {pendingCompany.terms.stipend}). You can rate the company after it starts.
-          </p>
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button variant="secondary" onClick={() => setConfirming(null)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                setState((st) => replyToOffer(st, pending.id, true));
-                setConfirming(null);
-              }}
-            >
-              Yes, accept offer
-            </Button>
-          </div>
-        </Dialog>
-      )}
+      <ConfirmDialog
+        open={!!ask}
+        onClose={() => setAsk(null)}
+        onConfirm={() => ask && setState((st) => replyToOffer(st, ask.id, ask.status === "accepted"))}
+        title={ask?.status === "accepted" ? `Accept the offer from ${askedCompany?.name}?` : `Decline the offer from ${askedCompany?.name}?`}
+        confirmLabel={ask?.status === "accepted" ? "Accept offer" : "Decline offer"}
+        danger={ask?.status === "declined"}
+      >
+        {ask?.status === "accepted" ? (
+          <>
+            <p>
+              {askedCompany?.terms.role || "Internship"} · {askedCompany?.terms.duration} · {askedCompany?.terms.location} · {askedCompany?.terms.stipend}
+            </p>
+            <p>Your internship starts, and {askedCompany?.name} is told right away. You can rate the company after it starts. You never pay anything to accept.</p>
+          </>
+        ) : (
+          <p>{askedCompany?.name} will move on to other candidates. You can&apos;t take this offer back after declining.</p>
+        )}
+      </ConfirmDialog>
     </>
   );
 }

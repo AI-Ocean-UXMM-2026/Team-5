@@ -4,6 +4,9 @@ import { useState } from "react";
 import type { Graded } from "@/lib/answers";
 import type { Question } from "@/lib/types";
 import { Button } from "./ui/Button";
+import { ConfirmDialog } from "./ui/ConfirmDialog";
+
+type ConfirmCopy = { title: string; body: string; confirmLabel: string };
 
 export function Quiz({
   questions,
@@ -11,6 +14,7 @@ export function Quiz({
   grade,
   onChecked,
   retry = true,
+  confirmSubmit,
   className = "",
   children,
 }: {
@@ -20,6 +24,8 @@ export function Quiz({
   grade: (picked: number[]) => Promise<Graded>;
   onChecked: (correct: number) => void;
   retry?: boolean;
+  /** Ask before checking, for scored attempts like the final test. */
+  confirmSubmit?: ConfirmCopy;
   className?: string;
   children?: React.ReactNode;
 }) {
@@ -27,26 +33,36 @@ export function Quiz({
   const [graded, setGraded] = useState<Graded | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [asking, setAsking] = useState(false);
   const checked = graded !== null;
+  const check = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const result = await grade(picked.map((p) => p ?? -1));
+      setGraded(result);
+      onChecked(result.correct);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "We couldn't check your answers. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <form
       className={`flex flex-col gap-6 ${className}`}
       onSubmit={async (e) => {
         e.preventDefault();
-        setBusy(true);
-        setError("");
-        try {
-          const result = await grade(picked.map((p) => p ?? -1));
-          setGraded(result);
-          onChecked(result.correct);
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "We couldn't check your answers. Try again.");
-        } finally {
-          setBusy(false);
-        }
+        if (confirmSubmit) setAsking(true);
+        else await check();
       }}
     >
+      {confirmSubmit && (
+        <ConfirmDialog open={asking} onClose={() => setAsking(false)} onConfirm={check} title={confirmSubmit.title} confirmLabel={confirmSubmit.confirmLabel} cancelLabel="Keep checking">
+          <p>{confirmSubmit.body}</p>
+        </ConfirmDialog>
+      )}
       {questions.map((q, i) => {
         const result = graded?.results?.[i];
         return (

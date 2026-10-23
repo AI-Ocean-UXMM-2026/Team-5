@@ -63,8 +63,18 @@ type Copy = {
   email: string;
   emailHint: string;
   emailTaken: string;
-  continueRegistration: string;
-  continueOnboarding: string;
+  agreeTerms: string;
+  readTerms: string;
+  continue: string;
+  confirmTitle: string;
+  confirmIntro: string;
+  codeLabel: string;
+  demoCode: string;
+  wrongCode: string;
+  confirmEmail: string;
+  resendCode: string;
+  codeResent: string;
+  changeEmail: string;
   free: string;
   paid: string;
   fullyFree: string;
@@ -154,8 +164,18 @@ export const copy: Record<Lang, Copy> = {
     email: "Email",
     emailHint: "Use an email on your company's own domain.",
     emailTaken: "An account with this email already exists.",
-    continueRegistration: "Continue to registration",
-    continueOnboarding: "Continue to onboarding",
+    agreeTerms: "I am 18 or older and I agree to the Terms and the Privacy policy.",
+    readTerms: "Read the terms and privacy policy",
+    continue: "Continue",
+    confirmTitle: "Check your email",
+    confirmIntro: "We sent a 6-digit code to",
+    codeLabel: "Confirmation code",
+    demoCode: "Demo only: no email is sent. Your code is",
+    wrongCode: "That code doesn't match. Check it and try again.",
+    confirmEmail: "Confirm email",
+    resendCode: "Send a new code",
+    codeResent: "A new code is on its way.",
+    changeEmail: "Change email",
     free: "Free",
     paid: "Paid",
     fullyFree: "Fully free",
@@ -243,8 +263,18 @@ export const copy: Record<Lang, Copy> = {
     email: "အီးမေးလ်",
     emailHint: "ကုမ္ပဏီကိုယ်ပိုင် ဒိုမိန်းပေါ်က အီးမေးလ်ကို သုံးပါ။",
     emailTaken: "ဒီအီးမေးလ်နဲ့ အကောင့် ရှိပြီးသားပါ။",
-    continueRegistration: "မှတ်ပုံတင်ရန် ဆက်သွားမည်",
-    continueOnboarding: "စတင်ပြင်ဆင်ရန် ဆက်သွားမည်",
+    agreeTerms: "ကျွန်ုပ်သည် အသက် ၁၈ နှစ်နှင့်အထက် ဖြစ်ပြီး စည်းကမ်းချက်များနှင့် ကိုယ်ရေးအချက်အလက် မူဝါဒကို သဘောတူပါသည်။",
+    readTerms: "စည်းကမ်းချက်နှင့် ကိုယ်ရေးအချက်အလက် မူဝါဒ ဖတ်ရန်",
+    continue: "ဆက်သွားမည်",
+    confirmTitle: "အီးမေးလ်ကို စစ်ပါ",
+    confirmIntro: "ဂဏန်း ၆ လုံး ကုဒ်ကို ပို့ထားပါတယ် —",
+    codeLabel: "အတည်ပြုကုဒ်",
+    demoCode: "စမ်းသပ်ချက်သာ — အီးမေးလ် မပို့ပါ။ သင့်ကုဒ်မှာ",
+    wrongCode: "ကုဒ် မကိုက်ညီပါ။ ပြန်စစ်ပြီး ထပ်ကြိုးစားပါ။",
+    confirmEmail: "အီးမေးလ် အတည်ပြုမည်",
+    resendCode: "ကုဒ်အသစ် ပို့ရန်",
+    codeResent: "ကုဒ်အသစ် ပို့လိုက်ပါပြီ။",
+    changeEmail: "အီးမေးလ် ပြောင်းရန်",
     free: "အခမဲ့",
     paid: "ငွေပေး",
     fullyFree: "အကုန်အခမဲ့",

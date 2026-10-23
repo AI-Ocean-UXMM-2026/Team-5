@@ -14,8 +14,8 @@ export function homePath(s: State): string {
 
 /** Where to send the current user instead of `pathname`, or null if they may stay. */
 export function redirectFor(s: State, area: Area, pathname: string): string | null {
-  // Guest layout would send a logged-in user home; these pages are public.
-  if (pathname === "/legal" || pathname.startsWith("/legal/")) return null;
+  // Marketing and legal pages remain public for signed-in visitors too.
+  if (pathname === "/" || pathname === "/legal" || pathname.startsWith("/legal/")) return null;
   const me = s.users.find((u) => u.id === s.sessionUserId);
   if (area === "guest") return me ? homePath(s) : null;
   if (!me) return "/login";

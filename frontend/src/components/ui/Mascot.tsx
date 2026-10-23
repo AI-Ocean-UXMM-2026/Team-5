@@ -25,7 +25,7 @@ const poses = { wave, teach, search, laptop, wink, cheer, read, love, think, exc
 
 export type Pose = keyof typeof poses;
 
-// The mascot PNGs have an opaque white background; multiply blends it into the light surfaces.
-export function Mascot({ pose, size = 120, className = "", priority, alt = "" }: { pose: Pose; size?: number; className?: string; priority?: boolean; alt?: string }) {
-  return <Image src={poses[pose]} alt={alt} width={size} height={size} priority={priority} className={`shrink-0 select-none mix-blend-multiply ${className}`} />;
+// Multiply softens the clay shading into light surfaces. On coloured panels pass onColor, or multiply would darken the mascot.
+export function Mascot({ pose, size = 120, className = "", priority, alt = "", onColor = false }: { pose: Pose; size?: number; className?: string; priority?: boolean; alt?: string; onColor?: boolean }) {
+  return <Image src={poses[pose]} alt={alt} width={size} height={size} priority={priority} className={`shrink-0 select-none ${onColor ? "" : "mix-blend-multiply"} ${className}`} />;
 }

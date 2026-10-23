@@ -2,12 +2,83 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { cardLinkClass, cardLinkStretch, PageHeader } from "@/components/ui/Card";
-import { SearchBar } from "@/components/ui/SearchBar";
-import { copy, courseTitle, formatMmk } from "@/lib/i18n";
-import { counted } from "@/lib/rules";
+import { Mascot } from "@/components/ui/Mascot";
+import { courseTitle, formatMmk } from "@/lib/i18n";
 import { useCourses } from "@/lib/catalogue";
 import { progressOf, useData } from "@/lib/store";
+import "@/components/learning/courses.css";
+
+function CourseArt({ id }: { id: string }) {
+  return (
+    <div className={`lc-art lc-art-${id}`} aria-hidden="true">
+      {id === "frontend" ? (
+        <div className="lc-browser">
+          <div className="lc-browserBar">
+            <i />
+            <i />
+            <i />
+            <span>your-next-project.dev</span>
+          </div>
+          <div className="lc-code">
+            <span>&lt;your future&gt;</span>
+            <b>
+              Build something
+              <br />
+              that matters<span>.</span>
+            </b>
+            <div className="lc-codeLines">
+              <i />
+              <i />
+              <i />
+            </div>
+            <em>&lt;/&gt;</em>
+          </div>
+          <div className="lc-floatTag">HTML · CSS · JS</div>
+        </div>
+      ) : id === "starter" ? (
+        <>
+          <div className="lc-artLabel">YOUR FIRST CHAPTER</div>
+          <Mascot pose="read" size={155} />
+          <div className="lc-artNote">
+            Big ideas.
+            <br />
+            <b>Small first steps.</b>
+          </div>
+          <span className="lc-artStar">✦</span>
+        </>
+      ) : id !== "qa" ? (
+        <div className={`flex size-full items-center justify-center ${covers[id] ?? "bg-yellow-tint text-ink"}`}>
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+            <path d={iconPaths[id as keyof typeof iconPaths] ?? iconPaths.other} stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      ) : (
+        <>
+          <div className="lc-testWindow">
+            <div className="lc-browserBar">
+              <i />
+              <i />
+              <i />
+              <span>Quality check</span>
+            </div>
+            <p>
+              <span>✓</span> Find the unexpected
+            </p>
+            <p>
+              <span>✓</span> Make it work better
+            </p>
+            <p>
+              <span className="lc-bug">!</span> One bug at a time
+            </p>
+          </div>
+          <div className="lc-qaStamp">
+            QA<span>TESTED</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 const iconPaths = {
   // compass
@@ -66,90 +137,371 @@ const covers: Record<string, string> = {
 export default function Courses() {
   const { s, me, lang } = useData();
   const courses = useCourses();
-  const t = copy[lang];
+  const my = lang === "my";
   const [q, setQ] = useState("");
-  const p = progressOf(s, me.id);
-  const shown = courses.filter((c) => `${courseTitle(c, lang)} ${c.title} ${c.skill}`.toLowerCase().includes(q.trim().toLowerCase()));
+  const [filter, setFilter] = useState("all");
+  const progress = progressOf(s, me.id);
+  const done = (c: (typeof courses)[number]) =>
+    c.lessons.filter((l) => progress.doneLessons.includes(l.id)).length;
+  const completed = courses.filter((c) => done(c) === c.lessons.length);
+  const roadmapCourses = progress.roadmap
+    .map((id) => courses.find((c) => c.id === id))
+    .filter((c): c is (typeof courses)[number] => !!c);
+  const next = [...roadmapCourses, ...courses].find(
+    (c) => done(c) < c.lessons.length,
+  );
+  const lesson = next?.lessons.find(
+    (l) => !progress.doneLessons.includes(l.id),
+  );
+  const totalDone = courses.reduce((n, c) => n + done(c), 0);
+  const shown = courses.filter(
+    (c) =>
+      (filter === "all" ||
+        (filter === "roadmap"
+          ? progress.roadmap.includes(c.id)
+          : completed.includes(c))) &&
+      `${courseTitle(c, lang)} ${c.title} ${c.skill}`
+        .toLowerCase()
+        .includes(q.trim().toLowerCase()),
+  );
 
   return (
-    <>
-      <PageHeader title="Courses" intro="Start free. Every paid course lets you try the first 25% for free. Each course ends with a real company challenge." pose="read">
-        <SearchBar label="Search courses" placeholder="Search courses" value={q} onChange={setQ} />
-      </PageHeader>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {shown.map((c) => {
-          const challenges = s.challenges.filter((ch) => ch.courseId === c.id).length;
-          const done = c.lessons.filter((l) => p.doneLessons.includes(l.id)).length;
-          const certified = s.certificates.some((x) => x.learnerId === me.id && x.courseId === c.id);
-          const free = c.priceMmk === 0;
-          const fullAccess = free || certified || p.paidCourseIds?.includes(c.id);
-          const status = certified ? "Certified" : done ? `${done} of ${c.lessons.length} lessons done` : "Not started";
-          const action = certified ? "Review" : done ? "Continue" : fullAccess ? "Start" : "Preview";
-          const icon = iconPaths[c.id as keyof typeof iconPaths] ?? iconPaths.other;
-          return (
-            <section key={c.id} className={`${cardLinkClass} flex flex-col overflow-hidden rounded-2xl border border-line bg-white`}>
-              <div className={`flex h-24 items-start justify-between gap-2 p-4 ${covers[c.id] ?? "bg-yellow-tint text-ink"}`}>
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden className="mt-auto">
-                  <path d={icon} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <div className="flex flex-wrap justify-end gap-1.5">
-                  {p.roadmap.includes(c.id) && <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-caption font-medium text-burgundy">On your roadmap</span>}
-                  <span className="rounded-full bg-white px-2.5 py-0.5 text-caption font-semibold text-ink">{free ? t.free : formatMmk(c.priceMmk)}</span>
-                </div>
-              </div>
-              <div className="flex flex-1 flex-col gap-3 p-5">
-                <h2 className="text-h4">
-                  <Link href={`/courses/${c.id}`} className={`${cardLinkStretch} group-hover:text-burgundy`}>
-                    {courseTitle(c, lang)}
-                  </Link>
-                </h2>
-                <p className="line-clamp-2 text-muted">{c.description}</p>
-                <ul className="flex flex-wrap gap-x-4 gap-y-1 text-body-sm text-muted">
-                  <Info d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4V4Zm0 12a4 4 0 0 1 4-4h10">{counted(c.lessons.length, t.lesson, t.lessons)}</Info>
-                  <Info d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-13v4l3 2">{counted(c.hours, t.hour, t.hours)}</Info>
-                  <Info d="M5 20v-4M12 20v-9M19 20V6">{c.level}</Info>
-                  {challenges > 0 && <Info d="M4 8h16v11H4V8Zm5 0V5h6v3M4 13h16">{counted(challenges, "challenge")}</Info>}
-                </ul>
-                <div className="mt-auto flex flex-col gap-1.5 pt-1">
-                  <div
-                    role="progressbar"
-                    aria-label={`${courseTitle(c, lang)} progress`}
-                    aria-valuemin={0}
-                    aria-valuemax={c.lessons.length}
-                    aria-valuenow={certified ? c.lessons.length : done}
-                    className="h-1.5 overflow-hidden rounded-full bg-line"
-                  >
-                    <div className={`h-full rounded-full ${certified ? "bg-success" : "bg-burgundy"}`} style={{ width: `${certified ? 100 : (done / c.lessons.length) * 100}%` }} />
-                  </div>
-                  <p className={`text-caption ${certified ? "font-medium text-success" : "text-muted"}`}>{status}</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-3 border-t border-line px-5 py-3">
-                <span className="text-body-sm font-medium">{free ? t.fullyFree : fullAccess ? "Full course unlocked" : t.firstFree}</span>
-                {/* The whole card is the link; this only looks like a button. */}
-                <span
-                  aria-hidden
-                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${action === "Preview" || action === "Review" ? "border border-line text-ink" : "bg-burgundy text-white"}`}
+    <div className="lc-workspace">
+      <header className="lc-pageHeading">
+        <div>
+          <p className="lc-kicker">
+            {my ? "သင့်ရဲ့ သင်ယူမှုနေရာ" : "YOUR LEARNING SPACE"}
+          </p>
+          <h1>
+            {my
+              ? "တစ်နေ့ထက်တစ်နေ့ ပိုတိုးတက်လာမယ်။"
+              : "A little progress. A bigger future."}
+          </h1>
+          <p>
+            {my
+              ? `${me.name}၊ သင့်အနာဂတ်အတွက် ဆက်လေ့လာလိုက်ပါ။`
+              : `Good to see you, ${me.name.split(" ")[0]}. Let's build what comes next.`}
+          </p>
+        </div>
+        <Link href="/roadmap" className="lc-textLink">
+          {my ? "ကျွန်ုပ်၏ လမ်းပြမြေပုံ" : "View my roadmap"}{" "}
+          <span aria-hidden>↗</span>
+        </Link>
+      </header>
+      <div className="lc-topGrid">
+        <section className="lc-nextCard" aria-labelledby="lc-next-title">
+          <div className="lc-nextCopy">
+            <span className="lc-pill">
+              {next && done(next) > 0
+                ? my
+                  ? "ဆက်လက်သင်ယူရန်"
+                  : "PICK UP WHERE YOU LEFT OFF"
+                : my
+                  ? "သင့်ရဲ့ နောက်တစ်ဆင့်"
+                  : "YOUR NEXT SMALL STEP"}
+            </span>
+            <h2 id="lc-next-title">
+              {next
+                ? courseTitle(next, lang)
+                : my
+                  ? "သင်ယူမှု ပြီးမြောက်ပါပြီ။"
+                  : "Look how far you've come."}
+            </h2>
+            <p>
+              {lesson
+                ? `${my ? "နောက်သင်ခန်းစာ" : "Up next"}: ${lesson.title}`
+                : my
+                  ? "သင့်ကျွမ်းကျင်မှုကို စိန်ခေါ်မှုဖြင့် ပြသပါ။"
+                  : "Put your new skills to work on a company challenge."}
+            </p>
+            {next && (
+              <div className="lc-nextProgress">
+                <div
+                  className="lc-track"
+                  role="progressbar"
+                  aria-label="Course progress"
+                  aria-valuemin={0}
+                  aria-valuemax={next.lessons.length}
+                  aria-valuenow={done(next)}
                 >
-                  {action}
+                  <span
+                    style={{
+                      width: `${(done(next) / next.lessons.length) * 100}%`,
+                    }}
+                  />
+                </div>
+                <span>
+                  {done(next)} / {next.lessons.length}{" "}
+                  {my ? "သင်ခန်းစာ" : "lessons"}
                 </span>
               </div>
-            </section>
-          );
-        })}
+            )}
+            <Link
+              className="lc-button"
+              href={
+                next && lesson
+                  ? `/courses/${next.id}/lessons/${lesson.id}`
+                  : "/challenges"
+              }
+            >
+              {next
+                ? done(next) > 0
+                  ? my
+                    ? "ဆက်သင်ယူမည်"
+                    : "Continue learning"
+                  : my
+                    ? "စတင်သင်ယူမည်"
+                    : "Start learning"
+                : my
+                  ? "စိန်ခေါ်မှုများ ကြည့်ရန်"
+                  : "Explore challenges"}{" "}
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+          <div className="lc-nextVisual">
+            <span className="lc-orbit" />
+            <Mascot pose="laptop" size={235} priority />
+            <span className="lc-visualNote">
+              {my ? "သင် လုပ်နိုင်ပါတယ်။" : "You've got this!"} <span>✦</span>
+            </span>
+          </div>
+        </section>
+        <aside className="lc-progressCard">
+          <div className="lc-progressTitle">
+            <h2>{my ? "သင့်ရဲ့ တိုးတက်မှု" : "Your learning snapshot"}</h2>
+            <span aria-hidden>✦</span>
+          </div>
+          <div className="lc-stat">
+            <strong>{String(totalDone).padStart(2, "0")}</strong>
+            <span>{my ? "ပြီးမြောက်သည့် သင်ခန်းစာ" : "Lessons completed"}</span>
+          </div>
+          <div className="lc-statRow">
+            <div>
+              <b>{roadmapCourses.length}</b>
+              <span>{my ? "လမ်းပြမြေပုံရှိ သင်တန်း" : "On your roadmap"}</span>
+            </div>
+            <div>
+              <b>{completed.length}</b>
+              <span>{my ? "ပြီးမြောက်သည့် သင်တန်း" : "Courses completed"}</span>
+            </div>
+          </div>
+          <Link href="/roadmap">
+            {my ? "နောက်တစ်ဆင့်ကို ကြည့်ရန်" : "One step closer to your goal"}{" "}
+            <span aria-hidden>→</span>
+          </Link>
+        </aside>
       </div>
-      {!shown.length && <p className="text-muted">No courses match “{q}”.</p>}
-    </>
-  );
-}
-
-function Info({ d, children }: { d: string; children: React.ReactNode }) {
-  return (
-    <li className="flex items-center gap-1.5">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0 text-subtle">
-        <path d={d} stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      {children}
-    </li>
+      <section className="lc-catalog" aria-labelledby="lc-catalog-title">
+        <div className="lc-catalogHeading">
+          <div>
+            <h2 id="lc-catalog-title">
+              {my ? "သင်ယူစရာများ" : "Make room for your next skill."}
+            </h2>
+            <p>
+              {my
+                ? "လေ့လာပါ။ လေ့ကျင့်ပါ။ လက်တွေ့ပြသပါ။"
+                : "Learn it. Practise it. Put it to work."}
+            </p>
+          </div>
+          <label className="lc-search">
+            <svg
+              aria-hidden
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                cx="10.5"
+                cy="10.5"
+                r="6.5"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              />
+              <path d="m16 16 5 5" stroke="currentColor" strokeWidth="1.6" />
+            </svg>
+            <span className="sr-only">
+              {my ? "သင်တန်းရှာရန်" : "Search courses"}
+            </span>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={my ? "သင်တန်းရှာရန်" : "Search courses"}
+            />
+          </label>
+        </div>
+        <div className="lc-filterRow">
+          <div
+            className="lc-filters"
+            role="group"
+            aria-label={my ? "သင်တန်း စစ်ထုတ်ရန်" : "Filter courses"}
+          >
+            {[
+              ["all", my ? "အားလုံး" : "All courses", courses.length],
+              [
+                "roadmap",
+                my ? "ကျွန်ုပ်၏ လမ်းပြမြေပုံ" : "My roadmap",
+                roadmapCourses.length,
+              ],
+              [
+                "completed",
+                my ? "ပြီးမြောက်ပြီး" : "Completed",
+                completed.length,
+              ],
+            ].map(([id, label, count]) => (
+              <button
+                key={id}
+                aria-pressed={filter === id}
+                onClick={() => setFilter(String(id))}
+              >
+                {label}
+                <span>{count}</span>
+              </button>
+            ))}
+          </div>
+          <span className="lc-freeNote">
+            ✧{" "}
+            {my
+              ? "အခမဲ့ စမ်းလေ့လာနိုင်သည်"
+              : "Every course starts with a free first step"}
+          </span>
+        </div>
+        <div className="lc-courseGrid" aria-live="polite">
+          {shown.map((c) => {
+            const count = done(c);
+            return (
+              <article className="lc-courseCard" key={c.id}>
+                <Link
+                  href={`/courses/${c.id}`}
+                  className="lc-coverLink"
+                  aria-label={courseTitle(c, lang)}
+                >
+                  <CourseArt id={c.id} />
+                  {progress.roadmap.includes(c.id) && (
+                    <span className="lc-roadmapBadge">
+                      ✦{" "}
+                      {my ? "သင့်လမ်းပြမြေပုံတွင် ပါဝင်သည်" : "On your roadmap"}
+                    </span>
+                  )}
+                </Link>
+                <div className="lc-courseBody">
+                  <div className="lc-courseMeta">
+                    <span>{c.skill}</span>
+                    <span>{c.level}</span>
+                  </div>
+                  <h3>
+                    <Link href={`/courses/${c.id}`}>
+                      {courseTitle(c, lang)}
+                    </Link>
+                  </h3>
+                  <p>{c.description}</p>
+                  <div className="lc-duration">
+                    <span>
+                      ▤ {c.lessons.length} {my ? "သင်ခန်းစာ" : "lessons"}
+                    </span>
+                    <span>
+                      ◷ {c.hours} {my ? "နာရီ" : "hours"}
+                    </span>
+                  </div>
+                  {count > 0 && (
+                    <div className="lc-cardProgress">
+                      <div className="lc-track">
+                        <span
+                          style={{
+                            width: `${(count / c.lessons.length) * 100}%`,
+                          }}
+                        />
+                      </div>
+                      <small>
+                        {Math.round((count / c.lessons.length) * 100)}%
+                      </small>
+                    </div>
+                  )}
+                  <div className="lc-courseBottom">
+                    <div>
+                      <strong>
+                        {c.priceMmk === 0
+                          ? my
+                            ? "အခမဲ့"
+                            : "Free"
+                          : formatMmk(c.priceMmk)}
+                      </strong>
+                      <small>
+                        {c.priceMmk === 0
+                          ? my
+                            ? "သင်တန်းတစ်ခုလုံး အခမဲ့"
+                            : "The whole course. Yours."
+                          : my
+                            ? "ပထမ ၂၅% အခမဲ့"
+                            : "Try the first 25% free"}
+                      </small>
+                    </div>
+                    <Link
+                      href={`/courses/${c.id}`}
+                      className="lc-courseArrow"
+                      aria-label={`${my ? "သင်တန်းကြည့်ရန်" : "View course"}: ${courseTitle(c, lang)}`}
+                    >
+                      <span aria-hidden>↗</span>
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        {shown.length === 0 && (
+          <div className="lc-empty">
+            <Mascot pose="search" size={100} />
+            <h3>
+              {q
+                ? my
+                  ? "ကိုက်ညီသည့် သင်တန်းမတွေ့ပါ။"
+                  : "No courses found."
+                : my
+                  ? "တစ်ဆင့်ချင်း ရှေ့ဆက်ကြမယ်။"
+                  : filter === "completed"
+                    ? "Your first finish is ahead of you."
+                    : "Your path starts with a plan."}
+            </h3>
+            <p>
+              {q
+                ? `Try another search instead of “${q}”.`
+                : filter === "completed"
+                  ? "Finish a course and it will appear here."
+                  : "Create your roadmap to see your recommended courses here."}
+            </p>
+            <button
+              onClick={() => {
+                setQ("");
+                setFilter("all");
+              }}
+            >
+              {my ? "သင်တန်းအားလုံး ကြည့်ရန်" : "Explore all courses"} →
+            </button>
+          </div>
+        )}
+      </section>
+      <section className="lc-bottomBanner">
+        <span className="lc-bannerIcon" aria-hidden>
+          ↗
+        </span>
+        <div>
+          <h2>
+            {my
+              ? "သင်ယူခြင်းမှ အခွင့်အလမ်းဆီသို့။"
+              : "Skills are just the beginning."}
+          </h2>
+          <p>
+            {my
+              ? "သင်ယူထားသည်ကို ကုမ္ပဏီစိန်ခေါ်မှုများတွင် အသုံးချပါ။"
+              : "Turn what you learn into real work with company challenges."}
+          </p>
+        </div>
+        <Link href="/challenges">
+          {my ? "စိန်ခေါ်မှုများ ကြည့်ရန်" : "Discover challenges"}{" "}
+          <span aria-hidden>→</span>
+        </Link>
+      </section>
+    </div>
   );
 }

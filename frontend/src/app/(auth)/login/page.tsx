@@ -3,62 +3,85 @@
 import Link from "next/link";
 import { useState } from "react";
 import { GoogleSignIn } from "@/components/GoogleSignIn";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Field";
+import {
+  AuthButton,
+  AuthFrame,
+  AuthInput,
+  AuthNote,
+} from "@/components/auth/AuthFrame";
 import { Mascot } from "@/components/ui/Mascot";
 import { setState, useData } from "@/lib/store";
 
 export default function Login() {
-  const { s } = useData();
+  const { s, lang } = useData();
+  const x = (en: string, my: string) => (lang === "my" ? my : en);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const logIn = (id: string) => setState((st) => ({ ...st, sessionUserId: id }));
-
   return (
-    <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
-      <Card>
-        <Mascot pose="wave" size={96} priority className="-mt-2 mb-2" />
-        <h1 className="text-h2">Log in</h1>
-        <p className="mt-1 mb-6 text-muted">Continue with Google, or use a demo email. Demo accounts have no passwords.</p>
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const user = s.users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-            if (user) logIn(user.id);
-            else setError("No account with this email. Try a demo account or sign up.");
-          }}
-        >
-          <Input label="Email" type="email" placeholder="you@email.com" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} />
-          <Button type="submit">Log in</Button>
-        </form>
-        <p className="my-4 text-center text-body-sm text-muted">or</p>
-        <GoogleSignIn />
-        <p className="mt-6 text-muted">
-          New here?{" "}
-          <Link href="/signup" className="font-medium text-burgundy underline-offset-2 hover:underline">
-            Create an account
-          </Link>
+    <AuthFrame>
+      <div className="ca-loginArtwork">
+        <Mascot pose="peek" size={340} priority />
+        <span className="ca-star" aria-hidden>
+          ✦
+        </span>
+        <span className="ca-peekLine" />
+      </div>
+      <div className="ca-heading ca-centered">
+        <h1>
+          {x("Welcome back", "ပြန်လည်ကြိုဆိုပါတယ်")}
+          <em>.</em>
+        </h1>
+        <p>
+          {x("Pick up where you left off.", "ရပ်ထားခဲ့သည့်နေရာမှ ဆက်လေ့လာပါ။")}
         </p>
-      </Card>
-      <Card>
-        <h2 className="text-h4">Demo accounts</h2>
-        <ul className="mt-4 flex flex-col gap-2">
-          {s.users.map((u) => {
-            const company = s.companies.find((c) => c.id === u.companyId);
-            const label = u.role === "learner" ? "Learner" : company?.status === "verified" ? "Verified company" : "Company, not verified";
-            return (
-              <li key={u.id}>
-                <button type="button" onClick={() => logIn(u.id)} className="w-full rounded-xl border border-line px-4 py-3 text-left hover:border-burgundy hover:bg-burgundy-tint">
-                  <span className="block font-medium">{u.name}</span>
-                  <span className="text-body-sm text-muted">{label}</span>
-                </button>
-              </li>
+      </div>
+      <form
+        className="ca-form ca-loginForm"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const user = s.users.find(
+            (u) => u.email.toLowerCase() === email.trim().toLowerCase(),
+          );
+          if (user) setState((st) => ({ ...st, sessionUserId: user.id }));
+          else
+            setError(
+              x(
+                "No account with this email. Check it, or create an account.",
+                "ဤအီးမေးလ်ဖြင့် အကောင့်မရှိပါ။ ပြန်စစ်ပါ သို့မဟုတ် အကောင့်ဖန်တီးပါ။",
+              ),
             );
-          })}
-        </ul>
-      </Card>
-    </div>
+        }}
+      >
+        <AuthInput
+          label={x("Email address", "အီးမေးလ်လိပ်စာ")}
+          type="email"
+          icon="mail"
+          placeholder="you@example.com"
+          required
+          autoComplete="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setError("");
+          }}
+          error={error}
+        />
+        <AuthButton type="submit">{x("Continue", "ဆက်သွားမယ်")}</AuthButton>
+      </form>
+      <p className="ca-switch">{x("or", "သို့မဟုတ်")}</p>
+      <GoogleSignIn />
+      <p className="ca-switch">
+        {x("New here?", "အသစ်လား။")}{" "}
+        <Link href="/signup">{x("Create an account", "အကောင့်ဖန်တီးပါ")}</Link>
+      </p>
+      <div className="ca-loginFoot">
+        <AuthNote>
+          {x(
+            "Demo access · no password required.",
+            "နမူနာအသုံးပြုမှု · စကားဝှက်မလိုအပ်ပါ။",
+          )}
+        </AuthNote>
+      </div>
+    </AuthFrame>
   );
 }
